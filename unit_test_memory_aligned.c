@@ -1,14 +1,19 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdint.h>
+#include <stdbool.h>
+#include <time.h>
 #include "memory_aligned.h"
 
-uintptr_t AlignedAlloc(size_t size, size_t alignment, void** alloc_ptr);
+#define ALLOC_BLOCK_SIZE	16
+#define ALIGNMENT			32
+
 void AlignedTest();
 
 int main(int argc, char* argv[])
 {
 	int i = 0;
+	srand((unsigned int)time(NULL));
 
 	for (i=0; i<500; ++i)
 	{
@@ -21,33 +26,26 @@ int main(int argc, char* argv[])
 
 void AlignedTest()
 {
-	int alloc_size			= 64;
-	void* alloc_ptr			= (void*)0;
-	uintptr_t aligned_ptr	= 0;
-	size_t x				= POWER_OF_TWO_SIZEOF(19, alloc_size);
-	unsigned char aligned1		= 0;
-	unsigned char aligned2		= 0;
-	uintptr_t alloc_address		= 0;
-	uintptr_t aligned_address	= 0;
+	void* alloc_ptr		= NULL;
+	void* aligned_ptr	= 0;
+	bool aligned_flag	= false;
+	int alloc_size		= ALLOC_BLOCK_SIZE * (1 + rand()%10) + (rand() % ALLOC_BLOCK_SIZE);
+	int real_alloc_size	= POWER_OF_TWO_SIZEOF(alloc_size, ALLOC_BLOCK_SIZE);
 
-	aligned_ptr		= AlignedAlloc( x, alloc_size, &alloc_ptr );
-	alloc_address	= (uintptr_t)alloc_ptr;
-	aligned_address	= (uintptr_t)aligned_ptr;
+	aligned_ptr = (void*)AlignedAlloc( ALIGNMENT, real_alloc_size, &alloc_ptr );
+	aligned_flag = ( (((uintptr_t)aligned_ptr) & (ALIGNMENT - 1)) == 0 );
 
-	aligned1 = alloc_address & (alloc_size - 1) ? 0 : 1;
-	aligned2 = aligned_address & (alloc_size - 1) ? 0 : 1;
-
-	if (aligned2 == 0)
+	if ( !aligned_flag )
 	{
 		printf("aligned failed!\n");
 	}
-	else if ( (~aligned1) & aligned2 )
+	else if ( aligned_ptr == alloc_ptr )
 	{
-		printf("aligned success!\n");
+		printf("can't judge! [%ld]\n", (uintptr_t)alloc_ptr);
 	}
 	else
 	{
-		printf("can't judge\n");
+		printf("aligned success! [%ld, %ld]\n", (uintptr_t)alloc_ptr, (uintptr_t)aligned_ptr);
 	}
 
 	free(alloc_ptr);
