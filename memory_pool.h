@@ -9,9 +9,9 @@ public:
 	{
 		MemoryBlock*	ptr_prev;
 		MemoryBlock*	ptr_next;
+		unsigned int 	id;
 		unsigned char	data[BLOCK_SIZE];
 #if _DEBUG
-		unsigned int 	id;
 		unsigned int 	status;		// 0 repersent free, 1 repersent working
 #endif
 	};
@@ -52,9 +52,7 @@ public:
 		for (i=0; i<size_; ++i)
 		{
 			memory_block_ptr_buf_[i] = (uintptr_t)&memory_block_buf_[i];
-#ifdef _DEBUG
 			memory_block_buf_[i].id = i;
-#endif
 		}
 
 		memset( &working_list_head_, 0, sizeof(MemoryBlock) );
@@ -83,45 +81,70 @@ public:
 			return true;
 		}
 
-		// TODO: realloc operate
-		/*
 		if ( enable_realloc_ )
 		{
+			unsigned int i = 0;
+
+			// alloc memory block and memory ptr block, and init
 			MemoryBlock* new_memory_block_buf = (MemoryBlock*)malloc( size * sizeof(MemoryBlock) );
 			uintptr_t* new_memory_block_ptr_buf = (uintptr_t*)malloc( size * sizeof(uintptr_t) );
-
-			bool is_new_address_bigger = ((uintptr_t)new_memory_block_buf > (uintptr_t)memory_block_buf_);
-			bool is_new_ptr_address_bigger = (uintptr_t)new_memory_block_ptr_buf > (uintptr_t)memory_block_ptr_buf_;
-
-			uintptr_t delta_address = is_new_address_bigger ? 
-				(uintptr_t)new_memory_block_buf - (uintptr_t)memory_block_buf_ :
-				(uintptr_t)memory_block_buf_ - (uintptr_t)new_memory_block_buf;
-
-			uintptr_t delta_ptr_address = is_new_ptr_address_bigger ? 
-				(uintptr_t)new_memory_block_ptr_buf - (uintptr_t)memory_block_ptr_buf_ :
-				(uintptr_t)memory_block_ptr_buf_ - (uintptr_t)new_memory_block_ptr_buf;
 
 			memset( new_memory_block_buf, 0, size * sizeof(MemoryBlock) );
 			memset( new_memory_block_ptr_buf, 0, size * sizeof(uintptr_t) );
 
-			for (i=0; i<size_; ++i)
+			for (i=size_; i<size; ++i)
 			{
 				new_memory_block_ptr_buf[i] = (uintptr_t)&new_memory_block_buf[i];
-#ifdef _DEBUG
 				new_memory_block_buf[i].id = i;
-#endif
 			}
 
-			memcpy( new_memory_block_buf,  )
+			// fill old data
+			memcpy( new_memory_block_buf,  memory_block_buf_, size_ * sizeof(MemoryBlock) );
+			memcpy( new_memory_block_ptr_buf, memory_block_ptr_buf_, size_ * sizeof(uintptr_t) );
+
+			// get delta of address 
+			uintptr_t delta_address = (uintptr_t)new_memory_block_buf - (uintptr_t)memory_block_buf_;
+			uintptr_t delta_ptr_address = (uintptr_t)new_memory_block_ptr_buf - (uintptr_t)memory_block_ptr_buf_;
+
+			// correct ptr block 
+			for (i=0; i<size_; ++i)
+			{
+				new_memory_block_ptr_buf[i] += delta_address;
+			}
+
+			// correct working list
+			MemoryBlock* ptr_cur_block = &working_list_head_;
+			while (ptr_cur_block->ptr_next != &working_list_tail_)
+			{
+				ptr_cur_block->ptr_next = (MemoryBlock*)( (uintptr_t)ptr_cur_block->ptr_next + delta_address );
+				ptr_cur_block = ptr_cur_block->ptr_next;
+			}
+
+			ptr_cur_block = &working_list_tail_;
+			while (ptr_cur_block->ptr_prev != &working_list_head_)
+			{
+				ptr_cur_block->ptr_prev = (MemoryBlock*)( (uintptr_t)ptr_cur_block->ptr_prev + delta_address );
+				ptr_cur_block = ptr_cur_block->ptr_prev;
+			}
+
+			// free old data
+			free(memory_block_buf_);
+			free(memory_block_ptr_buf_);
+
+			// alloc index, correct size, memory block buf, memory ptr block buf
+			alloc_index_ = size_;
+			free_index_ = 0;
+			size_ = size;
+			memory_block_buf_ = new_memory_block_buf;
+			memory_block_ptr_buf_ = new_memory_block_ptr_buf;			
 
 			return true;
 		}
-		*/
 		
 		return false;
 	}
 
-	MemoryBlock* Alloc()
+	unsigned int Alloc()
 	{
 		if ( working_num_ >= size_ && !EnsureSize(size_ * 2) )
 		{
@@ -129,7 +152,7 @@ public:
 			// assert(0);	// just for note user to notice memory is not enough in debug
 			printf("memory pool warning: the number of allocated block is not enough");
 #endif
-			return NULL;
+			return -1;
 		}
 
 		MemoryBlock* ptr_block = (MemoryBlock*)memory_block_ptr_buf_[alloc_index_];
@@ -153,7 +176,11 @@ public:
 
 		LinkToTail(ptr_block);
 
-		return ptr_block;
+		return ptr_block->id;
+	}
+	void* GetData(unsigned int id)
+	{
+		return (void*)memory_block_buf_[id].data;
 	}
 
 	void Free(MemoryBlock* ptr_block)
