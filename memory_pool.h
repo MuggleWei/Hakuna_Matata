@@ -205,6 +205,28 @@ public:
 		ptr_block->ptr_prev->ptr_next = ptr_block->ptr_next;
 		ptr_block->ptr_next->ptr_prev = ptr_block->ptr_prev;
 	}
+	void Free(unsigned int block_index)
+	{
+		Free(&memory_block_buf_[block_index]);
+	}
+
+	unsigned int GetSize()
+	{
+		return size_;
+	}
+	unsigned int GetWorkingSize()
+	{
+		return working_num_;
+	}
+
+	bool IsEnableRealloc()
+	{
+		return enable_realloc_;
+	}
+	void EnableRealloc(bool is_enable)
+	{
+		enable_realloc_ = is_enable;
+	}
 
 	void LinkToHead(MemoryBlock* ptr_block)
 	{
