@@ -4,7 +4,9 @@
 #include <string.h>
 #include <assert.h>
 #include <vector>
-#include "memory_pool.h"
+
+// #include "memory_pool.h"
+#include "memory_pool_use_index.h"
 
 enum 
 {
@@ -62,7 +64,7 @@ void PrintOperate(unsigned int block_id, bool b_alloc)
 
 void ComparePerformance()
 {
-	int num = 1024000;
+	int num = 10240000;
 	MemoryPool<block_size> memory_pool(num / 1024, true);
 	clock_t start_clock, delta_clock;
 	char** ptr_buf = (char**)malloc(sizeof(unsigned char*) * num);
