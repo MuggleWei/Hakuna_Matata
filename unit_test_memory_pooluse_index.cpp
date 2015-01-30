@@ -5,7 +5,7 @@
 #include <assert.h>
 #include <vector>
 
-#include "memory_pool.h"
+#include "memory_pool_use_index.h"
 
 enum 
 {
@@ -111,7 +111,7 @@ void ComparePerformance()
 	start_clock = clock();
 	for (int i=0; i<num; ++i)
 	{
-		memory_pool.Free(memory_pool.working_list_head_.ptr_next);
+		memory_pool.Free(memory_pool.working_list_head_.index_next);
 	}
 	delta_clock = clock() - start_clock;
 	printf("memory pool free: %ld\n\n", delta_clock);
@@ -127,7 +127,7 @@ void ComparePerformance()
 	start_clock = clock();
 	for (int i=0; i<num; ++i)
 	{
-		memory_pool.Free(memory_pool.working_list_head_.ptr_next);
+		memory_pool.Free(memory_pool.working_list_head_.index_next);
 	}
 	delta_clock = clock() - start_clock;
 	printf("memory pool free: %ld\n\n", delta_clock);
@@ -178,21 +178,21 @@ void Update()
 	else
 	{
 		MemoryBlock* ptr_block = &k_memory_pool.working_list_head_;
-		if (ptr_block->ptr_next == &k_memory_pool.working_list_tail_)
+		if (ptr_block->index_next == k_memory_pool.TAIL_ID)
 		{
 			return;
 		}
 		else
 		{
 			rand_num = rand() % 50;
-			ptr_block = k_memory_pool.working_list_head_.ptr_next;
+			ptr_block = k_memory_pool.GetNext(&k_memory_pool.working_list_head_);
 			while (rand_num > 0)
 			{
 				rand_num--;
-				ptr_block = ptr_block->ptr_next;
-				if (ptr_block == &k_memory_pool.working_list_tail_)
+				ptr_block = k_memory_pool.GetNext(ptr_block);
+				if (ptr_block->id == k_memory_pool.TAIL_ID)
 				{
-					ptr_block = k_memory_pool.working_list_head_.ptr_next;
+					ptr_block = k_memory_pool.GetNext(&k_memory_pool.working_list_head_);
 				}
 			}
 

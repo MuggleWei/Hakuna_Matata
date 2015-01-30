@@ -7,13 +7,19 @@ class MemoryPool
 public:
 	struct MemoryBlock
 	{
-		MemoryBlock*	ptr_prev;
-		MemoryBlock*	ptr_next;
+		unsigned int	index_prev;
+		unsigned int	index_next;
 		unsigned int 	id;
 		unsigned char	data[BLOCK_SIZE];
 #if _DEBUG
 		unsigned int 	status;		// 0 repersent free, 1 repersent working
 #endif
+	};
+
+	enum
+	{
+		HEAD_ID = (unsigned int)(-1),
+		TAIL_ID = (unsigned int)(-2),
 	};
 
 private:
@@ -58,8 +64,10 @@ public:
 		memset( &working_list_head_, 0, sizeof(MemoryBlock) );
 		memset( &working_list_tail_, 0, sizeof(MemoryBlock) );
 
-		working_list_head_.ptr_next = &working_list_tail_;
-		working_list_tail_.ptr_prev = &working_list_head_;
+		working_list_head_.id = HEAD_ID;
+		working_list_tail_.id = TAIL_ID;
+		working_list_head_.index_next = TAIL_ID;
+		working_list_tail_.index_prev = HEAD_ID;
 
 		alloc_index_ = 0;
 		free_index_ = 0;
@@ -101,24 +109,6 @@ public:
 			// fill old data
 			memcpy( new_memory_block_buf,  memory_block_buf_, size_ * sizeof(MemoryBlock) );
 			memcpy( new_memory_block_index_buf, memory_block_index_buf_, size_ * sizeof(uintptr_t) );
-
-			// get delta of address 
-			uintptr_t delta_address = (uintptr_t)new_memory_block_buf - (uintptr_t)memory_block_buf_;
-
-			// correct working list
-			MemoryBlock* ptr_cur_block = &working_list_head_;
-			while (ptr_cur_block->ptr_next != &working_list_tail_)
-			{
-				ptr_cur_block->ptr_next = (MemoryBlock*)( (uintptr_t)ptr_cur_block->ptr_next + delta_address );
-				ptr_cur_block = ptr_cur_block->ptr_next;
-			}
-
-			ptr_cur_block = &working_list_tail_;
-			while (ptr_cur_block->ptr_prev != &working_list_head_)
-			{
-				ptr_cur_block->ptr_prev = (MemoryBlock*)( (uintptr_t)ptr_cur_block->ptr_prev + delta_address );
-				ptr_cur_block = ptr_cur_block->ptr_prev;
-			}
 
 			// free old data
 			free(memory_block_buf_);
@@ -176,6 +166,15 @@ public:
 		return (void*)memory_block_buf_[id].data;
 	}
 
+	MemoryBlock* GetNext(MemoryBlock* ptr_block)
+	{
+		return ptr_block->index_next != TAIL_ID ? &memory_block_buf_[ptr_block->index_next] : &working_list_tail_;
+	}
+	MemoryBlock* GetPrev(MemoryBlock* ptr_block)
+	{
+		return ptr_block->index_prev != HEAD_ID ? &memory_block_buf_[ptr_block->index_prev] : &working_list_head_;
+	}
+
 	void Free(MemoryBlock* ptr_block)
 	{
 		Free(ptr_block->id);
@@ -200,8 +199,8 @@ public:
 
 		--working_num_;
 
-		ptr_block->ptr_prev->ptr_next = ptr_block->ptr_next;
-		ptr_block->ptr_next->ptr_prev = ptr_block->ptr_prev;
+		GetPrev(ptr_block)->index_next = ptr_block->index_next;
+		GetNext(ptr_block)->index_prev = ptr_block->index_prev;
 	}
 
 	unsigned int GetSize()
@@ -224,23 +223,22 @@ public:
 
 	void LinkToHead(MemoryBlock* ptr_block)
 	{
-		working_list_head_.ptr_next->ptr_prev 	= ptr_block;
-		ptr_block->ptr_next 					= working_list_head_.ptr_next;
-		working_list_head_.ptr_next 			= ptr_block;
-		ptr_block->ptr_prev 					= &working_list_head_;
-
+		GetNext(&working_list_head_)->index_prev	= ptr_block->id;
+		ptr_block->index_next						= working_list_head_.index_next;
+		working_list_head_.index_next				= ptr_block->id;
+		ptr_block->index_prev						= HEAD_ID;
 	}
 	void LinkToTail(MemoryBlock* ptr_block)
 	{
-		working_list_tail_.ptr_prev->ptr_next	= ptr_block;
-		ptr_block->ptr_prev 					= working_list_tail_.ptr_prev;
-		working_list_tail_.ptr_prev 			= ptr_block;
-		ptr_block->ptr_next 					= &working_list_tail_;
+		GetPrev(&working_list_tail_)->index_next	= ptr_block->id;
+		ptr_block->index_prev						= working_list_tail_.index_prev;
+		working_list_tail_.index_prev				= ptr_block->id;
+		ptr_block->index_next						= TAIL_ID;
 	}
 
 	void Print()
 	{
-		MemoryBlock* ptr_block = working_list_head_.ptr_next;
+		MemoryBlock* ptr_block = GetNext(&working_list_head_);
 		unsigned int i = 0;
 
 		printf("current memory pool status: \n");
@@ -253,7 +251,7 @@ public:
 		while (ptr_block != &working_list_tail_)
 		{
 			printf("%5d  -->", ptr_block->id);
-			ptr_block = ptr_block->ptr_next;
+			ptr_block = GetNext(ptr_block);
 		}
 		printf("  tail\n");
 
