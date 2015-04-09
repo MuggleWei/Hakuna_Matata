@@ -1,7 +1,8 @@
 Target_File = unit_test_memory_aligned\
 	unit_test_ptr_hide_data\
 	unit_test_memory_pool\
-	unit_test_memory_pool_use_index
+	unit_test_memory_pool_use_index\
+	v_table_exploer
 
 all: $(Target_File)
 
