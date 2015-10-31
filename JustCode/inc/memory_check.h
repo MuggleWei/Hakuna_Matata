@@ -5,6 +5,7 @@
 
 #define _CRTDBG_MAP_ALLOC 
 #include <crtdbg.h>
+#include <stdio.h>
 
 class MemoryCheck
 {
@@ -19,7 +20,7 @@ public:
     {
         if (s_in_trace_)
         {
-            printf("warning: Nested call will error in linux!\n");
+            printf("warning: Nested call memory check will error in linux!\n");
         }
         _CrtMemCheckpoint(&s1_);
         s_in_trace_ = true;
@@ -62,7 +63,7 @@ public:
     {
         if (s_in_trace_)
         {
-            printf("error: Nested call is not allowed!\n");
+            printf("error: Nested call memory check is not allowed!\n");
             return;
         }
         setenv("MALLOC_TRACE", "memory_leak_file", 1);
