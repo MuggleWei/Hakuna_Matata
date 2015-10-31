@@ -115,3 +115,20 @@ add_executable(memory_check
 	${SOURCES_memory_check}
 )
 # end memory_check
+
+# delegate
+if (${CMAKE_SYSTEM_NAME} STREQUAL "Windows")
+set(HEADERS_delegate
+	inc/delegate.h
+)
+else()
+set(HEADERS_delegate)
+endif()
+set(SOURCES_delegate
+	run_test/run_test_delegate.cpp
+)
+add_executable(delegate
+	${HEADERS_delegate}
+	${SOURCES_delegate}
+)
+# end delegate
