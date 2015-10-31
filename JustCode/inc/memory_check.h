@@ -9,13 +9,25 @@
 class MemoryCheck
 {
 public:
-    void Start()
+    MemoryCheck()
     {
         _CrtMemCheckpoint(&s1_);
+        _CrtMemCheckpoint(&s2_);
+    }
+
+    void Start()
+    {
+        if (s_in_trace_)
+        {
+            printf("warning: Nested call will error in linux!\n");
+        }
+        _CrtMemCheckpoint(&s1_);
+        s_in_trace_ = true;
     }
     void End()
     {
         _CrtMemCheckpoint(&s2_);
+        s_in_trace_ = false;
     }
     void Statistics()
     {
@@ -29,7 +41,10 @@ public:
 
 private:
     _CrtMemState s1_, s2_;
+    static bool s_in_trace_;
 };
+
+bool MemoryCheck::s_in_trace_ = false;
 
 #else
 
@@ -41,18 +56,18 @@ class MemoryCheck
 {
 public:
     MemoryCheck()
-    {
-        s_in_trace_ = false;
-    }
+    {}
 
     void Start()
     {
         if (s_in_trace_)
         {
+            printf("error: Nested call is not allowed!\n");
             return;
         }
         setenv("MALLOC_TRACE", "memory_leak_file", 1);
         mtrace();
+        s_in_trace_ = true;
     }
     void End()
     {
@@ -61,27 +76,15 @@ public:
     }
     void Statistics()
     {
-        FILE *fp = fopen("memory_leak_file", "r");
-        if (fp == NULL)
-        {
-            return;
-        }
-
-        fseek(fp, 0, SEEK_END);
-        long size = ftell(fp);
-        fseek(fp, 0, SEEK_SET);
-
-        char* buf = (char*)malloc(size);
-        fread(buf, 1, size+1, fp);
-        printf("%s\n", buf);
-        free(buf);
-
-        fclose(fp);
+        system("cat memory_leak_file");
+        system("mtrace memory_leak_file");
     }
 
 private:
     static bool s_in_trace_;
 };
+
+bool MemoryCheck::s_in_trace_ = false;
 
 #endif
 

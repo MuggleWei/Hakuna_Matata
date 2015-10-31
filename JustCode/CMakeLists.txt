@@ -108,7 +108,7 @@ else()
 set(HEADERS_memory_check)
 endif()
 set(SOURCES_memory_check
-	run_test/memory_check.cpp
+	run_test/run_test_memory_check.cpp
 )
 add_executable(memory_check
 	${HEADERS_memory_check}

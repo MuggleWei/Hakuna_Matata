@@ -1,6 +1,8 @@
 #ifndef MEMORY_POOL_H_
 #define MEMORY_POOL_H_
 
+#include <stdint.h>
+
 template<int BLOCK_SIZE>
 class MemoryPool
 {
