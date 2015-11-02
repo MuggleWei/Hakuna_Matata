@@ -1,6 +1,6 @@
 #include <stdio.h>
 #include <functional>
-#include "Delegate.h"
+#include "delegate.h"
 
 void FuncVoid()
 {
