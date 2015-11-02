@@ -1,6 +1,8 @@
 #ifndef __DELEGATE_H__
 #define __DELEGATE_H__
 
+#include <functional>
+
 template<typename ReturnType>
 class StaticDelegateVoid
 {
@@ -9,22 +11,22 @@ class StaticDelegateVoid
 public:
     StaticDelegateVoid()
     {
-        m_ptrFunc = nullptr;
+        ptr_func_ = nullptr;
     }
-    void Bind(FunctionPointer ptrFunc)
+    void Bind(FunctionPointer ptr_func)
     {
-        m_ptrFunc = ptrFunc;
+        ptr_func_ = ptr_func;
     }
     void Invoke()
     {
-        if (m_ptrFunc)
+        if (ptr_func_)
         {
-            (m_ptrFunc)();
+            (ptr_func_)();
         }
     }
 
 private:
-    FunctionPointer m_ptrFunc;
+    FunctionPointer ptr_func_;
 };
 
 template<typename ReturnType, typename Arg1>
@@ -35,22 +37,22 @@ class StaticDelegateOne
 public:
     StaticDelegateOne()
     {
-        m_ptrFunc = nullptr;
+        ptr_func_ = nullptr;
     }
-    void Bind(FunctionPointer ptrFunc)
+    void Bind(FunctionPointer ptr_func)
     {
-        m_ptrFunc = ptrFunc;
+        ptr_func_ = ptr_func;
     }
     void Invoke(Arg1 arg1)
     {
-        if (m_ptrFunc)
+        if (ptr_func_)
         {
-            (m_ptrFunc)(arg1);
+            (ptr_func_)(arg1);
         }
     }
 
 private:
-    FunctionPointer m_ptrFunc;
+    FunctionPointer ptr_func_;
 };
 
 
@@ -62,25 +64,106 @@ class DelegateVoid
 public:
     DelegateVoid()
     {
-        m_instance = nullptr;
-        m_ptrFunc = nullptr;
+        instance_ = nullptr;
+        ptr_func_ = nullptr;
     }
-    void Bind(TClass* instance, FunctionPointer ptrFunc)
+    void Bind(TClass* instance, FunctionPointer ptr_func)
     {
-        m_instance = instance;
-        m_ptrFunc = ptrFunc;
+        instance_ = instance;
+        ptr_func_ = ptr_func;
     }
     void Invoke()
     {
-        if (m_instance && m_ptrFunc)
+        if (instance_ && ptr_func_)
         {
-            (m_instance->*m_ptrFunc)();
+            (instance_->*ptr_func_)();
         }
     }
 
 private:
-    TClass* m_instance;
-    FunctionPointer m_ptrFunc;
+    TClass* instance_;
+    FunctionPointer ptr_func_;
+};
+
+template<typename TClass, typename ReturnType, typename Arg1>
+class DelegateOne
+{
+    typedef ReturnType (TClass::*FunctionPointer)(Arg1);
+
+public:
+    DelegateOne()
+    {
+        instance_ = nullptr;
+        ptr_func_ = nullptr;
+    }
+    void Bind(TClass* instance, FunctionPointer ptr_func)
+    {
+        instance_ = instance;
+        ptr_func_ = ptr_func;
+    }
+    void Invoke(Arg1 arg1)
+    {
+        if (instance_ && ptr_func_)
+        {
+            (instance_->*ptr_func_)(arg1);
+        }
+    }
+
+private:
+    TClass* instance_;
+    FunctionPointer ptr_func_;
+};
+
+template<typename TClass, typename ReturnType>
+class DelegateVoidC11
+{
+    typedef ReturnType (TClass::*FunctionPointer)();
+
+public:
+    DelegateVoidC11()
+    {
+        ptr_func_ = nullptr;
+    }
+    void Bind(TClass* instance, FunctionPointer ptr_func)
+    {
+        ptr_func_ = std::bind(ptr_func, instance);
+    }
+    void Invoke()
+    {
+        if (ptr_func_)
+        {
+            ptr_func_();
+        }
+    }
+
+private:
+    std::function<ReturnType()> ptr_func_;
+};
+
+template<typename TClass, typename ReturnType, typename Arg1>
+class DelegateOneC11
+{
+    typedef ReturnType(TClass::*FunctionPointer)(Arg1);
+
+public:
+    DelegateOneC11()
+    {
+        ptr_func_ = nullptr;
+    }
+    void Bind(TClass* instance, FunctionPointer ptr_func)
+    {
+        ptr_func_ = std::bind(ptr_func, instance, std::placeholders::_1);
+    }
+    void Invoke(Arg1 arg1)
+    {
+        if (ptr_func_)
+        {
+            ptr_func_(arg1);
+        }
+    }
+
+private:
+    std::function<ReturnType(Arg1)> ptr_func_;
 };
 
 #endif
