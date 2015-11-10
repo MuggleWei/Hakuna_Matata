@@ -137,3 +137,20 @@ add_executable(delegate
 	${SOURCES_delegate}
 )
 # end delegate
+
+# ref_count
+if (${CMAKE_SYSTEM_NAME} STREQUAL "Windows")
+set(HEADERS_ref_count
+	inc/ref_count.h
+)
+else()
+set(HEADERS_ref_count)
+endif()
+set(SOURCES_ref_count
+	run_test/run_test_ref_count.cpp
+)
+add_executable(ref_count
+	${HEADERS_ref_count}
+	${SOURCES_ref_count}
+)
+# end ref_count
