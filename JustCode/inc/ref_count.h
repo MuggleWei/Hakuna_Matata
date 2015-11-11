@@ -1,3 +1,6 @@
+#ifndef __REFERENCE_COUNT_H__
+#define __REFERENCE_COUNT_H__
+
 template<typename T>
 class RefCount
 {
@@ -59,3 +62,5 @@ private:
     std::size_t *used_;
     T *obj_;
 };
+
+#endif
