@@ -87,22 +87,6 @@ void ComparePerformance()
     start_clock = clock();
     for (int i=0; i<num; ++i)
     {
-        ptr_buf[i] = new char[block_size];
-    }
-    delta_clock = clock() - start_clock;
-    printf("new: %ld\n", delta_clock);
-
-    start_clock = clock();
-    for (int i=0; i<num; ++i)
-    {
-        delete[](ptr_buf[i]);
-    }
-    delta_clock = clock() - start_clock;
-    printf("delete: %ld\n\n", delta_clock);
-
-    start_clock = clock();
-    for (int i=0; i<num; ++i)
-    {
         memory_pool.Alloc();
     }
     delta_clock = clock() - start_clock;

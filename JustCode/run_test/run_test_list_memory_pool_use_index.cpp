@@ -15,9 +15,9 @@ struct Node
 {
     unsigned char data[block_size];
 };
-typedef ListMemoryPool<block_size>::ListMemoryBlock ListMemoryBlock;
+typedef ListMemoryPool_UseIndex<block_size>::ListMemoryBlock_UseIndex ListMemoryBlock_UseIndex;
 
-ListMemoryPool<block_size> k_memory_pool(4, true);
+ListMemoryPool_UseIndex<block_size> k_memory_pool(4, true);
 
 void ComparePerformance();
 void SimpleUse();
@@ -64,7 +64,7 @@ void PrintOperate(unsigned int block_id, bool b_alloc)
 void ComparePerformance()
 {
     int num = 10240000;
-    ListMemoryPool<block_size> memory_pool(num / 1024, true);
+    ListMemoryPool_UseIndex<block_size> memory_pool(num / 1024, true);
     clock_t start_clock, delta_clock;
     char** ptr_buf = (char**)malloc(sizeof(unsigned char*) * num);
 
@@ -83,22 +83,6 @@ void ComparePerformance()
     }
     delta_clock = clock() - start_clock;
     printf("free: %ld\n\n", delta_clock);
-
-    start_clock = clock();
-    for (int i=0; i<num; ++i)
-    {
-        ptr_buf[i] = new char[block_size];
-    }
-    delta_clock = clock() - start_clock;
-    printf("new: %ld\n", delta_clock);
-
-    start_clock = clock();
-    for (int i=0; i<num; ++i)
-    {
-        delete[](ptr_buf[i]);
-    }
-    delta_clock = clock() - start_clock;
-    printf("delete: %ld\n\n", delta_clock);
 
     start_clock = clock();
     for (int i=0; i<num; ++i)
@@ -136,7 +120,7 @@ void ComparePerformance()
 }
 void SimpleUse()
 {
-    ListMemoryPool<block_size> memory_pool(1, true);
+    ListMemoryPool_UseIndex<block_size> memory_pool(1, true);
     unsigned int index_buf[8];
     int i = 0;
 
@@ -177,7 +161,7 @@ void Update()
     }
     else
     {
-        ListMemoryBlock* ptr_block = &k_memory_pool.working_list_head_;
+        ListMemoryBlock_UseIndex* ptr_block = &k_memory_pool.working_list_head_;
         if (ptr_block->index_next == k_memory_pool.TAIL_ID)
         {
             return;

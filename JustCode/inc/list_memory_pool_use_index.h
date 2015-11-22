@@ -1,13 +1,13 @@
-#ifndef MEMORY_POOL_H_
-#define MEMORY_POOL_H_
+#ifndef __LIST_MEMORY_POOL_INDEX_H__
+#define __LIST_MEMORY_POOL_INDEX_H__
 
 #include <stdint.h>
 
 template<int BLOCK_SIZE>
-class ListMemoryPool
+class ListMemoryPool_UseIndex
 {
 public:
-    struct ListMemoryBlock
+    struct ListMemoryBlock_UseIndex
     {
         unsigned int    index_prev;
         unsigned int    index_next;
@@ -25,7 +25,7 @@ public:
     };
 
 private:
-    ListMemoryBlock*    memory_block_buf_;
+    ListMemoryBlock_UseIndex*    memory_block_buf_;
     unsigned int*        memory_block_index_buf_;
 
     unsigned int        alloc_index_;
@@ -40,21 +40,21 @@ private:
 #endif
 
 public:
-    ListMemoryBlock         working_list_head_;
-    ListMemoryBlock         working_list_tail_;
+    ListMemoryBlock_UseIndex         working_list_head_;
+    ListMemoryBlock_UseIndex         working_list_tail_;
 
 public:
-    ListMemoryPool(unsigned int init_size = 32, bool enable_realloc = false)
+    ListMemoryPool_UseIndex(unsigned int init_size = 32, bool enable_realloc = false)
     {
         unsigned int i = 0;
 
         size_ = init_size;
         enable_realloc_ = enable_realloc;
 
-        memory_block_buf_         = (ListMemoryBlock*)malloc( size_ * sizeof(ListMemoryBlock) );
+        memory_block_buf_         = (ListMemoryBlock_UseIndex*)malloc( size_ * sizeof(ListMemoryBlock_UseIndex) );
         memory_block_index_buf_    = (unsigned int*)malloc( size_ * sizeof(unsigned int) );
 
-        memset( memory_block_buf_, 0, size_ * sizeof(ListMemoryBlock) );
+        memset( memory_block_buf_, 0, size_ * sizeof(ListMemoryBlock_UseIndex) );
         memset( memory_block_index_buf_, 0, size_ * sizeof(unsigned int) );
 
         for (i=0; i<size_; ++i)
@@ -63,8 +63,8 @@ public:
             memory_block_buf_[i].id = i;
         }
 
-        memset( &working_list_head_, 0, sizeof(ListMemoryBlock) );
-        memset( &working_list_tail_, 0, sizeof(ListMemoryBlock) );
+        memset( &working_list_head_, 0, sizeof(ListMemoryBlock_UseIndex) );
+        memset( &working_list_tail_, 0, sizeof(ListMemoryBlock_UseIndex) );
 
         working_list_head_.id = HEAD_ID;
         working_list_tail_.id = TAIL_ID;
@@ -78,7 +78,7 @@ public:
         peak_ = 0;
 #endif
     }
-    ~ListMemoryPool()
+    ~ListMemoryPool_UseIndex()
     {
         free(memory_block_buf_);
         free(memory_block_index_buf_);
@@ -96,10 +96,10 @@ public:
             unsigned int i = 0;
 
             // alloc memory block and memory ptr block, and init
-            ListMemoryBlock* new_memory_block_buf = (ListMemoryBlock*)malloc( size * sizeof(ListMemoryBlock) );
+            ListMemoryBlock_UseIndex* new_memory_block_buf = (ListMemoryBlock_UseIndex*)malloc( size * sizeof(ListMemoryBlock_UseIndex) );
             unsigned int* new_memory_block_index_buf = (unsigned int*)malloc( size * sizeof(unsigned int) );
 
-            memset( new_memory_block_buf, 0, size * sizeof(ListMemoryBlock) );
+            memset( new_memory_block_buf, 0, size * sizeof(ListMemoryBlock_UseIndex) );
             memset( new_memory_block_index_buf, 0, size * sizeof(unsigned int) );
 
             for (i=size_; i<size; ++i)
@@ -109,7 +109,7 @@ public:
             }
 
             // fill old data
-            memcpy( new_memory_block_buf,  memory_block_buf_, size_ * sizeof(ListMemoryBlock) );
+            memcpy( new_memory_block_buf,  memory_block_buf_, size_ * sizeof(ListMemoryBlock_UseIndex) );
             memcpy( new_memory_block_index_buf, memory_block_index_buf_, size_ * sizeof(uintptr_t) );
 
             // free old data
@@ -140,7 +140,7 @@ public:
             return -1;
         }
 
-        ListMemoryBlock* ptr_block = memory_block_buf_ + memory_block_index_buf_[alloc_index_];
+        ListMemoryBlock_UseIndex* ptr_block = memory_block_buf_ + memory_block_index_buf_[alloc_index_];
 #ifdef _DEBUG
         assert(ptr_block->status == 0);    // Repeat alloc a memory block
         ptr_block->status = 1;
@@ -168,16 +168,16 @@ public:
         return (void*)memory_block_buf_[id].data;
     }
 
-    ListMemoryBlock* GetNext(ListMemoryBlock* ptr_block)
+    ListMemoryBlock_UseIndex* GetNext(ListMemoryBlock_UseIndex* ptr_block)
     {
         return ptr_block->index_next != TAIL_ID ? &memory_block_buf_[ptr_block->index_next] : &working_list_tail_;
     }
-    ListMemoryBlock* GetPrev(ListMemoryBlock* ptr_block)
+    ListMemoryBlock_UseIndex* GetPrev(ListMemoryBlock_UseIndex* ptr_block)
     {
         return ptr_block->index_prev != HEAD_ID ? &memory_block_buf_[ptr_block->index_prev] : &working_list_head_;
     }
 
-    void Free(ListMemoryBlock* ptr_block)
+    void Free(ListMemoryBlock_UseIndex* ptr_block)
     {
         Free(ptr_block->id);
     }
@@ -187,7 +187,7 @@ public:
         assert(working_num_ > 0);
 #endif
         memory_block_index_buf_[free_index_] = block_index;
-        ListMemoryBlock* ptr_block = memory_block_buf_ + block_index;
+        ListMemoryBlock_UseIndex* ptr_block = memory_block_buf_ + block_index;
 #ifdef _DEBUG
         assert(ptr_block->status == 1); // Free a memory block that not alloced
         ptr_block->status = 0;
@@ -223,14 +223,14 @@ public:
         enable_realloc_ = is_enable;
     }
 
-    void LinkToHead(ListMemoryBlock* ptr_block)
+    void LinkToHead(ListMemoryBlock_UseIndex* ptr_block)
     {
         GetNext(&working_list_head_)->index_prev    = ptr_block->id;
         ptr_block->index_next                        = working_list_head_.index_next;
         working_list_head_.index_next                = ptr_block->id;
         ptr_block->index_prev                        = HEAD_ID;
     }
-    void LinkToTail(ListMemoryBlock* ptr_block)
+    void LinkToTail(ListMemoryBlock_UseIndex* ptr_block)
     {
         GetPrev(&working_list_tail_)->index_next    = ptr_block->id;
         ptr_block->index_prev                        = working_list_tail_.index_prev;
@@ -240,7 +240,7 @@ public:
 
     void Print()
     {
-        ListMemoryBlock* ptr_block = GetNext(&working_list_head_);
+        ListMemoryBlock_UseIndex* ptr_block = GetNext(&working_list_head_);
         unsigned int i = 0;
 
         printf("current memory pool status: \n");
@@ -260,7 +260,7 @@ public:
         printf("current memory pointer array status: \n");
         for (i=0; i<size_; ++i)
         {
-            ListMemoryBlock* ptr_block = memory_block_buf_ + memory_block_index_buf_[i];
+            ListMemoryBlock_UseIndex* ptr_block = memory_block_buf_ + memory_block_index_buf_[i];
             printf("%5d[%d](%d) | ", ptr_block->id, ptr_block->status, i);
         }
         printf("\n");

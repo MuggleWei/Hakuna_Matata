@@ -1,5 +1,5 @@
-#ifndef MEMORY_POOL_H_
-#define MEMORY_POOL_H_
+#ifndef __LIST_MEMORY_POOL_H__
+#define __LIST_MEMORY_POOL_H__
 
 #include <stdint.h>
 
@@ -11,31 +11,31 @@ public:
     {
         ListMemoryBlock*    ptr_prev;
         ListMemoryBlock*    ptr_next;
-        unsigned int         id;
-        unsigned char        data[BLOCK_SIZE];
+        unsigned int        id;
+        unsigned char       data[BLOCK_SIZE];
 #if _DEBUG
-        unsigned int     status;        // 0 repersent free, 1 repersent working
+        unsigned int        status;        // 0 repersent free, 1 repersent working
 #endif
     };
 
 private:
     ListMemoryBlock*    memory_block_buf_;
-    uintptr_t*            memory_block_ptr_buf_;
+    uintptr_t*          memory_block_ptr_buf_;
 
     unsigned int        alloc_index_;
     unsigned int        free_index_;
 
-    unsigned int         size_;
+    unsigned int        size_;
     unsigned int        working_num_;
 
-    bool                 enable_realloc_;
+    bool                enable_realloc_;
 #if _DEBUG
-    unsigned int         peak_;        // // record the peak of memory allocate number
+    unsigned int        peak_;        // // record the peak of memory allocate number
 #endif
 
 public:
-    ListMemoryBlock         working_list_head_;
-    ListMemoryBlock         working_list_tail_;
+    ListMemoryBlock     working_list_head_;
+    ListMemoryBlock     working_list_tail_;
 
 public:
     ListMemoryPool(unsigned int init_size = 32, bool enable_realloc = false)
@@ -45,7 +45,7 @@ public:
         size_ = init_size;
         enable_realloc_ = enable_realloc;
 
-        memory_block_buf_         = (ListMemoryBlock*)malloc( size_ * sizeof(ListMemoryBlock) );
+        memory_block_buf_        = (ListMemoryBlock*)malloc( size_ * sizeof(ListMemoryBlock) );
         memory_block_ptr_buf_    = (uintptr_t*)malloc( size_ * sizeof(uintptr_t) );
 
         memset( memory_block_buf_, 0, size_ * sizeof(ListMemoryBlock) );
