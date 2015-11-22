@@ -6,7 +6,7 @@
 
 #define PTR_HIDE_DATA_GET_PTR(ptr)    (ptr & ~PTR_HIDE_DATA_MASK)
 #define PTR_HIDE_DATA_GET_DATA(ptr)   (ptr & PTR_HIDE_DATA_MASK)
-#define PTR_HIDE_DATA_SET_DATA(ptr, data)	(ptr |= (data & PTR_HIDE_DATA_MASK))
+#define PTR_HIDE_DATA_SET_DATA(ptr, data)    (ptr |= (data & PTR_HIDE_DATA_MASK))
 
 #endif
 
