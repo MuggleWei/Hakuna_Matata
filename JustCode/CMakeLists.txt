@@ -10,6 +10,11 @@ include_directories(
     inc/
 )
 
+# set output directory
+set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
+set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
+
 # timer
 if (${CMAKE_SYSTEM_NAME} STREQUAL "Windows")
 set(HEADERS_timer
@@ -44,6 +49,24 @@ add_executable(memory_aligned
     ${SOURCES_memory_aligned}
 )
 # end memory_aligned
+
+# memory_pool
+if (${CMAKE_SYSTEM_NAME} STREQUAL "Windows")
+set(HEADERS_memory_pool
+    inc/memory_pool.h
+)
+else()
+set(HEADERS_memory_pool)
+endif()
+set(SOURCES_memory_pool
+	src/memory_pool.c
+    run_test/run_test_memory_pool.cpp
+)
+add_executable(memory_pool
+    ${HEADERS_memory_pool}
+    ${SOURCES_memory_pool}
+)
+# end memory_pool
 
 # list_memory_pool
 if (${CMAKE_SYSTEM_NAME} STREQUAL "Windows")
