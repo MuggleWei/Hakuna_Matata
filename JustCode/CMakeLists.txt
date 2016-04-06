@@ -177,3 +177,39 @@ add_executable(ref_count
     ${SOURCES_ref_count}
 )
 # end ref_count
+
+# enum string
+if (${CMAKE_SYSTEM_NAME} STREQUAL "Windows")
+set(HEADERS_enum_string
+    inc/enum_string.h
+)
+else()
+set(HEADERS_enum_string)
+endif()
+set(SOURCES_enum_string
+	src/enum_string.c
+    run_test/run_test_enum_string.c
+)
+add_executable(enum_string
+    ${HEADERS_enum_string}
+    ${SOURCES_enum_string}
+)
+# end enum sting 
+
+# enum string struct
+if (${CMAKE_SYSTEM_NAME} STREQUAL "Windows")
+set(HEADERS_enum_string_struct
+    inc/enum_string_struct.h
+)
+else()
+set(HEADERS_enum_string_struct)
+endif()
+set(SOURCES_enum_string_struct
+	src/enum_string_struct.cpp
+    run_test/run_test_enum_string_struct.cpp
+)
+add_executable(enum_string_struct
+    ${HEADERS_enum_string_struct}
+    ${SOURCES_enum_string_struct}
+)
+# end enum string struct
