@@ -29,6 +29,10 @@ int8_t ParseOption(const char* p_start, const char* p_end)
 	{
 		ret_val = MG_OT_FollowArbitrary;
 	}
+	else if (strcmp(q, "o") == 0 && dash_count == 1)
+	{
+		ret_val = MG_OT_FollowArbitrary;
+	}
 
 	free(p);
 
@@ -88,7 +92,13 @@ int main(int argc, char* argv[])
 	}
 	else
 	{
-		char *cmd_line = "Test_CmdUtils  --Mode Test --OpenGL -i file1 file2 file3 -o=\"out1 out2 out3\"";
+		// correct option example
+		// char *cmd_line = "Test_CmdUtils  --Mode Test --OpenGL -i file1 file2 file3 -o=\"out1 out2 out3\"";
+		char *cmd_line = "Test_CmdUtils  --Mode Test --OpenGL -i file1 file2 file3 -o out1 out2 out3";
+
+		// incorrect option example
+		// char *cmd_line = "Test_CmdUtils  --Mode Test --OpenGL - -i file1 file2 file3 -o out1 out2 out3";
+
 		CmdUtils_ParseCmdLine(cmd_line, ParseOption, executeCommand);
 	}
 
