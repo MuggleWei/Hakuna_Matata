@@ -1,9 +1,22 @@
 cmake_minimum_required (VERSION 2.8.9)
 project (JustCode)
 
-if (${CMAKE_SYSTEM_NAME} STREQUAL "Windows")
-else()
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
+# set compile parameter
+if (${CMAKE_CXX_COMPILER_ID} STREQUAL GNU)
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -march=native -Wall -Wextra -std=c++11")
+elseif (${CMAKE_CXX_COMPILER_ID} MATCHES Clang)
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -march=native -Wall -Wextra -Wno-missing-field-initializers")
+elseif (${CMAKE_CXX_COMPILER_ID} STREQUAL MSVC)
+    add_definitions(-D_CRT_SECURE_NO_WARNINGS=1 -D_UNICODE -DUNICODE)
+endif()
+
+# platform macro
+if (${CMAKE_CXX_COMPILER_ID} STREQUAL GNU)
+	add_definitions(-DMG_PLATFORM_UNIX=1)
+elseif (${CMAKE_CXX_COMPILER_ID} MATCHES Clang)
+	add_definitions(-DMG_PLATFORM_OSX=1)
+elseif (${CMAKE_CXX_COMPILER_ID} STREQUAL MSVC)
+	add_definitions(-DMG_PLATFORM_WINDOWS=1)
 endif()
 
 include_directories(
@@ -213,3 +226,27 @@ add_executable(enum_string_struct
     ${SOURCES_enum_string_struct}
 )
 # end enum string struct
+
+# enum command utils
+if (${CMAKE_SYSTEM_NAME} STREQUAL "Windows")
+set(HEADERS_cmd_utils
+    inc/cmd_utils.h
+	inc/base.h
+	inc/str_utils.h
+)
+else()
+set(HEADERS_cmd_utils)
+endif()
+set(SOURCES_cmd_utils
+	src/cmd_utils.c
+	src/base.c
+	src/str_utils.c
+    run_test/run_test_cmd_utils.c
+)
+add_executable(command_utils
+    ${HEADERS_cmd_utils}
+    ${SOURCES_cmd_utils}
+)
+set_target_properties(command_utils PROPERTIES 
+	COMPILE_DEFINITIONS MG_USE_LIB)
+# end command utils
