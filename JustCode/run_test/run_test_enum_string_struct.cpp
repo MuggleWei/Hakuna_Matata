@@ -19,9 +19,26 @@ int main()
 
 	for (i = 0; i < Enum3::Max; ++i)
 	{
-		printf("%s\t", Enum3::getEnumString(i));
+		printf("%s\t", Enum3::EnumToString((Enum3::Enum)i));
 	}
 	printf("\n");
+
+	Enum3::Enum e;
+	e = Enum3::StringToEnum("A");
+	if (e == Enum3::Enum::A)
+	{
+		printf("string to enum. A correct\n");
+	}
+	e = Enum3::StringToEnum("B");
+	if (e == Enum3::Enum::B)
+	{
+		printf("string to enum. B correct\n");
+	}
+	e = Enum3::StringToEnum("c");
+	if (e == Enum3::Enum::Max)
+	{
+		printf("string to enum. assert correct\n");
+	}
 
 	return 0;
 }

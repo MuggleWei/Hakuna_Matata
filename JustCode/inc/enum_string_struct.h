@@ -1,6 +1,8 @@
 #ifndef __ENUM_STRING_STRUCT_H__
 #define __ENUM_STRING_STRUCT_H__
 
+#include <string.h>
+
 // common enum
 struct Enum1
 {
@@ -41,13 +43,25 @@ struct struct_name \
 		FOREACH_ENUM(GENERATE_ENUM) \
 		Max, \
 	}; \
-	static const char* getEnumString(int index) \
+	static const char* EnumToString(Enum index) \
 	{ \
 		switch (index) \
 		{ \
 			FOREACH_ENUM(CASE_ENUM_TO_STRING); \
 		} \
 		return ""; \
+	} \
+	static Enum StringToEnum(const char* str) \
+	{ \
+		int enum_index; \
+		for (enum_index = 0; enum_index < Enum::Max; ++enum_index) \
+		{ \
+			if (strcmp(str, EnumToString((Enum)enum_index)) == 0) \
+			{ \
+				return (Enum)enum_index; \
+			} \
+		} \
+		return Enum::Max; \
 	} \
 };
 
