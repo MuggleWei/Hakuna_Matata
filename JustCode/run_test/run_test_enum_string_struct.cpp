@@ -17,5 +17,11 @@ int main()
 	}
 	printf("\n");
 
+	for (i = 0; i < Enum3::Max; ++i)
+	{
+		printf("%s\t", Enum3::getEnumString(i));
+	}
+	printf("\n");
+
 	return 0;
 }
