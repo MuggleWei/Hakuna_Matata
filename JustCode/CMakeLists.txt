@@ -250,3 +250,32 @@ add_executable(command_utils
 set_target_properties(command_utils PROPERTIES 
 	COMPILE_DEFINITIONS MG_USE_LIB)
 # end command utils
+
+# adapter
+if (${CMAKE_SYSTEM_NAME} STREQUAL "Windows")
+add_executable(adapter
+	inc/adapter.h
+	src/adapter.cpp
+	run_test/run_test_adapter.cpp
+)
+else()
+set(adapter
+	src/adapter.cpp
+	run_test/run_test_adapter.cpp
+)
+endif()
+# end adapter
+
+# singleton
+if (${CMAKE_SYSTEM_NAME} STREQUAL "Windows")
+add_executable(singleton
+	inc/singleton.h
+	inc/scope_lock.h
+	run_test/run_test_singleton.cpp
+)
+else()
+add_executable(singleton
+	run_test/run_test_singleton.cpp
+)
+endif()
+# end singleton
