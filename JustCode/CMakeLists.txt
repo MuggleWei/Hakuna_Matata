@@ -259,7 +259,7 @@ add_executable(adapter
 	run_test/run_test_adapter.cpp
 )
 else()
-set(adapter
+add_executable(adapter
 	src/adapter.cpp
 	run_test/run_test_adapter.cpp
 )
