@@ -7,10 +7,17 @@ build/
 # vscode
 .vscode/
 
-# idea
+# Intellij
 use/java/*/.idea/
 use/java/*/classes/
 use/java/*/target/
+
+*.iml
+.idea/workspace.xml
+.idea/tasks.xml
+.idea/gradle.xml
+.idea/dictionaries
+.idea/libraries
 
 
 ####################### from: https://github.com/github/gitignore #######################
