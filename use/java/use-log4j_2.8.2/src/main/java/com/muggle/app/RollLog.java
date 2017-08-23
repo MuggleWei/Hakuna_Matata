@@ -11,6 +11,9 @@ public class RollLog {
     private static Logger logger = null;
 
     public static void main(String[] args) {
+        // use below or -Dlog4j.configurationFile=config/log4j2.xml
+        System.setProperty("log4j.configurationFile", "config/log4j2.xml");
+
         logger = LogManager.getLogger("myRollLog");
         for(int i = 0; i < 500000; i++) {
             PrintInfo();

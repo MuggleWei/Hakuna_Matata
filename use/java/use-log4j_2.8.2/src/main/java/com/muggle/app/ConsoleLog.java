@@ -7,8 +7,10 @@ import org.apache.logging.log4j.Logger;
  * Created by mugglewei on 2017/8/20.
  */
 public class ConsoleLog {
-
     public static void main(String[] args) {
+        // use below or -Dlog4j.configurationFile=config/log4j2.xml
+        System.setProperty("log4j.configurationFile", "config/log4j2.xml");
+
         Logger logger = LogManager.getLogger("myConsoleLog");
         logger.trace("trace level");
         logger.debug("debug level");

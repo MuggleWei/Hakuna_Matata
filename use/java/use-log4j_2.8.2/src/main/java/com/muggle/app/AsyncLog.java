@@ -8,6 +8,9 @@ import org.apache.logging.log4j.Logger;
  */
 public class AsyncLog {
     public static void main(String[] args) {
+        // use below or -Dlog4j.configurationFile=config/log4j2.xml
+        System.setProperty("log4j.configurationFile", "config/log4j2.xml");
+
         Logger logger = LogManager.getLogger("myAsyncLog");
         logger.trace("trace level");
         logger.debug("debug level");
