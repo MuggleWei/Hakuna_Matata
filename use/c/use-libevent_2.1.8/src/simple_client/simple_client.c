@@ -49,7 +49,6 @@ void eventcb(struct bufferevent *bev, short events, void *ctx)
 
 		struct timeval time_interval = { 0,500000 };
 
-		evutil_socket_t fd = bufferevent_getfd(bev);
 		struct event_base *base = bufferevent_get_base(bev);
 		int ret = 0;
 
