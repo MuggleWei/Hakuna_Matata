@@ -48,9 +48,9 @@ void myEventCb(struct Peer *peer, short events)
 	{
 		fprintf(stdout, "disconnected %s\n", peer->addr);
 	}
-	else
+	else if (events & BEV_EVENT_EOF)
 	{
-		fprintf(stdout, "%d\n", events);
+		fprintf(stdout, "eof %s\n", peer->addr);
 	}
 }
 

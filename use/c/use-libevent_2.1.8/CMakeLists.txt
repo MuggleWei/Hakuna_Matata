@@ -86,6 +86,7 @@ endfunction()
 add_le_project(simple_client ${CMAKE_CURRENT_LIST_DIR}/src/simple_client)
 add_le_project(echo_server ${CMAKE_CURRENT_LIST_DIR}/src/echo_server)
 add_le_project(client ${CMAKE_CURRENT_LIST_DIR}/src/client)
+add_le_project(time_server ${CMAKE_CURRENT_LIST_DIR}/src/time_server)
 
 # add post compile event - copy libevent
 if (MSVC AND USE_LIBEVENT_WITH_SOURCE)
