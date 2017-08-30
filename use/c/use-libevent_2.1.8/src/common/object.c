@@ -1,4 +1,6 @@
 #include "object.h"
+#include <stdlib.h>
+#include <string.h>
 
 int g_detect_endian = 1;
 

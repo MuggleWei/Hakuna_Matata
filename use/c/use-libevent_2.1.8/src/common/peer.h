@@ -16,6 +16,8 @@ enum
 	PEER_CLOSE = 0x04,
 };
 
+struct Peer;
+
 typedef void(*peer_callback_fn)(struct Peer *peer, short events);
 
 struct Peer {

@@ -4,6 +4,8 @@
 #include <pthread.h>
 #endif
 #include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 #include <event2/thread.h>
 #include "common/object.h"
 #include "common/peer.h"
@@ -212,7 +214,7 @@ int main(int argc, char *argv)
 	}
 
 	pthread_t thread_id;
-	pthread_create(&th, NULL, threadFunc, NULL);
+	pthread_create(&thread_id, NULL, threadFunc, NULL);
 	pthread_detach(thread_id);
 #endif
 

@@ -1,4 +1,6 @@
 #include "peer.h"
+#include <stdlib.h>
+#include <string.h>
 #include <assert.h>
 
 // internal functions -- default callbacks
@@ -117,7 +119,7 @@ void eventcb(struct bufferevent *bev, short events, void *ctx)
 		(peer->func_event)(peer, events);
 	}
 
-	if (events & BEV_EVENT_ERROR)
+	if ((events & BEV_EVENT_ERROR) || (events & BEV_EVENT_EOF))
 	{
 		if (peer->flag & PEER_AUTO_RECONNECT)
 		{
@@ -170,7 +172,7 @@ struct Peer* peerConnect(struct event_base *base, const char *addr, int peer_siz
 		return NULL;
 	}
 
-	peer_size = sizeof(struct Peer) > peer_size ? sizeof(struct Peer) : peer_size;
+	peer_size = sizeof(struct Peer) > (size_t)peer_size ? sizeof(struct Peer) : peer_size;
 	struct Peer *peer = (struct Peer*)malloc(peer_size);
 	if (!peer)
 	{
