@@ -147,7 +147,7 @@ void reconncb(evutil_socket_t fd, short events, void *arg)
 }
 
 
-struct Peer* peerConnect(struct event_base *base, const char *addr)
+struct Peer* peerConnect(struct event_base *base, const char *addr, int peer_size)
 {
 	struct sockaddr_storage ss;
 	int sockaddr_len = (int)sizeof(ss);
@@ -170,7 +170,8 @@ struct Peer* peerConnect(struct event_base *base, const char *addr)
 		return NULL;
 	}
 
-	struct Peer *peer = (struct Peer*)malloc(sizeof(struct Peer));
+	peer_size = sizeof(struct Peer) > peer_size ? sizeof(struct Peer) : peer_size;
+	struct Peer *peer = (struct Peer*)malloc(peer_size);
 	if (!peer)
 	{
 		bufferevent_free(bev);

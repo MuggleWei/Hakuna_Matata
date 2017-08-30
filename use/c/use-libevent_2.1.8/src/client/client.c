@@ -60,7 +60,7 @@ void run()
 	struct event_base *base = NULL;
 
 	base = event_base_new();
-	struct Peer *peer = peerConnect(base, "127.0.0.1:40713");
+	struct Peer *peer = peerConnect(base, "127.0.0.1:40713", 0);
 	peerSetCb(peer, myReadCb, NULL, myEventCb);
 	peerSetAutoReconn(peer, 1);
 

@@ -34,7 +34,7 @@ struct Peer {
 };
 
 // peer connect to address
-struct Peer* peerConnect(struct event_base *base, const char *addr);
+struct Peer* peerConnect(struct event_base *base, const char *addr, int peer_size);
 void peerClose(struct Peer *peer);
 
 // peer callbacks

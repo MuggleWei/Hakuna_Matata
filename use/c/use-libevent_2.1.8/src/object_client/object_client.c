@@ -8,6 +8,12 @@
 #include "common/object.h"
 #include "common/peer.h"
 
+struct CustomPeer
+{
+	struct Peer base_peer;
+	char connect_name[16];
+};
+
 struct Peer *g_peer = NULL;
 
 void testEncodeDecode(struct baseObj *obj)
@@ -91,6 +97,7 @@ void myReadCb(struct Peer *peer, short events)
 				return;
 			}
 
+			fprintf(stdout, "message from: %s\n", ((struct CustomPeer*)peer)->connect_name);
 			struct baseObj* obj = decodeMsg(stream_bytes, len);
 			if (obj != NULL)
 			{
@@ -109,7 +116,7 @@ void myEventCb(struct Peer *peer, short events)
 {
 	if (events & BEV_EVENT_CONNECTED)
 	{
-		struct timeval time_interval = { 2, 0 };
+		struct timeval time_interval = { 1, 0 };
 		peerSetHeartbeat(peer, myHeartbeat, &time_interval);
 	}
 	else if (events & BEV_EVENT_ERROR)
@@ -127,9 +134,12 @@ void* threadFunc(void *arg)
 	struct event_base *base = NULL;
 
 	base = event_base_new();
-	g_peer = peerConnect(base, "127.0.0.1:40713");
+	g_peer = peerConnect(base, "127.0.0.1:40713", sizeof(struct CustomPeer));
 	peerSetCb(g_peer, myReadCb, NULL, myEventCb);
 	peerSetAutoReconn(g_peer, 1);
+
+	struct CustomPeer *peer = (struct CustomPeer*)g_peer;
+	strncpy(peer->connect_name, "my server", sizeof(peer->connect_name));
 
 	event_base_loop(base, EVLOOP_NO_EXIT_ON_EMPTY);
 
