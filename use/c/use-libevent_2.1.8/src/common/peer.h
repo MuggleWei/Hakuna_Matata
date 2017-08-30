@@ -5,6 +5,10 @@
 #include <event2/buffer.h>
 #include <event2/bufferevent.h>
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 enum
 {
 	PEER_ENABLE_HEARTBEAT = 0x01,
@@ -37,5 +41,9 @@ void peerClose(struct Peer *peer);
 int peerSetCb(struct Peer *peer, peer_callback_fn readfn, peer_callback_fn writefn, peer_callback_fn eventfn);
 void peerSetAutoReconn(struct Peer *peer, long interval_sec);
 int peerSetHeartbeat(struct Peer *peer, peer_callback_fn heartbeatfn, struct timeval *time_interval);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif

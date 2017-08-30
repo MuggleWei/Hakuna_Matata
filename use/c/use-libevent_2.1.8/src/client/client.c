@@ -1,4 +1,4 @@
-#include "peer.h"
+#include "common/peer.h"
 
 #if WIN32
 #pragma comment(lib, "ws2_32.lib")
