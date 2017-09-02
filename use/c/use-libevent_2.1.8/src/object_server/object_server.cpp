@@ -16,13 +16,13 @@
 PeerIOThread** g_io_threads = NULL;
 int g_io_thread_cnt = 0;
 
-void myInitPeer(struct Peer *peer, struct PeerIOThread_AddSocket *task)
+void myInitPeer(struct Peer *peer, struct PeerIOThread_AddSocket * /*task*/)
 {
 	PeerIOThread *io_thread = (PeerIOThread*)peer->base_info.thread;
 	fprintf(stdout, "#%d Thread has peer: %d\n", io_thread->thread_id, (int)io_thread->peers.size());
 }
 
-void myReadcb(struct Peer *peer, short events)
+void myReadcb(struct Peer *peer, short /*events*/)
 {
 	unsigned char *mem;
 
@@ -42,7 +42,7 @@ void myReadcb(struct Peer *peer, short events)
 		}
 
 		int32_t len = util_ntoh_32(*(int32_t*)mem);
-		if (total_bytes >= len)
+		if ((int32_t)total_bytes >= len)
 		{
 			void *stream_bytes = malloc(len);
 			if (evbuffer_remove(input_ev, stream_bytes, (size_t)len) < 0)
@@ -115,9 +115,8 @@ void addNewSocket(evutil_socket_t fd, struct sockaddr_storage *ss, socklen_t sle
 	}
 }
 
-void do_accept(evutil_socket_t listener, short event, void *arg)
+void do_accept(evutil_socket_t listener, short /*event*/, void *arg)
 {
-	struct event_base *base = (struct event_base*)arg;
 	struct sockaddr_storage ss;
 	socklen_t slen = sizeof(ss);
 	evutil_socket_t fd = accept(listener, (struct sockaddr*)&ss, &slen);

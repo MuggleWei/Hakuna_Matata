@@ -5,6 +5,9 @@
 extern "C" {
 #endif
 
+#ifndef WIN32
+#include <netinet/in.h>
+#endif
 #include <stdlib.h>
 #include "common_export_macro.h"
 

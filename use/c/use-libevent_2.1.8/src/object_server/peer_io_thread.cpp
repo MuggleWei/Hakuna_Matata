@@ -1,4 +1,5 @@
 #include "peer_io_thread.h"
+#include <stdlib.h>
 #include <event2/thread.h>
 
 #if WIN32
@@ -28,7 +29,7 @@ struct PeerIOThreadArg
 	CONDITION_VARIABLE cv;
 #else
 	pthread_mutex_t mtx;
-	pthread_cond_t cond_var;
+	pthread_cond_t cv;
 #endif
 };
 
@@ -44,7 +45,7 @@ void onClosePeer(struct Peer *peer)
 	PeerIOThread *io_thread = (PeerIOThread*)peer->base_info.thread;
 	io_thread->peers.erase(peer);
 }
-static void check_timeout(evutil_socket_t fd, short events, void *arg)
+static void check_timeout(evutil_socket_t fd, short /*events*/, void *arg)
 {
 	PeerIOThread *io_thread = (PeerIOThread*)arg;
 	struct timeval t;
@@ -248,22 +249,22 @@ PeerIOThread* createPeerIOThread(int id)
 #else
 	if (pthread_mutex_init(&arg->mtx, NULL) != 0)
 	{
-		free(peer_io_th);
+		free(arg);
 		return NULL;
 	}
 	if (pthread_cond_init(&arg->cv, NULL) != 0)
 	{
-		free(peer_io_th);
+		free(arg);
 		return NULL;
 	}
 	if (pthread_mutex_lock(&arg->mtx) != 0)
 	{
-		free(peer_io_th);
+		free(arg);
 		return NULL;
 	}
 
 	pthread_t system_thread_id;
-	pthread_create(&system_thread_id, NULL, threadFunc, (void*)arg);
+	pthread_create(&system_thread_id, NULL, peerIOThreadFunc, (void*)arg);
 	pthread_detach(system_thread_id);
 
 	pthread_cond_wait(&arg->cv, &arg->mtx);
