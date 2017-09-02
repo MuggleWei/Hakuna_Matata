@@ -2,12 +2,6 @@
 #include <stdlib.h>
 #include <event2/thread.h>
 
-#if WIN32
-#define ThreadLocal __declspec(thread) 
-#else
-#define ThreadLocal __thread
-#endif
-
 enum eTunnelType
 {
 	TUNNEL_IN = 0,
