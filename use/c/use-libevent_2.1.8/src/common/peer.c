@@ -2,20 +2,21 @@
 #include <stdlib.h>
 #include <string.h>
 #include <assert.h>
+#include "utils.h"
 
 // internal functions -- default callbacks
-void readcb(struct bufferevent *bev, void *ctx);
-void writecb(struct bufferevent *bev, void *ctx);
-void eventcb(struct bufferevent *bev, short events, void *ctx);
-void heartbeatcb(evutil_socket_t fd, short events, void *arg);
-void reconncb(evutil_socket_t fd, short events, void *arg);
+static void readcb(struct bufferevent *bev, void *ctx);
+static void writecb(struct bufferevent *bev, void *ctx);
+static void eventcb(struct bufferevent *bev, short events, void *ctx);
+static void heartbeatcb(evutil_socket_t fd, short events, void *arg);
+static void reconncb(evutil_socket_t fd, short events, void *arg);
 
 // internal functions
-void peerFree(struct Peer *peer);
-void peerClearTimeTask(struct Peer *peer);
-void peerSetupReconn(struct Peer *peer);
+static void peerFree(struct Peer *peer);
+static void peerClearTimeTask(struct Peer *peer);
+static void peerSetupReconn(struct Peer *peer);
 
-void peerFree(struct Peer *peer)
+static void peerFree(struct Peer *peer)
 {
 	if (peer)
 	{
@@ -34,7 +35,7 @@ void peerFree(struct Peer *peer)
 		free(peer);
 	}
 }
-void peerClearTimeTask(struct Peer *peer)
+static void peerClearTimeTask(struct Peer *peer)
 {
 	peerSetHeartbeat(peer, NULL, NULL);
 	if (peer->reconn_ev)
@@ -43,7 +44,7 @@ void peerClearTimeTask(struct Peer *peer)
 		peer->reconn_ev = NULL;
 	}
 }
-void peerSetupReconn(struct Peer *peer)
+static void peerSetupReconn(struct Peer *peer)
 {
 	// clear time task
 	peerClearTimeTask(peer);
@@ -82,7 +83,7 @@ void peerSetupReconn(struct Peer *peer)
 	peer->reconn_ev = ev;
 }
 
-void readcb(struct bufferevent *bev, void *ctx)
+static void readcb(struct bufferevent *bev, void *ctx)
 {
 	struct Peer *peer = (struct Peer*)ctx;
 	assert(bev == peer->bev);
@@ -93,7 +94,7 @@ void readcb(struct bufferevent *bev, void *ctx)
 
 	if (peer->flag & PEER_CLOSE) peerFree(peer);
 }
-void writecb(struct bufferevent *bev, void *ctx)
+static void writecb(struct bufferevent *bev, void *ctx)
 {
 	struct Peer *peer = (struct Peer*)ctx;
 	assert(bev == peer->bev);
@@ -104,7 +105,7 @@ void writecb(struct bufferevent *bev, void *ctx)
 
 	if (peer->flag & PEER_CLOSE) peerFree(peer);
 }
-void eventcb(struct bufferevent *bev, short events, void *ctx)
+static void eventcb(struct bufferevent *bev, short events, void *ctx)
 {
 	struct Peer *peer = (struct Peer*)ctx;
 	assert(bev == peer->bev);
@@ -131,7 +132,7 @@ void eventcb(struct bufferevent *bev, short events, void *ctx)
 		}
 	}
 }
-void heartbeatcb(evutil_socket_t fd, short events, void *arg)
+static void heartbeatcb(evutil_socket_t fd, short events, void *arg)
 {
 	struct Peer *peer = (struct Peer*)arg;
 	if (peer->func_heartbeat)
@@ -141,7 +142,7 @@ void heartbeatcb(evutil_socket_t fd, short events, void *arg)
 
 	if (peer->flag & PEER_CLOSE) peerFree(peer);
 }
-void reconncb(evutil_socket_t fd, short events, void *arg)
+static void reconncb(evutil_socket_t fd, short events, void *arg)
 {
 	struct Peer *peer = (struct Peer*)arg;
 
@@ -188,6 +189,36 @@ struct Peer* peerConnect(struct event_base *base, const char *addr, int peer_siz
 	strncpy(peer->addr, addr, sizeof(peer->addr));
 	peer->sock_storage = ss;
 	peer->sockaddr_len = sockaddr_len;
+
+	return peer;
+}
+struct Peer* peerConnectIn(struct event_base *base, evutil_socket_t fd, 
+	struct sockaddr_storage *ss, socklen_t slen, int peer_size)
+{
+	struct bufferevent *bev;
+
+	peer_size = sizeof(struct Peer) > (size_t)peer_size ? sizeof(struct Peer) : peer_size;
+	struct Peer *peer = (struct Peer*)malloc(peer_size);
+	if (!peer)
+	{
+		return NULL;
+	}
+	memset(peer, 0, sizeof(struct Peer));
+
+	evutil_make_socket_nonblocking(fd);
+	bev = bufferevent_socket_new(base, fd, BEV_OPT_CLOSE_ON_FREE);
+	if (bev == NULL)
+	{
+		bufferevent_free(bev);
+		return NULL;
+	}
+	bufferevent_setcb(bev, readcb, writecb, eventcb, (void*)peer);
+	bufferevent_enable(bev, EV_READ | EV_WRITE);
+	
+	peer->bev = bev;
+	get_sockaddr_port((struct sockaddr*)ss, peer->addr, sizeof(peer->addr));
+	peer->sock_storage = *ss;
+	peer->sockaddr_len = slen;
 
 	return peer;
 }

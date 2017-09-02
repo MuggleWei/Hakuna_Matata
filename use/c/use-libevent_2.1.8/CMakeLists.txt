@@ -63,35 +63,30 @@ include_directories(
 	${CMAKE_CURRENT_LIST_DIR}/src
 )
 
-# add exe dependent on libevent
+# add common shared lib
+muggle_add_project(common ${CMAKE_CURRENT_LIST_DIR}/src/common SHARED)
+target_link_libraries(common
+	event_core
+	event_extra
+)
+if (USE_LIBEVENT_WITH_SOURCE)
+	add_dependencies(common
+		event_core
+		event_extra
+	)
+endif()
+
+# add exe dependent on libevent and common
 function(add_le_project name folder)
 	muggle_add_project(${name} ${folder} EXE)
 	target_link_libraries(${name}
+		common
 		event_core
 		event_extra
 	)
 	if (USE_LIBEVENT_WITH_SOURCE)
 		add_dependencies(${name}
-			event_core
-			event_extra
-		)
-	endif()
-	
-	if (MSVC)
-		set_target_properties(${name} PROPERTIES VS_DEBUGGER_WORKING_DIRECTORY "$(OutDir)")
-	endif()
-endfunction()
-
-function(add_le_project_multi_folder name folders)
-
-	muggle_add_project_with_folders(${name} ${CMAKE_CURRENT_LIST_DIR}/src EXE "${folders}")
-	
-	target_link_libraries(${name}
-		event_core
-		event_extra
-	)
-	if (USE_LIBEVENT_WITH_SOURCE)
-		add_dependencies(${name}
+			common
 			event_core
 			event_extra
 		)
@@ -106,18 +101,9 @@ endfunction()
 add_le_project(simple_client ${CMAKE_CURRENT_LIST_DIR}/src/simple_client)
 add_le_project(echo_server ${CMAKE_CURRENT_LIST_DIR}/src/echo_server)
 add_le_project(time_server ${CMAKE_CURRENT_LIST_DIR}/src/time_server)
-
-list(APPEND client_folders
-	${CMAKE_CURRENT_LIST_DIR}/src/common
-	${CMAKE_CURRENT_LIST_DIR}/src/client
-)
-add_le_project_multi_folder(client "${client_folders}")
-
-list(APPEND object_client_folders
-	${CMAKE_CURRENT_LIST_DIR}/src/common
-	${CMAKE_CURRENT_LIST_DIR}/src/object_client
-)
-add_le_project_multi_folder(object_client "${object_client_folders}")
+add_le_project(client ${CMAKE_CURRENT_LIST_DIR}/src/client)
+add_le_project(object_client ${CMAKE_CURRENT_LIST_DIR}/src/object_client)
+add_le_project(object_server ${CMAKE_CURRENT_LIST_DIR}/src/object_server)
 
 
 # add post compile event - copy libevent

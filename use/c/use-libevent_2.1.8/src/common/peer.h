@@ -4,6 +4,7 @@
 #include <event2/event.h>
 #include <event2/buffer.h>
 #include <event2/bufferevent.h>
+#include "common/common_export_macro.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -36,13 +37,15 @@ struct Peer {
 };
 
 // peer connect to address
-struct Peer* peerConnect(struct event_base *base, const char *addr, int peer_size);
-void peerClose(struct Peer *peer);
+common_EXPORT struct Peer* peerConnect(struct event_base *base, const char *addr, int peer_size);
+common_EXPORT struct Peer* peerConnectIn(struct event_base *base, evutil_socket_t fd, 
+	struct sockaddr_storage *ss, socklen_t slen, int peer_size);
+common_EXPORT void peerClose(struct Peer *peer);
 
 // peer callbacks
-int peerSetCb(struct Peer *peer, peer_callback_fn readfn, peer_callback_fn writefn, peer_callback_fn eventfn);
-void peerSetAutoReconn(struct Peer *peer, long interval_sec);
-int peerSetHeartbeat(struct Peer *peer, peer_callback_fn heartbeatfn, struct timeval *time_interval);
+common_EXPORT int peerSetCb(struct Peer *peer, peer_callback_fn readfn, peer_callback_fn writefn, peer_callback_fn eventfn);
+common_EXPORT void peerSetAutoReconn(struct Peer *peer, long interval_sec);
+common_EXPORT int peerSetHeartbeat(struct Peer *peer, peer_callback_fn heartbeatfn, struct timeval *time_interval);
 
 #ifdef __cplusplus
 }

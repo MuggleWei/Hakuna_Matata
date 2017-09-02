@@ -9,6 +9,7 @@
 #include <event2/thread.h>
 #include "common/object.h"
 #include "common/peer.h"
+#include "common/utils.h"
 
 struct CustomPeer
 {

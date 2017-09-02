@@ -1,8 +1,7 @@
 #include "object.h"
 #include <stdlib.h>
 #include <string.h>
-
-int g_detect_endian = 1;
+#include "utils.h"
 
 static const char *s_names[] = {
 	"foo", "bar"

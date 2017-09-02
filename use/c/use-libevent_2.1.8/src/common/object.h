@@ -3,36 +3,11 @@
 
 #include <stdint.h>
 #include <event2/event.h>
+#include "common/common_export_macro.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif
-
-// endian
-extern int g_detect_endian;
-#define IS_LITTLE_ENDIAN (*(char*)&g_detect_endian)
-
-#define util_ex_32(v) \
-((((v)&0xff) << 24) | \
-(((v) & 0xff00) << 8) | \
-(((v) & 0xff0000) >> 8) | \
-(((v) & 0xff000000) >> 24))
-
-#define util_ex_64(v) \
-((((v)&0xff) << 56) | \
-(((v) & 0xff00) << 40) | \
-(((v) & 0xff0000) << 24) | \
-(((v) & 0xff000000) << 8) | \
-(((v) & 0xff00000000) >> 8) | \
-(((v) & 0xff0000000000) >> 24) | \
-(((v) & 0xff000000000000) >> 40) | \
-(((v) & 0xff00000000000000) >> 56))
-
-#define util_hton_32(v) (IS_LITTLE_ENDIAN ? util_ex_32(v) : v)
-#define util_hton_64(v) (IS_LITTLE_ENDIAN ? util_ex_64(v) : v)
-#define util_ntoh_32(v) util_hton_32(v)
-#define util_ntoh_64(v) util_hton_64(v)
-
 
 enum
 {
@@ -67,10 +42,10 @@ struct streamHead
 	int64_t time_usec;
 };
 
-const char* getName(struct baseObj *obj);
-void printObj(struct baseObj *obj);
-void* encodeMsg(struct baseObj *obj, int *len);
-struct baseObj* decodeMsg(void *buf, int len);
+common_EXPORT const char* getName(struct baseObj *obj);
+common_EXPORT void printObj(struct baseObj *obj);
+common_EXPORT void* encodeMsg(struct baseObj *obj, int *len);
+common_EXPORT struct baseObj* decodeMsg(void *buf, int len);
 
 #ifdef __cplusplus
 }
