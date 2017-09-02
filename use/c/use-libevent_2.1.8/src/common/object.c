@@ -223,7 +223,24 @@ struct baseObj* decodeMsg(void *buf, int len)
 	int64_t sec = util_ntoh_64(*(const int64_t*)p);
 	p += sizeof(int64_t);
 	int64_t usec = util_ntoh_64(*(const int64_t*)p);
-	fprintf(stdout, "encode time: %ld.%06ld\n", (long)sec, (long)usec);
+	// fprintf(stdout, "encode time: %ld.%06ld\n", (long)sec, (long)usec);
+
+	static struct timeval max_tv = { 0 };
+	struct timeval tv;
+	if (evutil_gettimeofday(&tv, NULL) == 0)
+	{
+		struct timeval interval = { tv.tv_sec - (long)sec, tv.tv_usec - (long)usec };
+		if (interval.tv_sec > max_tv.tv_sec)
+		{
+			max_tv = interval;
+			fprintf(stdout, "max interval: %ld, %ld\n", max_tv.tv_sec, max_tv.tv_usec);
+		}
+		else if (interval.tv_sec == max_tv.tv_sec && interval.tv_usec > max_tv.tv_usec)
+		{
+			max_tv = interval;
+			fprintf(stdout, "max interval: %ld, %ld\n", max_tv.tv_sec, max_tv.tv_usec);
+		}
+	}
 
 	return obj;
 }

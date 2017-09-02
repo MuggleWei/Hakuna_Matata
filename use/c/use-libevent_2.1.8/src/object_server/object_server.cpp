@@ -7,25 +7,19 @@
 #include "common/utils.h"
 #include "common/peer.h"
 #include "common/object.h"
-#include "common/peer_io_thread.h"
+#include "peer_io_thread.h"
 
 #if WIN32
 #pragma comment(lib, "ws2_32.lib")
 #endif
 
-struct CustomPeer
-{
-	struct Peer base_peer;
-	time_t connect_time;
-};
-
-struct PeerIOThread** g_io_threads = NULL;
+PeerIOThread** g_io_threads = NULL;
 int g_io_thread_cnt = 0;
 
-void myInitPeer(struct Peer *peer, struct PeerIOThread_AddSocketTask *task)
+void myInitPeer(struct Peer *peer, struct PeerIOThread_AddSocket *task)
 {
-	struct CustomPeer *custom_peer = (struct CustomPeer*)peer;
-	custom_peer->connect_time = time(NULL);
+	PeerIOThread *io_thread = (PeerIOThread*)peer->base_info.thread;
+	fprintf(stdout, "#%d Thread has peer: %d\n", io_thread->thread_id, (int)io_thread->peers.size());
 }
 
 void myReadcb(struct Peer *peer, short events)
@@ -56,13 +50,13 @@ void myReadcb(struct Peer *peer, short events)
 				return;
 			}
 
-			fprintf(stdout, "peer[%ld]:\n", (long)((struct CustomPeer*)peer)->connect_time);
 			struct baseObj* obj = decodeMsg(stream_bytes, len);
 			if (obj != NULL)
 			{
-				printObj(obj);
+				// printObj(obj);
 				free(obj);
 			}
+			bufferevent_write(peer->bev, stream_bytes, len);
 			free(stream_bytes);
 		}
 		else
@@ -92,20 +86,24 @@ void myEventcb(struct Peer *peer, short events)
 
 void addNewSocket(evutil_socket_t fd, struct sockaddr_storage *ss, socklen_t slen)
 {
-	static io_thread_idx = 0;
+	static int io_thread_idx = 0;
 	if (g_io_threads)
 	{
-		struct PeerIOThread_AddSocketTask task;
+		struct PeerIOThread_AddSocket task;
 		memset(&task, 0, sizeof(task));
 		task.fd = fd;
-		task.ss = *ss;
-		task.slen = slen;
-		task.peer_size = sizeof(struct CustomPeer);
+		task.remote_ss = *ss;
+		task.remote_ss_len = slen;
 		task.read_cb = myReadcb;
 		task.event_cb = myEventcb;
 		task.init_cb = myInitPeer;
 
-		peerIOThreadAddSocket(g_io_threads[io_thread_idx++], &task);
+		int ret = peerIOThreadAddSocket(g_io_threads[io_thread_idx++], &task);
+		if (ret < 0)
+		{
+			fprintf(stderr, "failed add new socket: %d\n", fd);
+			evutil_closesocket(fd);
+		}
 		if (io_thread_idx >= g_io_thread_cnt)
 		{
 			io_thread_idx = 0;
@@ -119,7 +117,7 @@ void addNewSocket(evutil_socket_t fd, struct sockaddr_storage *ss, socklen_t sle
 
 void do_accept(evutil_socket_t listener, short event, void *arg)
 {
-	struct event_base *base = arg;
+	struct event_base *base = (struct event_base*)arg;
 	struct sockaddr_storage ss;
 	socklen_t slen = sizeof(ss);
 	evutil_socket_t fd = accept(listener, (struct sockaddr*)&ss, &slen);
@@ -133,16 +131,15 @@ void do_accept(evutil_socket_t listener, short event, void *arg)
 	}
 }
 
-struct PeerIOThread** createIOThread(int cnt)
+PeerIOThread** createIOThread(int cnt)
 {
-	struct PeerIOThread **io_threads = malloc(sizeof(struct PeerIOThread*) * (cnt+1));
+	PeerIOThread **io_threads = (PeerIOThread**)malloc(sizeof(PeerIOThread*) * cnt);
 	int i = 0;
 
 	for (i = 0; i < cnt; ++i)
 	{
-		io_threads[i] = createPeerIOThread(i, 0);
+		io_threads[i] = createPeerIOThread(i);
 	}
-	io_threads[cnt] = NULL;
 
 	return io_threads;
 }
@@ -213,13 +210,9 @@ void run(void)
 	g_io_threads = createIOThread(8);
 	g_io_thread_cnt = 8;
 
-	struct PeerIOThread **p = g_io_threads;
-	long sec = 1;
-	while (*p)
+	for (int i = 0; i < g_io_thread_cnt; ++i)
 	{
-		peerIOThreadSetTimeout(*p, 15, sec);
-		sec += 1;
-		++p;
+		peerIOThreadSetTimeout(g_io_threads[i], 30, 15);
 	}
 
 	mainloop();

@@ -119,7 +119,7 @@ void myEventCb(struct Peer *peer, short events)
 {
 	if (events & BEV_EVENT_CONNECTED)
 	{
-		struct timeval time_interval = { 1, 0 };
+		struct timeval time_interval = { 15, 0 };
 		peerSetHeartbeat(peer, myHeartbeat, &time_interval);
 	}
 	else if (events & BEV_EVENT_ERROR)
@@ -137,9 +137,9 @@ void* threadFunc(void *arg)
 	struct event_base *base = NULL;
 
 	base = event_base_new();
-	g_peer = peerConnect(base, "127.0.0.1:40713", sizeof(struct CustomPeer));
+	g_peer = peerConnectTo(base, "127.0.0.1:40713", sizeof(struct CustomPeer));
 	peerSetCb(g_peer, myReadCb, NULL, myEventCb);
-	peerSetAutoReconn(g_peer, 1);
+	peerSetReconn(g_peer, 1, 0);
 
 	struct CustomPeer *peer = (struct CustomPeer*)g_peer;
 	strncpy(peer->connect_name, "my server", sizeof(peer->connect_name));
@@ -157,7 +157,11 @@ void runManual()
 {
 	while (1)
 	{
-		getchar();
+#if WIN32
+		Sleep(300);
+#else
+		usleep(300 * 1000);
+#endif
 
 		if (g_peer)
 		{

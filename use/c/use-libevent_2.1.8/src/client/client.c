@@ -39,18 +39,18 @@ void myEventCb(struct Peer *peer, short events)
 {
 	if (events & BEV_EVENT_CONNECTED)
 	{
-		fprintf(stdout, "connected to %s\n", peer->addr);
+		fprintf(stdout, "connected to %s\n", peer->base_info.remote_addr);
 
 		struct timeval time_interval = { 0,50000 };
 		peerSetHeartbeat(peer, myHeartbeat, &time_interval);
 	}
 	else if (events & BEV_EVENT_ERROR)
 	{
-		fprintf(stdout, "disconnected %s\n", peer->addr);
+		fprintf(stdout, "disconnected %s\n", peer->base_info.remote_addr);
 	}
 	else if (events & BEV_EVENT_EOF)
 	{
-		fprintf(stdout, "eof %s\n", peer->addr);
+		fprintf(stdout, "eof %s\n", peer->base_info.remote_addr);
 	}
 }
 
@@ -60,9 +60,9 @@ void run()
 	struct event_base *base = NULL;
 
 	base = event_base_new();
-	struct Peer *peer = peerConnect(base, "127.0.0.1:40713", 0);
+	struct Peer *peer = peerConnectTo(base, "127.0.0.1:40713", 0);
 	peerSetCb(peer, myReadCb, NULL, myEventCb);
-	peerSetAutoReconn(peer, 1);
+	peerSetReconn(peer, 1, 0);
 
 	event_base_loop(base, EVLOOP_NO_EXIT_ON_EMPTY);
 }
