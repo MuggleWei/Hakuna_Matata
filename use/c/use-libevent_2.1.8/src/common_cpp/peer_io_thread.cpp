@@ -144,9 +144,14 @@ static int tunnelcb_addsocktask(struct evbuffer *input, PeerIOThread *io_thread)
 			return -1;
 		}
 
+		struct timeval t;
+		event_base_gettimeofday_cached(io_thread->base, &t);
+
 		peerSetCb(peer, task.read_cb, task.write_cb, task.event_cb);
 		peerSetCloseCb(peer, onClosePeer);
 		peer->base_info.thread = (void*)io_thread;
+		peer->events.timeout.last_read = t.tv_sec;
+		peer->events.timeout.last_write = t.tv_sec;
 		peer->events.timeout.in_timeout = io_thread->in_timeout_sec;
 		peer->events.timeout.out_timeout = io_thread->out_timeout_sec;
 		io_thread->peers.insert(peer);
