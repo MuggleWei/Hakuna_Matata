@@ -1,4 +1,8 @@
 #include "base_server.h"
+#ifndef WIN32
+#include <signal.h>
+#endif
+#include <string.h>
 #include "common/utils.h"
 #include "common/peer.h"
 #include "common/object.h"

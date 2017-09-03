@@ -157,7 +157,7 @@ void myEventCb(struct Peer *peer, short events)
 {
 	if (events & BEV_EVENT_CONNECTED)
 	{
-		struct timeval time_interval = { 15, 0 };
+		struct timeval time_interval = { 2, 0 };
 		peerSetHeartbeat(peer, myHeartbeat, &time_interval);
 	}
 	else if (events & BEV_EVENT_ERROR)
@@ -195,11 +195,7 @@ void runManual()
 {
 	while (1)
 	{
-#if WIN32
-		Sleep(300);
-#else
-		usleep(300 * 1000);
-#endif
+		getchar();
 
 		if (g_peer)
 		{
