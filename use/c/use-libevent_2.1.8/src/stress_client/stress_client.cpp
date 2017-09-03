@@ -2,6 +2,7 @@
 #include <process.h>
 #else
 #include <pthread.h>
+#include <signal.h>
 #endif
 #include <stdio.h>
 #include <stdlib.h>
@@ -14,7 +15,7 @@
 #include "common/peer.h"
 #include "common/utils.h"
 
-std::set<struct Peer*> peers;
+thread_local std::set<struct Peer*> peers;
 
 const static char *server = "127.0.0.1:40713";
 
@@ -101,7 +102,7 @@ void TimeTask(evutil_socket_t fd, short events, void *arg)
 
 	if (rand() % 100 > 2)
 	{
-		if (peers.size() < 500)
+		if (peers.size() < 1000)
 		{
 			auto peer = peerConnectTo((struct event_base*)arg, server, 0);
 			if (peer)
@@ -119,7 +120,6 @@ void TimeTask(evutil_socket_t fd, short events, void *arg)
 			peers.erase(peers.begin());
 		}
 	}
-	
 }
 
 void run()
@@ -128,9 +128,9 @@ void run()
 
 	struct event_base *base = event_base_new();
 
-	for (int i = 0; i < 100; ++i)
+	for (int i = 0; i < 500; ++i)
 	{
-		std::this_thread::sleep_for(std::chrono::milliseconds(30));
+		std::this_thread::sleep_for(std::chrono::milliseconds(5));
 		auto peer = peerConnectTo(base, server, 0);
 		if (peer)
 		{
@@ -188,11 +188,15 @@ int main(int argc, char *argv)
 	}
 #endif
 
-	// for (int i = 0; i < 4; ++i)
-	// {
-	// 	std::thread th(run);
-	// 	th.detach();
-	// }
+	for (int i = 0; i < 8; ++i)
+	{
+		std::thread th(run);
+		th.detach();
+	}
+	
+#ifndef WIN32
+	signal(SIGPIPE,SIG_IGN);
+#endif
 
 	run();
 

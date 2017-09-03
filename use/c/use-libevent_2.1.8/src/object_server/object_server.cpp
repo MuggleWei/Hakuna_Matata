@@ -1,5 +1,8 @@
 #include <stdlib.h>
 #include <string.h>
+#ifndef WIN32
+#include <signal.h>
+#endif
 #include <event2/event.h>
 #include <event2/buffer.h>
 #include <event2/bufferevent.h>
@@ -236,6 +239,10 @@ int main(int argc, char *argv[])
 		printf("WSAStartup failed with error: %d\n", err);
 		return 1;
 	}
+#endif
+
+#ifndef WIN32
+	signal(SIGPIPE,SIG_IGN);
 #endif
 
 	run();
