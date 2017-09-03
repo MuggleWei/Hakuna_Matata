@@ -27,7 +27,7 @@ public:
 	BaseServer& operator=(const BaseServer &&rhs) = delete;
 
 	common_cpp_EXPORT void IOThread(int num);
-	common_cpp_EXPORT void IdleTimeout(unsigned short timeout);
+	common_cpp_EXPORT void IdleTimeout(unsigned short in_timeout, unsigned short out_timeout);
 	common_cpp_EXPORT void RegistReadCb(std::function<void(struct Peer*)>& cb);
 	common_cpp_EXPORT void RegistWriteCb(std::function<void(struct Peer*)>& cb);
 	common_cpp_EXPORT void RegistEventCb(std::function<void(struct Peer*, short)>& cb);
@@ -45,7 +45,8 @@ private:
 
 private:
 	std::vector<PeerIOThread*> io_threads_;
-	unsigned short timeout_;
+	unsigned short in_timeout_;
+	unsigned short out_timeout_;
 	int checktimout_interval_;
 	FuncReadCb read_cb_;
 	FuncWriteCb write_cb_;

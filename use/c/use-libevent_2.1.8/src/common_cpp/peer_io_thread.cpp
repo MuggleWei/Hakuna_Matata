@@ -49,8 +49,8 @@ static void check_timeout(evutil_socket_t fd, short /*events*/, void *arg)
 	std::set<struct Peer*> del_peers;
 	for (auto it = io_thread->peers.begin(); it != io_thread->peers.end(); ++it)
 	{
-		if (cur_time - (*it)->events.timeout.last_read > io_thread->timeout_sec ||
-			cur_time - (*it)->events.timeout.last_write > io_thread->timeout_sec)
+		if (((*it)->events.timeout.in_timeout != 0 && cur_time - (*it)->events.timeout.last_read > (*it)->events.timeout.in_timeout) ||
+			((*it)->events.timeout.out_timeout != 0 && cur_time - (*it)->events.timeout.last_write > (*it)->events.timeout.out_timeout))
 		{
 			fprintf(stdout, "#%d thread: %s is timeout", io_thread->thread_id, (*it)->base_info.remote_addr);
 			del_peers.insert(*it);
@@ -147,6 +147,8 @@ static int tunnelcb_addsocktask(struct evbuffer *input, PeerIOThread *io_thread)
 		peerSetCb(peer, task.read_cb, task.write_cb, task.event_cb);
 		peerSetCloseCb(peer, onClosePeer);
 		peer->base_info.thread = (void*)io_thread;
+		peer->events.timeout.in_timeout = io_thread->in_timeout_sec;
+		peer->events.timeout.out_timeout = io_thread->out_timeout_sec;
 		io_thread->peers.insert(peer);
 
 		if (task.init_cb)
@@ -278,11 +280,13 @@ PeerIOThread* createPeerIOThread(int id)
 	return io_thread;
 }
 
-int peerIOThreadSetTimeout(PeerIOThread* io_thread, unsigned short timeout_sec, long check_interval_sec)
+int peerIOThreadSetTimeout(PeerIOThread *io_thread, long check_interval_sec,
+	unsigned short in_timeout_sec, unsigned short out_timeout_sec)
 {
 	struct PeerIOThread_CheckTimeout task = { TUNNEL_ADD_TIME, { check_interval_sec, 0 } };
+	io_thread->in_timeout_sec = in_timeout_sec;
+	io_thread->out_timeout_sec = out_timeout_sec;
 	int ret = bufferevent_write(io_thread->tunnel[TUNNEL_IN], (void*)&task, sizeof(struct PeerIOThread_CheckTimeout));
-	io_thread->timeout_sec = timeout_sec;
 
 	return ret;
 }

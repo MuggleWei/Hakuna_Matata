@@ -47,7 +47,8 @@ static void do_event(struct Peer *peer, short events)
 }
 
 BaseServer::BaseServer()
-	: timeout_(0)
+	: in_timeout_(0)
+	, out_timeout_(0)
 	, checktimout_interval_(15)
 	, read_cb_(nullptr)
 	, write_cb_(nullptr)
@@ -65,9 +66,10 @@ void BaseServer::IOThread(int num)
 	io_thread_num_ = num;
 	io_thread_num_ = io_thread_num_ >= 1 ? io_thread_num_ : 1;
 }
-void BaseServer::IdleTimeout(unsigned short timeout)
+void BaseServer::IdleTimeout(unsigned short in_timeout, unsigned short out_timeout)
 {
-	timeout_ = timeout;
+	in_timeout_ = in_timeout;
+	out_timeout_ = out_timeout;
 }
 void BaseServer::RegistReadCb(std::function<void(struct Peer*)>& cb)
 {
@@ -184,9 +186,9 @@ void BaseServer::createIOThread()
 	for (int i = 0; i < io_thread_num_; ++i)
 	{
 		io_threads_.push_back(createPeerIOThread(i));
-		if (timeout_ > 0 && checktimout_interval_ > 0)
+		if (checktimout_interval_ > 0)
 		{
-			peerIOThreadSetTimeout(io_threads_[i], timeout_, checktimout_interval_);
+			peerIOThreadSetTimeout(io_threads_[i], checktimout_interval_, in_timeout_, out_timeout_);
 		}
 	}
 }

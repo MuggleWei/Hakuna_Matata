@@ -22,7 +22,8 @@ struct PeerIOThread
 		, base(nullptr)
 		, tunnel{ nullptr }
 		, timeout_ev(nullptr)
-		, timeout_sec(0)
+		, in_timeout_sec(0)
+		, out_timeout_sec(0)
 	{}
 
 #if WIN32
@@ -35,7 +36,8 @@ struct PeerIOThread
 	struct bufferevent *tunnel[2];
 	std::set<struct Peer*> peers;
 	struct event *timeout_ev;
-	unsigned short timeout_sec;
+	unsigned short in_timeout_sec;
+	unsigned short out_timeout_sec;
 };
 
 struct PeerIOThread_AddSocket;
@@ -62,7 +64,8 @@ struct PeerIOThread_AddSocket
 
 common_cpp_EXPORT PeerIOThread* createPeerIOThread(int id);
 
-common_cpp_EXPORT int peerIOThreadSetTimeout(PeerIOThread *io_thread, unsigned short timeout_sec, long check_interval_sec);
+common_cpp_EXPORT int peerIOThreadSetTimeout(PeerIOThread *io_thread, long check_interval_sec,
+	unsigned short in_timeout_sec, unsigned short out_timeout_sec);
 common_cpp_EXPORT int peerIOThreadAddSocket(PeerIOThread *io_thread, struct PeerIOThread_AddSocket *task);
 common_cpp_EXPORT int peerIOThreadGetPeerCnt(PeerIOThread *io_thread);
 

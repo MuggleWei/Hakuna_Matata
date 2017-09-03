@@ -66,7 +66,7 @@ int main(int argc, char *argv[])
 
 	BaseServer server;
 	server.IOThread(8);
-	server.IdleTimeout(30);
+	server.IdleTimeout(30, 0);
 	server.RegistReadCb(read_cb);
 
 	server.Run(40713);
