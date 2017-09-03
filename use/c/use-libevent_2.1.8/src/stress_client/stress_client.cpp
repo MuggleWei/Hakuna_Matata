@@ -60,7 +60,7 @@ void myReadCb(struct Peer *peer, short events)
 				{
 					struct TimeRecord *tr = (struct TimeRecord*)obj;
 					struct timeval interval = { tv.tv_sec - (long)tr->sec, tv.tv_usec - (long)tr->usec };
-					fprintf(stdout, "time interval: %ld, %ld\n", interval.tv_sec, interval.tv_usec);
+
 					if (interval.tv_sec > max_tv.tv_sec)
 					{
 						max_tv = interval;
@@ -70,6 +70,23 @@ void myReadCb(struct Peer *peer, short events)
 					{
 						max_tv = interval;
 						fprintf(stdout, "max interval: %ld, %ld\n", max_tv.tv_sec, max_tv.tv_usec);
+					}
+
+					static thread_local int invoke_times = 0;
+					static thread_local timeval accu_tv = {0,0};
+
+					++invoke_times;
+					accu_tv.tv_sec += interval.tv_sec;
+					accu_tv.tv_usec += interval.tv_usec;
+					if (invoke_times >= 10000)
+					{
+						double sec = (double)accu_tv.tv_sec / (double)invoke_times;
+						double usec = (double)accu_tv.tv_usec / (double)invoke_times;
+						double ms = sec * 1000.0 + usec / 1000.0;
+						fprintf(stdout, "avg time interval: %f\n", ms);
+						invoke_times = 0;
+						accu_tv.tv_sec = 0;
+						accu_tv.tv_usec = 0;
 					}
 				}
 				else
@@ -100,7 +117,7 @@ void myEventCb(struct Peer *peer, short events)
 
 void send(struct Peer *peer)
 {
-	static int req_id = 0;
+	static thread_local int req_id = 0;
 	int len;
 	struct event_base *base = bufferevent_get_base(peer->bev);
 
@@ -124,10 +141,7 @@ void TimeTask(evutil_socket_t fd, short events, void *arg)
 {
 	for (auto it = peers.begin(); it != peers.end(); ++it)
 	{
-		if (rand() % 10 > 7)
-		{
-			send(*it);
-		}
+		send(*it);
 	}
 
 	if (rand() % 100 > 2)
@@ -144,7 +158,7 @@ void TimeTask(evutil_socket_t fd, short events, void *arg)
 	}
 	else
 	{
-		if (peers.size() > 0)
+		if (peers.size() > 900)
 		{
 			peerFree(*(peers.begin()));
 			peers.erase(peers.begin());
@@ -175,7 +189,7 @@ void run()
 		return;
 	}
 
-	struct timeval tv = { 0, 200 };
+	struct timeval tv = { 0, 100000 };
 	if (event_add(ev, &tv) < 0)
 	{
 		event_free(ev);
@@ -218,7 +232,7 @@ int main(int argc, char *argv)
 	}
 #endif
 
-	for (int i = 0; i < 8; ++i)
+	for (int i = 0; i < 9; ++i)
 	{
 		std::thread th(run);
 		th.detach();

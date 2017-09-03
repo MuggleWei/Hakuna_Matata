@@ -152,6 +152,7 @@ struct Peer* peerConnectTo(struct event_base *base, const char *addr, int peer_s
 
 	if (bufferevent_socket_connect(bev, (struct sockaddr *)&remote_ss, remote_ss_len) < 0)
 	{
+		fprintf(stderr, "failed connect to %s\n", addr);
 		bufferevent_free(bev);
 		return NULL;
 	}
@@ -160,6 +161,7 @@ struct Peer* peerConnectTo(struct event_base *base, const char *addr, int peer_s
 	struct Peer *peer = (struct Peer*)malloc(peer_size);
 	if (!peer)
 	{
+		fprintf(stderr, "failed allocate peer\n");
 		bufferevent_free(bev);
 		return NULL;
 	}
