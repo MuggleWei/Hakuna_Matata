@@ -11,11 +11,12 @@
 #include <event2/bufferevent.h>
 #include <set>
 #include "common/common_export_macro.h"
+#include "common_cpp/common_cpp_export_macro.h"
 #include "common/peer.h"
 
-struct PeerIOThread 
+struct PeerIOThread
 {
-	PeerIOThread()
+	common_cpp_EXPORT PeerIOThread()
 		: system_thread_id(0)
 		, thread_id(-1)
 		, base(nullptr)
@@ -56,12 +57,13 @@ struct PeerIOThread_AddSocket
 	peer_callback_fn write_cb;
 	peer_callback_fn event_cb;
 	peer_init_extra_fn init_cb;
+	void *extra;
 };
 
-PeerIOThread* createPeerIOThread(int id);
+common_cpp_EXPORT PeerIOThread* createPeerIOThread(int id);
 
-int peerIOThreadSetTimeout(PeerIOThread *io_thread, unsigned short timeout_sec, long check_interval_sec);
-int peerIOThreadAddSocket(PeerIOThread *io_thread, struct PeerIOThread_AddSocket *task);
-int peerIOThreadGetPeerCnt(PeerIOThread *io_thread);
+common_cpp_EXPORT int peerIOThreadSetTimeout(PeerIOThread *io_thread, unsigned short timeout_sec, long check_interval_sec);
+common_cpp_EXPORT int peerIOThreadAddSocket(PeerIOThread *io_thread, struct PeerIOThread_AddSocket *task);
+common_cpp_EXPORT int peerIOThreadGetPeerCnt(PeerIOThread *io_thread);
 
 #endif

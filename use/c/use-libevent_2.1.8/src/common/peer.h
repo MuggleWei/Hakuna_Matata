@@ -81,6 +81,7 @@ struct Peer
 	struct PeerBaseInfo base_info;
 	struct PeerCallback callbacks;
 	struct PeerBaseEvent events;
+	void *extra;
 };
 
 /*

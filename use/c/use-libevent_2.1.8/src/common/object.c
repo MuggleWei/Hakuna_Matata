@@ -4,7 +4,7 @@
 #include "utils.h"
 
 static const char *s_names[] = {
-	"foo", "bar"
+	"foo", "bar", "timerecord"
 };
 
 typedef const char* (*func_get_name)(struct baseObj* obj);
@@ -144,10 +144,58 @@ int barDecode(void *buf, int len, struct baseObj *obj)
 	return 0;
 }
 
+// tr
+const char* trGetName(struct baseObj* obj)
+{
+	return s_names[OBJ_TYPE_TR];
+}
+void trPrint(struct baseObj* obj)
+{
+	struct TimeRecord *tr = (struct TimeRecord*)obj;
+	fprintf(stdout, "%s: %ld, %ld\n", trGetName(obj), (long)tr->sec, (long)tr->usec);
+}
+void* trEncode(struct baseObj *obj, int *len)
+{
+	struct TimeRecord *tr = (struct TimeRecord*)obj;
+
+	*len = (int)(sizeof(struct streamHead) + 2 * sizeof(int64_t));
+
+	char *buf = (char*)malloc(*len);
+	if (buf == NULL)
+	{
+		return NULL;
+	}
+	char *p = buf + sizeof(struct streamHead);
+
+	int64_t tmp = util_hton_64(tr->sec);
+	memcpy(p, &tmp, sizeof(tmp));
+	p += sizeof(int64_t);
+
+	tmp = util_hton_64(tr->usec);
+	memcpy(p, &tmp, sizeof(tmp));
+
+	return buf;
+}
+int trDecode(void *buf, int len, struct baseObj *obj)
+{
+	struct TimeRecord *tr = (struct TimeRecord*)obj;
+
+	const char *p = buf;
+	p += sizeof(struct streamHead);
+
+	tr->sec = util_ntoh_64(*(int64_t*)p);
+	p += sizeof(int64_t);
+
+	tr->usec = util_ntoh_64(*(int64_t*)p);
+
+	return 0;
+}
+
 // callbacks
 struct objFunc obj_fn[OBJ_TYPE_MAX] = {
 	{ fooGetName, fooPrint, fooEncode, fooDecode },
-	{ barGetName, barPrint, barEncode, barDecode }
+	{ barGetName, barPrint, barEncode, barDecode },
+	{ trGetName, trPrint, trEncode, trDecode}
 };
 
 const char* getName(struct baseObj *obj)
@@ -224,23 +272,6 @@ struct baseObj* decodeMsg(void *buf, int len)
 	p += sizeof(int64_t);
 	int64_t usec = util_ntoh_64(*(const int64_t*)p);
 	// fprintf(stdout, "encode time: %ld.%06ld\n", (long)sec, (long)usec);
-
-	static struct timeval max_tv = { 0 };
-	struct timeval tv;
-	if (evutil_gettimeofday(&tv, NULL) == 0)
-	{
-		struct timeval interval = { tv.tv_sec - (long)sec, tv.tv_usec - (long)usec };
-		if (interval.tv_sec > max_tv.tv_sec)
-		{
-			max_tv = interval;
-			fprintf(stdout, "max interval: %ld, %ld\n", max_tv.tv_sec, max_tv.tv_usec);
-		}
-		else if (interval.tv_sec == max_tv.tv_sec && interval.tv_usec > max_tv.tv_usec)
-		{
-			max_tv = interval;
-			fprintf(stdout, "max interval: %ld, %ld\n", max_tv.tv_sec, max_tv.tv_usec);
-		}
-	}
 
 	return obj;
 }

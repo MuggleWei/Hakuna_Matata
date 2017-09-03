@@ -13,6 +13,7 @@ enum
 {
 	OBJ_TYPE_FOO = 0,
 	OBJ_TYPE_BAR,
+	OBJ_TYPE_TR,
 	OBJ_TYPE_MAX,
 };
 
@@ -32,6 +33,12 @@ struct Bar
 	struct baseObj obj;
 	char buf[32];
 	uint32_t bar_id;
+};
+struct TimeRecord
+{
+	struct baseObj obj;
+	int64_t sec;
+	int64_t usec;
 };
 
 struct streamHead

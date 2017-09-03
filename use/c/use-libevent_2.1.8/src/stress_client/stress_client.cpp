@@ -21,7 +21,13 @@ const static char *server = "127.0.0.1:40713";
 
 void myReadCb(struct Peer *peer, short events)
 {
+	static struct timeval max_tv = { 0 };
+
 	unsigned char *mem;
+
+	struct timeval tv;
+	struct event_base *base = bufferevent_get_base(peer->bev);
+	event_base_gettimeofday_cached(base, &tv);
 
 	struct evbuffer *input_ev = bufferevent_get_input(peer->bev);
 	while (1)
@@ -50,7 +56,26 @@ void myReadCb(struct Peer *peer, short events)
 			struct baseObj* obj = decodeMsg(stream_bytes, len);
 			if (obj != NULL)
 			{
-				printObj(obj);
+				if (obj->type == OBJ_TYPE_TR)
+				{
+					struct TimeRecord *tr = (struct TimeRecord*)obj;
+					struct timeval interval = { tv.tv_sec - (long)tr->sec, tv.tv_usec - (long)tr->usec };
+					fprintf(stdout, "time interval: %ld, %ld\n", interval.tv_sec, interval.tv_usec);
+					if (interval.tv_sec > max_tv.tv_sec)
+					{
+						max_tv = interval;
+						fprintf(stdout, "max interval: %ld, %ld\n", max_tv.tv_sec, max_tv.tv_usec);
+					}
+					else if (interval.tv_sec == max_tv.tv_sec && interval.tv_usec > max_tv.tv_usec)
+					{
+						max_tv = interval;
+						fprintf(stdout, "max interval: %ld, %ld\n", max_tv.tv_sec, max_tv.tv_usec);
+					}
+				}
+				else
+				{
+					printObj(obj);
+				}
 				free(obj);
 			}
 			free(stream_bytes);
@@ -75,13 +100,18 @@ void myEventCb(struct Peer *peer, short events)
 
 void send(struct Peer *peer)
 {
+	static int req_id = 0;
 	int len;
-	struct Bar bar;
+	struct event_base *base = bufferevent_get_base(peer->bev);
 
-	bar.obj.type = OBJ_TYPE_BAR;
-	bar.bar_id = 0;
-	strncpy(bar.buf, "Hey, it's manual message", sizeof(bar.buf));
-	void *stream_bytes = encodeMsg((struct baseObj*)&bar, &len);
+	struct timeval tv;
+	event_base_gettimeofday_cached(base, &tv);
+
+	struct TimeRecord tr;
+	tr.obj.type = OBJ_TYPE_TR;
+	tr.sec = tv.tv_sec;
+	tr.usec = tv.tv_usec;
+	void *stream_bytes = encodeMsg((struct baseObj*)&tr, &len);
 
 	if (stream_bytes)
 	{

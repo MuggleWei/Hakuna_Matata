@@ -76,6 +76,20 @@ if (USE_LIBEVENT_WITH_SOURCE)
 	)
 endif()
 
+muggle_add_project(common_cpp ${CMAKE_CURRENT_LIST_DIR}/src/common_cpp SHARED)
+target_link_libraries(common_cpp
+	event_core
+	event_extra
+	common
+)
+if (USE_LIBEVENT_WITH_SOURCE)
+	add_dependencies(common_cpp
+		event_core
+		event_extra
+		common
+	)
+endif()
+
 # add exe dependent on libevent and common
 function(add_le_project name folder)
 	muggle_add_project(${name} ${folder} EXE)
@@ -97,14 +111,36 @@ function(add_le_project name folder)
 	endif()
 endfunction()
 
+function(add_le_cpp_project name folder)
+	muggle_add_project(${name} ${folder} EXE)
+	target_link_libraries(${name}
+		common
+		common_cpp
+		event_core
+		event_extra
+	)
+	if (USE_LIBEVENT_WITH_SOURCE)
+		add_dependencies(${name}
+			common
+			common_cpp
+			event_core
+			event_extra
+		)
+	endif()
+	
+	if (MSVC)
+		set_target_properties(${name} PROPERTIES VS_DEBUGGER_WORKING_DIRECTORY "$(OutDir)")
+	endif()
+endfunction()
+
 # add projects
 add_le_project(simple_client ${CMAKE_CURRENT_LIST_DIR}/src/simple_client)
 add_le_project(echo_server ${CMAKE_CURRENT_LIST_DIR}/src/echo_server)
 add_le_project(time_server ${CMAKE_CURRENT_LIST_DIR}/src/time_server)
 add_le_project(client ${CMAKE_CURRENT_LIST_DIR}/src/client)
 add_le_project(object_client ${CMAKE_CURRENT_LIST_DIR}/src/object_client)
-add_le_project(object_server ${CMAKE_CURRENT_LIST_DIR}/src/object_server)
-add_le_project(stress_client ${CMAKE_CURRENT_LIST_DIR}/src/stress_client)
+add_le_cpp_project(object_server ${CMAKE_CURRENT_LIST_DIR}/src/object_server)
+add_le_cpp_project(stress_client ${CMAKE_CURRENT_LIST_DIR}/src/stress_client)
 
 
 # add post compile event - copy libevent

@@ -52,18 +52,30 @@ void testObj()
 	}
 	bar.buf[sizeof(bar.buf) - 1] = '\0';
 	testEncodeDecode((struct baseObj*)&bar);
+
+	struct TimeRecord tr;
+	struct timeval tv;
+	tr.obj.type = OBJ_TYPE_TR;
+	evutil_gettimeofday(&tv, NULL);
+	tr.sec = tv.tv_sec;
+	tr.usec = tv.tv_usec;
+	testEncodeDecode((struct baseObj*)&tr);
 }
 
 void myHeartbeat(struct Peer *peer, short events)
 {
 	static int req_id = 0;
 	int len;
-	struct Foo foo;
+	struct event_base *base = bufferevent_get_base(peer->bev);
 
-	foo.obj.type = OBJ_TYPE_FOO;
-	foo.foo_id = ++req_id;
-	strncpy(foo.buf, "Hey, it's heartbeat message", sizeof(foo.buf));
-	void *stream_bytes = encodeMsg((struct baseObj*)&foo, &len);
+	struct timeval tv;
+	event_base_gettimeofday_cached(base, &tv);
+
+	struct TimeRecord tr;
+	tr.obj.type = OBJ_TYPE_TR;
+	tr.sec = tv.tv_sec;
+	tr.usec = tv.tv_usec;
+	void *stream_bytes = encodeMsg((struct baseObj*)&tr, &len);
 
 	if (stream_bytes)
 	{
@@ -74,7 +86,13 @@ void myHeartbeat(struct Peer *peer, short events)
 
 void myReadCb(struct Peer *peer, short events)
 {
+	static struct timeval max_tv = { 0 };
+
 	unsigned char *mem;
+
+	struct timeval tv;
+	struct event_base *base = bufferevent_get_base(peer->bev);
+	event_base_gettimeofday_cached(base, &tv);
 
 	struct evbuffer *input_ev = bufferevent_get_input(peer->bev);
 	while (1)
@@ -104,7 +122,27 @@ void myReadCb(struct Peer *peer, short events)
 			struct baseObj* obj = decodeMsg(stream_bytes, len);
 			if (obj != NULL)
 			{
-				printObj(obj);
+				if (obj->type == OBJ_TYPE_TR)
+				{
+					struct TimeRecord *tr = (struct TimeRecord*)obj;
+					struct timeval interval = { tv.tv_sec - (long)tr->sec, tv.tv_usec - (long)tr->usec };
+					fprintf(stdout, "time interval: %ld, %ld\n", interval.tv_sec, interval.tv_usec);
+					if (interval.tv_sec > max_tv.tv_sec)
+					{
+						max_tv = interval;
+						fprintf(stdout, "max interval: %ld, %ld\n", max_tv.tv_sec, max_tv.tv_usec);
+					}
+					else if (interval.tv_sec == max_tv.tv_sec && interval.tv_usec > max_tv.tv_usec)
+					{
+						max_tv = interval;
+						fprintf(stdout, "max interval: %ld, %ld\n", max_tv.tv_sec, max_tv.tv_usec);
+					}
+				}
+				else
+				{
+					printObj(obj);
+				}
+
 				free(obj);
 			}
 			free(stream_bytes);
@@ -185,7 +223,6 @@ void runManual()
 
 int main(int argc, char *argv)
 {
-
 #if WIN32
 	WORD wVersionRequested;
 	WSADATA wsaData;
