@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.muggle.app.mapper.CountryMapper">
+    <resultMap id="countryMapper" type="com.muggle.app.model.Country">
+        <!--<result property="name" column="Name"/>-->
+    </resultMap>
+
+    <select id="selectAll" resultMap="countryMapper">
+        select * from country
+    </select>
+
+    <select id="selectCodes" resultType="String">
+        select Code from country
+    </select>
+
+    <select id="selectRegions" resultType="String">
+        select distinct Region from country
+    </select>
+
+    <select id="selectByContinent" resultMap="countryMapper">
+        select * from country where Continent = #{continent}
+    </select>
+
+    <insert id="insertCountry">
+        insert into country(Code, Name, Continent)
+        values(#{code}, #{name}, #{continent})
+    </insert>
+
+    <update id="updateByCode">
+        update country
+        set
+            Name = #{name}
+        where
+            Code = #{code}
+    </update>
+    
+    <delete id="deleteByName">
+        delete from country where name = #{name}
+    </delete>
+</mapper>
