@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi = "http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:p="http://www.springframework.org/schema/p"
+       xsi:schemaLocation=
+               "http://www.springframework.org/schema/beans
+                http://www.springframework.org/schema/beans/spring-beans-4.0.xsd">
+
+    <bean id="hongqi" class="com.muggle.object.Car"
+          p:brand="hongqi"
+          p:color="black"
+          p:maxSpeed="300"/>
+    <bean id="Audi" class="com.muggle.object.Car" scope="prototype"
+          p:brand="Audi"
+          p:color="white"
+          p:maxSpeed="280"/>
+    <bean id="driver" class="com.muggle.object.Driver"
+          p:name="unknown"
+          p:car-ref="hongqi"/>
+
+</beans>
