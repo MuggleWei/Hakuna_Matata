@@ -33,6 +33,23 @@ public class AccountService {
         return true;
     }
 
+    @Transactional
+    public boolean BadCreateAccount(Account account) throws Exception {
+        int ret = accountMapper.createAccountInfo(account);
+        if (ret <= 0) {
+            return false;
+        }
+
+        account.setId(10000L);
+
+        ret = accountMapper.createAccountPasswd(account);
+        if (ret <= 0) {
+            return false;
+        }
+
+        return true;
+    }
+
     public int getAccountInfoCnt() {
         return accountMapper.getAccountInfoCnt();
     }

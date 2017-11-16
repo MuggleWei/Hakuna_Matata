@@ -39,7 +39,26 @@ public class AccountServiceTest {
             e.printStackTrace();
         }
 
+        Assert.assertEquals(service.getAccountInfoCnt(), service.getAccountPasswdCnt());
+    }
 
+    @Test
+    public void BadCreateAccountTest() {
+        ApplicationContext ctx = new AnnotationConfigApplicationContext(
+                DBConfig.class, MapperConfig.class, ServiceConfig.class
+        );
+        AccountService service = ctx.getBean(AccountService.class);
+
+        Account account = new Account();
+        account.setName("xxx");
+        account.setPassword("xxxxxx");
+        try {
+            service.BadCreateAccount(account);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        Assert.assertEquals(service.getAccountInfoCnt(), service.getAccountPasswdCnt());
     }
 
     @Test
