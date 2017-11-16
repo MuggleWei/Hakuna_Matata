@@ -33,6 +33,16 @@ public class DBConfig {
         dataSource.setUrl(env.getProperty("datasource.url"));
         dataSource.setUsername(env.getProperty("datasource.username"));
         dataSource.setPassword(env.getProperty("datasource.password"));
+
+        /*
+        *  can improve performance, but be careful, cause need to know mysql setting, in
+        *  general situation, just keep default setting
+        * */
+//        dataSource.setTestOnBorrow(false);
+//        dataSource.setTestWhileIdle(true);
+//        dataSource.setValidationQuery("select 1");
+//        dataSource.setTimeBetweenEvictionRunsMillis(60 * 60 * 1000);
+
         return dataSource;
     }
 
