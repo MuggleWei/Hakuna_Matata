@@ -18,4 +18,10 @@ public interface AccountMapper {
 
     @Update({"insert into account_passwd (id, passwd) value (#{id}, #{password})"})
     int createAccountPasswd(Account account) throws Exception;
+
+    @Select({"select count(*) from account_info"})
+    int getAccountInfoCnt();
+
+    @Select({"select count(*) from account_passwd"})
+    int getAccountPasswdCnt();
 }

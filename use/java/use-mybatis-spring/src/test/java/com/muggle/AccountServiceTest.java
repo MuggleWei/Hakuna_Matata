@@ -43,7 +43,7 @@ public class AccountServiceTest {
     }
 
     @Test
-    public void MulThreadCreateAccountTest() {
+    public void ConcurrencyCreateAccountTest() {
         ApplicationContext ctx = new AnnotationConfigApplicationContext(
                 DBConfig.class, MapperConfig.class, ServiceConfig.class
         );
@@ -51,7 +51,7 @@ public class AccountServiceTest {
 
         Runnable r = () -> {
             long threadStart = System.currentTimeMillis();
-            for (int i = 0; i < 10000; ++i) {
+            for (int i = 0; i < 2000; ++i) {
                 Account account = new Account();
                 account.setName("xxx");
                 account.setPassword("xxxxxx");
@@ -90,5 +90,7 @@ public class AccountServiceTest {
         long end = System.currentTimeMillis();
         long elapsed = end - start;
         System.out.println("total use time: " + elapsed + "ms");
+
+        Assert.assertEquals(service.getAccountInfoCnt(), service.getAccountPasswdCnt());
     }
 }

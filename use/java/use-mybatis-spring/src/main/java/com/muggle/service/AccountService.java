@@ -32,4 +32,12 @@ public class AccountService {
 
         return true;
     }
+
+    public int getAccountInfoCnt() {
+        return accountMapper.getAccountInfoCnt();
+    }
+
+    public int getAccountPasswdCnt() {
+        return accountMapper.getAccountPasswdCnt();
+    }
 }
