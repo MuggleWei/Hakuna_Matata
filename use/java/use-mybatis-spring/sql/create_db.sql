@@ -1,5 +1,5 @@
-create database if not exists systemdb;
-use systemdb;
+create database if not exists account;
+use account;
 
 -- create account_info table
 drop table if exists account_info;
