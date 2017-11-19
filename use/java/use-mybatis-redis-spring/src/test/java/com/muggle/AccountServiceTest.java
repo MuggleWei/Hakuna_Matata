@@ -20,7 +20,7 @@ import java.util.Random;
 
 public class AccountServiceTest {
 
-    private long accountCnt = 100;
+    private long accountCnt = 1000;
     private long tradeCnt = 2000;
     private int increIdx = 1;
     private String[] productList = new String[]{ "Google", "Facebook", "Microsoft", "Apple", "Tencent", "Alibaba" };
@@ -177,5 +177,49 @@ public class AccountServiceTest {
         end = System.currentTimeMillis();
         elapsed = end - start;
         System.out.println("get trade records by account id from cache: " + elapsed);
+    }
+
+    @Test
+    public void ConcurrencyCreateTradeRecordTest() {
+        ApplicationContext ctx = new AnnotationConfigApplicationContext(
+                MapperConfig.class, ServiceConfig.class, DBConfig.class, CacheConfig.class
+        );
+        TradeService service = ctx.getBean(TradeService.class);
+        Assert.assertNotNull(service);
+
+        Runnable r = () -> {
+            long threadStart = System.currentTimeMillis();
+            for (int i = 0; i < 15000; ++i) {
+                TradeRecord record = generateTradeRecord();
+                try {
+                    service.NewTradeRecord(record);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+            long threadEnd = System.currentTimeMillis();
+            long threadElapsed = threadEnd - threadStart;
+            System.out.println("Thread use time: " + threadElapsed);
+        };
+
+        long start = System.currentTimeMillis();
+
+        int size = 8;
+        Thread[] threads = new Thread[size];
+        for (int i = 0; i < size; ++i) {
+            threads[i] = new Thread(r);
+            threads[i].start();
+        }
+        for (Thread thread : threads) {
+            try {
+                thread.join();
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }
+
+        long end = System.currentTimeMillis();
+        long elapsed = end - start;
+        System.out.println("total use time: " + elapsed + "ms");
     }
 }
