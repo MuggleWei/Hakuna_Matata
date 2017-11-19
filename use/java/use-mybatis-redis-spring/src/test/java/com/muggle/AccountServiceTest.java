@@ -221,5 +221,12 @@ public class AccountServiceTest {
         long end = System.currentTimeMillis();
         long elapsed = end - start;
         System.out.println("total use time: " + elapsed + "ms");
+
+        int cntDB = service.getRecordCntFromDB();
+        int cntCache = 0;
+        for (int i = 1; i <= (int)accountCnt; ++i) {
+            cntCache += service.getRecordCntByAccountIdFromCache((long)i);
+        }
+        Assert.assertEquals(cntDB, cntCache);
     }
 }

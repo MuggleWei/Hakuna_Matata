@@ -15,4 +15,7 @@ public interface TradeRecordMapper {
     @Select({"select * from trade_record where account_id = #{account_id}"})
     List<TradeRecord> selectRecordByAccountId(long id);
 
+    @Select({"select count(*) from trade_record"})
+    int getRecordCnt();
+
 }

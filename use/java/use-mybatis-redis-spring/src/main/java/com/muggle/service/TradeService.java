@@ -44,4 +44,13 @@ public class TradeService {
         String key = "TradeRecord:" + Long.toString(accountId);
         return hashOperations.values(key);
     }
+
+    public int getRecordCntFromDB() {
+        return tradeRecordMapper.getRecordCnt();
+    }
+
+    public int getRecordCntByAccountIdFromCache(long accountId) {
+        String key = "TradeRecord:" + Long.toString(accountId);
+        return hashOperations.size(key).intValue();
+    }
 }
