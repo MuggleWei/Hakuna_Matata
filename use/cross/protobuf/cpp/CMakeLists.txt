@@ -22,6 +22,11 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 # set use folder in vs
 set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 
+# for vim plugin - YCM
+if (NOT ${CMAKE_CXX_COMPILER_ID} STREQUAL MSVC)
+	set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
+endif()
+
 # protobuf
 if (WIN32)
 	set(USE_PROTOBUF_WITH_SOURCE ON CACHE BOOL "use protobuf with source, if it OFF, try to find protobuf binary in system")
@@ -30,6 +35,7 @@ else()
 endif()
 
 if (USE_PROTOBUF_WITH_SOURCE)
+
 	include(${CMAKE_CURRENT_LIST_DIR}/cmake/FindProtobufSrc.cmake)
 	if (ProtobufSrc_FOUND)
 		SET(protobuf_BUILD_TESTS OFF CACHE BOOL "protobuf test")
@@ -50,6 +56,7 @@ if (USE_PROTOBUF_WITH_SOURCE)
 		message(FATAL_ERROR "Can't find protobuf source")
 	endif()
 else()
+
 	include(${CMAKE_CURRENT_LIST_DIR}/cmake/FindProtobufBin.cmake)
 	if (ProtobufBin_FOUND)
 		include_directories(${PROTOBUF_INCLUDE_DIR})
@@ -89,9 +96,15 @@ endif()
 target_include_directories(hello PUBLIC
 	${PROJECT_BINARY_DIR}
 )
-target_link_libraries(hello
-	libprotobuf
-)
-add_dependencies(hello
-	libprotobuf
-)
+if (USE_PROTOBUF_WITH_SOURCE)
+	target_link_libraries(hello
+		libprotobuf
+	)
+	add_dependencies(hello
+		libprotobuf
+	)
+else()
+	target_link_libraries(hello
+		protobuf
+	)
+endif()

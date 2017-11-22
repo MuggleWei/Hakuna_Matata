@@ -95,7 +95,8 @@ public:
 		Message *msg = codec_.Deserialize(bytes);
 		if (msg)
 		{
-			handler_.OnMessage(std::shared_ptr<Message>(msg));
+			auto sp = std::shared_ptr<Message>(msg);
+			handler_.OnMessage(sp);
 		}
 		free(bytes);
 	}

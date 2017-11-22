@@ -17,11 +17,12 @@ class ProtoMessageHandler
 	template<typename T>
 	class TMsgCallback : public MsgCallback
 	{
-		typedef std::function<void(std::shared_ptr<T>)> callbackFunc;
+		typedef std::function<void(std::shared_ptr<T>&)> callbackFunc;
 
 	public:
-		TMsgCallback(callbackFunc callback)
-			: callback_(callback)
+		TMsgCallback(const callbackFunc& callback)
+			: MsgCallback()
+			, callback_(callback)
 		{}
 
 		virtual void OnMessage(std::shared_ptr<google::protobuf::Message> &msg)
@@ -44,7 +45,7 @@ public:
 	{}
 
 	template<typename T>
-	void RegisterDefault(std::function<void(std::shared_ptr<T>)>&& callback)
+	void RegisterDefault(const std::function<void(std::shared_ptr<T>&)>& callback)
 	{
 		if (default_callback_)
 		{
@@ -54,7 +55,7 @@ public:
 	}
 
 	template<typename T>
-	void Register(std::function<void(std::shared_ptr<T>)>&& callback)
+	void Register(const std::function<void(std::shared_ptr<T>&)>& callback)
 	{
 		TMsgCallback<T> *tcallback = new TMsgCallback<T>(callback);
 		std::string msg_type_name = T::descriptor()->full_name();
