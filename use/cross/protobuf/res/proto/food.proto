@@ -1,0 +1,36 @@
+syntax = "proto3";
+
+package gen.proto;
+
+enum Taste {
+	NO_SPICY = 0;
+	SPICY = 1;
+	HEAVY_SPICY = 2;
+}
+
+message Rice {
+	string origin_place = 1;
+}
+
+message Dumpling {
+	string stuffing = 1;
+	Taste taste = 2;
+}
+
+message Noodle {
+	string material = 1;
+	Taste taste = 2;
+}
+
+message Food {
+	oneof food_oneof {
+		Rice rice = 1;
+		Dumpling dumpling = 2;
+		Noodle noodle = 3;
+	}
+}
+
+
+message Lunch {
+	repeated Food foods = 1;
+}
