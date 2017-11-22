@@ -52,7 +52,7 @@ public class DBConfig {
         return new DataSourceTransactionManager(dataSource());
     }
 
-    @Bean
+    @Bean(name = "sqlSessionFactory")
     public SqlSessionFactory sqlSessionFactory() throws Exception {
         SqlSessionFactoryBean sqlSessionFactory = new SqlSessionFactoryBean();
         sqlSessionFactory.setDataSource(dataSource());
