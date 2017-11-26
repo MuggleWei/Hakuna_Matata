@@ -8,21 +8,15 @@ build/
 .vscode/
 
 # gen proto
-gen/proto/*
-proto/desc/*
+**/gen/proto/
+**/proto/desc/
 
 # Intellij
-use/java/*/.idea/
-use/java/*/classes/
-use/java/*/target/
-
-*.iml
-.idea/workspace.xml
-.idea/tasks.xml
-.idea/gradle.xml
-.idea/dictionaries
-.idea/libraries
-
+**/java/**/.idea/
+**/java/**/classes/
+**/java/**/target/
+**/java/**/META-INF/
+**/java/**/*.iml
 
 ####################### from: https://github.com/github/gitignore #######################
 
