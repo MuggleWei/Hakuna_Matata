@@ -91,9 +91,9 @@ public:
 		handler_.Register<Lunch>(std::bind(&Receiver::OnMessageLunch, this, std::placeholders::_1));
 	}
 
-	int64_t Parse(char *bytes)
+	int32_t Parse(char *bytes)
 	{
-		int64_t total_len = 0;
+		int32_t total_len = 0;
 		Message *msg = codec_.Deserialize(bytes, total_len);
 		if (msg)
 		{
@@ -114,7 +114,7 @@ void baseSample()
 	Receiver receiver;
 	Codec codec;
 	char *bytes = nullptr;
-	int64_t total_len = 0;
+	int32_t total_len = 0;
 
 	receiver.Register();
 
@@ -177,7 +177,7 @@ void writeSample()
 {
 	Codec codec;
 	char *bytes = nullptr;
-	int64_t total_len = 0;
+	int32_t total_len = 0;
 
 	FILE *fp = fopen("msg_bytes", "wb");
 	if (fp == nullptr)
@@ -260,11 +260,11 @@ void readSample()
 	void *bytes = malloc(file_len);
 	fread(bytes, file_len, 1, fp);
 
-	int64_t accum_len = 0;
+	int32_t accum_len = 0;
 	while (true)
 	{
 		char *p = (char*)bytes + accum_len;
-		int64_t parse_len = receiver.Parse(p);
+		int32_t parse_len = receiver.Parse(p);
 		accum_len += parse_len;
 		if (accum_len >= file_len)
 		{

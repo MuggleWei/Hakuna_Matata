@@ -7,6 +7,10 @@ build/
 # vscode
 .vscode/
 
+# gen proto
+gen/proto/*
+proto/desc/*
+
 # Intellij
 use/java/*/.idea/
 use/java/*/classes/
