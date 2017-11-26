@@ -22,7 +22,7 @@ static google::protobuf::Message* CreateProtoMessage(const std::string &message_
 	return google::protobuf::MessageFactory::generated_factory()->GetPrototype(desc)->New();
 }
 
-char* Codec::Serialize(const google::protobuf::Message *msg)
+char* Codec::Serialize(const google::protobuf::Message *msg, int64_t &total_len)
 {
 	/*
 	 |          int64_t               |      16 byte     |           int32_t               |   char*   |    void*   |
@@ -32,7 +32,7 @@ char* Codec::Serialize(const google::protobuf::Message *msg)
 	static char *version = "0.0.1";
 	size_t size = msg->ByteSizeLong();
 	const std::string &type_name = msg->GetDescriptor()->full_name();
-	int64_t total_len = (int64_t)(sizeof(int64_t) + 16 + sizeof(int32_t) + type_name.size() + 1 + size);
+	total_len = (int64_t)(sizeof(int64_t) + 16 + sizeof(int32_t) + type_name.size() + 1 + size);
 
 	void* bytes = malloc(total_len);
 	if (!bytes)
@@ -69,7 +69,7 @@ char* Codec::Serialize(const google::protobuf::Message *msg)
 	return (char*)bytes;
 }
 
-google::protobuf::Message* Codec::Deserialize(const char *bytes)
+google::protobuf::Message* Codec::Deserialize(const char *bytes, int64_t &total_len)
 {
 	static const int32_t limit_name_len = 128;
 
@@ -77,7 +77,7 @@ google::protobuf::Message* Codec::Deserialize(const char *bytes)
 	char name[limit_name_len] = { 0 };
 
 	// total len
-	int64_t total_len = (int64_t)ntohl(*(int64_t*)p);
+	total_len = (int64_t)ntohl(*(int64_t*)p);
 	p += (int64_t)sizeof(int64_t);
 
 	// version info

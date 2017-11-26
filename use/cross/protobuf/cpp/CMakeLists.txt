@@ -87,6 +87,8 @@ if (WIN32)
 			"generate source with script cross/protobuf/gen_proto.*"
 		)
 	endif()
+	
+	set_target_properties(hello PROPERTIES VS_DEBUGGER_WORKING_DIRECTORY "$(OutDir)")
 else()
 	add_executable(hello
 		${cpp_files}

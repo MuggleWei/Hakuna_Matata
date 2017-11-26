@@ -1,3 +1,4 @@
+#include <stdio.h>
 #include <iostream>
 #include <map>
 #include <functional>
@@ -90,15 +91,17 @@ public:
 		handler_.Register<Lunch>(std::bind(&Receiver::OnMessageLunch, this, std::placeholders::_1));
 	}
 
-	void Parse(char *bytes)
+	int64_t Parse(char *bytes)
 	{
-		Message *msg = codec_.Deserialize(bytes);
+		int64_t total_len = 0;
+		Message *msg = codec_.Deserialize(bytes, total_len);
 		if (msg)
 		{
 			auto sp = std::shared_ptr<Message>(msg);
 			handler_.OnMessage(sp);
 		}
-		free(bytes);
+
+		return total_len;
 	}
 
 private:
@@ -106,11 +109,12 @@ private:
 	ProtoMessageHandler handler_;
 };
 
-int main(int argc, char *argv[])
+void baseSample()
 {
 	Receiver receiver;
 	Codec codec;
 	char *bytes = nullptr;
+	int64_t total_len = 0;
 
 	receiver.Register();
 
@@ -119,31 +123,35 @@ int main(int argc, char *argv[])
 	pos.set_x(5.0);
 	pos.set_y(1.0);
 	pos.set_z(6.0);
-	bytes = codec.Serialize(&pos);
+	bytes = codec.Serialize(&pos, total_len);
 	receiver.Parse(bytes);
+	free(bytes);
 
 	// rotation
 	Rotation rot;
 	rot.set_x_axis(3.14f);
 	rot.set_y_axis(0.0f);
 	rot.set_z_axis(1.57f);
-	bytes = codec.Serialize(&rot);
+	bytes = codec.Serialize(&rot, total_len);
 	receiver.Parse(bytes);
+	free(bytes);
 
 	// scale
 	Scale scale;
 	scale.set_x_scale(1.0f);
 	scale.set_y_scale(1.0f);
 	scale.set_z_scale(1.0f);
-	bytes = codec.Serialize(&scale);
+	bytes = codec.Serialize(&scale, total_len);
 	receiver.Parse(bytes);
+	free(bytes);
 
 	// transform
 	Transform transform;
 	*transform.mutable_position() = pos;
 	*transform.mutable_rotation() = rot;
-	bytes = codec.Serialize(&transform);
+	bytes = codec.Serialize(&transform, total_len);
 	receiver.Parse(bytes);
+	free(bytes);
 
 	// lunch
 	Lunch lunch;
@@ -160,8 +168,133 @@ int main(int argc, char *argv[])
 
 	lunch.add_foods();
 
-	bytes = codec.Serialize(&lunch);
+	bytes = codec.Serialize(&lunch, total_len);
 	receiver.Parse(bytes);
+	free(bytes);
+}
+
+void writeSample()
+{
+	Codec codec;
+	char *bytes = nullptr;
+	int64_t total_len = 0;
+
+	FILE *fp = fopen("msg_bytes", "wb");
+	if (fp == nullptr)
+	{
+		return;
+	}
+
+	// position
+	Position pos;
+	pos.set_x(5.0);
+	pos.set_y(1.0);
+	pos.set_z(6.0);
+	bytes = codec.Serialize(&pos, total_len);
+	fwrite(bytes, 1, total_len, fp);
+	free(bytes);
+
+	// rotation
+	Rotation rot;
+	rot.set_x_axis(3.14f);
+	rot.set_y_axis(0.0f);
+	rot.set_z_axis(1.57f);
+	bytes = codec.Serialize(&rot, total_len);
+	fwrite(bytes, 1, total_len, fp);
+	free(bytes);
+
+	// scale
+	Scale scale;
+	scale.set_x_scale(1.0f);
+	scale.set_y_scale(1.0f);
+	scale.set_z_scale(1.0f);
+	bytes = codec.Serialize(&scale, total_len);
+	fwrite(bytes, 1, total_len, fp);
+	free(bytes);
+
+	// transform
+	Transform transform;
+	*transform.mutable_position() = pos;
+	*transform.mutable_rotation() = rot;
+	bytes = codec.Serialize(&transform, total_len);
+	fwrite(bytes, 1, total_len, fp);
+	free(bytes);
+
+	// lunch
+	Lunch lunch;
+
+	lunch.add_foods()->mutable_rice()->set_origin_place("fujian");
+
+	auto noddle = lunch.add_foods()->mutable_noodle();
+	noddle->set_material("flour");
+	noddle->set_taste(Taste::NO_SPICY);
+
+	auto dumpling = lunch.add_foods()->mutable_dumpling();
+	dumpling->set_stuffing("Leek pork");
+	dumpling->set_taste(Taste::SPICY);
+
+	lunch.add_foods();
+
+	bytes = codec.Serialize(&lunch, total_len);
+	fwrite(bytes, 1, total_len, fp);
+	free(bytes);
+
+	fclose(fp);
+}
+
+void readSample()
+{
+	Receiver receiver;
+	receiver.Register();
+
+	FILE *fp = fopen("msg_bytes", "rb");
+	if (fp == nullptr)
+	{
+		return;
+	}
+
+	fseek(fp, 0, SEEK_END);
+	long file_len = ftell(fp);
+	fseek(fp, 0, SEEK_SET);
+
+	void *bytes = malloc(file_len);
+	fread(bytes, file_len, 1, fp);
+
+	int64_t accum_len = 0;
+	while (true)
+	{
+		char *p = (char*)bytes + accum_len;
+		int64_t parse_len = receiver.Parse(p);
+		accum_len += parse_len;
+		if (accum_len >= file_len)
+		{
+			free(bytes);
+			break;
+		}
+	}
+}
+
+int main(int argc, char *argv[])
+{
+	if (argc == 1)
+	{
+		baseSample();
+	}
+	else if (argc >= 2)
+	{
+		if (argv[1][0] == 'r')
+		{
+			readSample();
+		}
+		else if (argv[1][0] == 'w')
+		{
+			writeSample();
+		}
+		else
+		{
+			std::cout << "enter: " << argv[0] << " [r|w]" << std::endl;
+		}
+	}
 
 	return 0;
 }
