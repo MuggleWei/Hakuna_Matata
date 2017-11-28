@@ -1,4 +1,4 @@
-package com.muggle.helloproto;
+package com.muggle.proto;
 
 import com.google.protobuf.Message;
 

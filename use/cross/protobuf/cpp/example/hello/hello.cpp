@@ -272,6 +272,8 @@ void readSample()
 			break;
 		}
 	}
+
+	fclose(fp);
 }
 
 int main(int argc, char *argv[])

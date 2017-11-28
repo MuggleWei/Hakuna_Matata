@@ -1,6 +1,7 @@
-package com.muggle.helloproto;
+package com.muggle.proto;
 
 import com.google.protobuf.*;
+import gen.proto.Gameobject;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -79,7 +80,7 @@ public class Codec {
         return byteBuffer.array();
     }
 
-    public Message Deserialize(byte[] bytes) {
+    public DynamicMessage Deserialize(byte[] bytes) {
         ByteBuffer byteBuffer = ByteBuffer.allocate(bytes.length);
         byteBuffer.order(ByteOrder.BIG_ENDIAN);
         byteBuffer.put(bytes);
@@ -112,12 +113,30 @@ public class Codec {
         Descriptors.Descriptor desc = getProtoDescriptor(name);
 
         // parse
-        AbstractMessage msg = null;
+        DynamicMessage msg = null;
         int dataLen = totalLen - (4 + 16 + 4 + nameLen);
         try {
             if (dataLen > 0) {
                 byte[] data = new byte[dataLen];
                 byteBuffer.get(data);
+                msg = DynamicMessage.parseFrom(desc, data);
+            } else {
+                msg = DynamicMessage.newBuilder(desc).build();
+            }
+        } catch (InvalidProtocolBufferException e) {
+            e.printStackTrace();
+        }
+
+        return msg;
+    }
+
+    public DynamicMessage Deserialize(String name, byte[] data) {
+        Descriptors.Descriptor desc = getProtoDescriptor(name);
+
+        // parse
+        DynamicMessage msg = null;
+        try {
+            if (data != null && data.length > 0) {
                 msg = DynamicMessage.parseFrom(desc, data);
             } else {
                 msg = DynamicMessage.newBuilder(desc).build();
