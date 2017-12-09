@@ -30,8 +30,8 @@ mkdir %cpp_targetdir%
 MOVE /Y %cpp_outdir%\* %cpp_targetdir%
 
 :: move into java example project
-set java_targetdir=java\src\main\java\gen\proto
-set java_descdir=java\src\main\resources\proto\desc
+set java_targetdir=java\example\src\main\java\gen\proto
+set java_descdir=java\example\src\main\resources\proto\desc
 
 IF exist %java_targetdir% (rmdir /s /q %java_targetdir%)
 mkdir %java_targetdir%

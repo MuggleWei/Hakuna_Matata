@@ -1,7 +1,7 @@
-package com.muggle.proto;
+package com.muggle.proto.handler;
 
 import com.google.protobuf.Message;
 
-public interface ProtoCallback {
+public interface ByteProtoCallback {
     void OnMessage(Message msg);
 }

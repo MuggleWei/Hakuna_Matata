@@ -1,17 +1,18 @@
-package com.muggle.helloproto;
+package com.muggle.example.local;
 
-import com.google.protobuf.Message;
-import com.muggle.proto.Codec;
+import com.muggle.proto.codec.Code;
 import gen.proto.FoodOuterClass;
 import gen.proto.Gameobject;
-import javafx.geometry.Pos;
 
 import java.io.*;
-import java.nio.ByteBuffer;
-import java.nio.ByteOrder;
 
 public class Hello {
+    static private Code code;
+    static private MessageHandler messageHandler;
+
     static public void main(String[] args) {
+        Init();
+
         if (args.length != 0) {
             if (args[0].equals("r")) {
                 readSample();
@@ -25,32 +26,34 @@ public class Hello {
         }
     }
 
-    static private void baseSample() {
-        MyReceiver receiver = new MyReceiver();
-        Codec codec = new Codec();
-        byte[] bytes = null;
+    static private void Init() {
+        code = new Code();
+        messageHandler = new MessageHandler("proto/desc/proto.desc");
+        messageHandler.Registers();
+    }
 
-        receiver.Register();
+    static private void baseSample() {
+        byte[] bytes = null;
 
         // position
         Gameobject.Position position = Gameobject.Position.newBuilder()
                 .setX(5.0f).setY(1.0f).setZ(6.0f).build();
-        bytes = codec.Serialize(position);
-        receiver.Parse(bytes);
+        bytes = code.Serialize(position);
+        messageHandler.OnMessage(bytes);
 
         // rotation
         Gameobject.Rotation rotation = Gameobject.Rotation.newBuilder()
                 .setXAxis(3.14f).setYAxis(0.0f).setZAxis(1.57f).build();
-        bytes = codec.Serialize(rotation);
-        receiver.Parse(bytes);
+        bytes = code.Serialize(rotation);
+        messageHandler.OnMessage(bytes);
 
         // Transform
         Gameobject.Transform transform = Gameobject.Transform.newBuilder()
                 .setPosition(position)
                 .setRotation(rotation)
                 .build();
-        bytes = codec.Serialize(transform);
-        receiver.Parse(bytes);
+        bytes = code.Serialize(transform);
+        messageHandler.OnMessage(bytes);
 
         // lunch
         FoodOuterClass.Lunch.Builder lunchBuilder = FoodOuterClass.Lunch.newBuilder();
@@ -74,8 +77,8 @@ public class Hello {
         lunchBuilder.addFoods(foodDumpling);
 
         lunchBuilder.addFoods(FoodOuterClass.Food.newBuilder().build());
-        bytes = codec.Serialize(lunchBuilder.build());
-        receiver.Parse(bytes);
+        bytes = code.Serialize(lunchBuilder.build());
+        messageHandler.OnMessage(bytes);
 
     }
 
@@ -86,31 +89,7 @@ public class Hello {
         try (BufferedInputStream reader = new BufferedInputStream(new FileInputStream(f))){
             byte[] bytes = new byte[(int)len];
             reader.read(bytes);
-
-            MyReceiver receiver = new MyReceiver();
-            Codec codec = new Codec();
-            receiver.Register();
-
-            ByteBuffer byteBuffer = ByteBuffer.allocate(4);
-            byteBuffer.order(ByteOrder.BIG_ENDIAN);
-
-            int accum = 0;
-            while (true) {
-                byteBuffer.clear();
-                byteBuffer.put(bytes, accum, 4);
-                byteBuffer.clear();
-                int messageLen = byteBuffer.getInt();
-
-                byte[] messageBytes = new byte[messageLen];
-                for (int i = 0; i < messageLen; ++i) {
-                    messageBytes[i] = bytes[accum + i];
-                }
-                receiver.Parse(messageBytes);
-                accum += messageLen;
-                if (accum >= len) {
-                    break;
-                }
-            }
+            messageHandler.OnMessage(bytes);
         } catch (FileNotFoundException e) {
             e.printStackTrace();
         } catch (IOException e) {
@@ -119,25 +98,24 @@ public class Hello {
     }
 
     static private void writeSample() {
-        Codec codec = new Codec();
         byte[] bytes = null;
         try (BufferedOutputStream writer = new BufferedOutputStream(new FileOutputStream("msg_bytes"))) {
             // position
             Gameobject.Position position = Gameobject.Position.newBuilder()
                     .setX(5.0f).setY(1.0f).setZ(6.0f).build();
-            bytes = codec.Serialize(position);
+            bytes = code.Serialize(position);
             writer.write(bytes);
 
             // rotation
             Gameobject.Rotation rotation = Gameobject.Rotation.newBuilder()
                     .setXAxis(3.14f).setYAxis(0.0f).setZAxis(1.57f).build();
-            bytes = codec.Serialize(rotation);
+            bytes = code.Serialize(rotation);
             writer.write(bytes);
 
             // scale
             Gameobject.Scale scale = Gameobject.Scale.newBuilder()
                     .setXScale(1.0f).setYScale(1.0f).setZScale(1.0f).build();
-            bytes = codec.Serialize(scale);
+            bytes = code.Serialize(scale);
             writer.write(bytes);
 
             // Transform
@@ -145,7 +123,7 @@ public class Hello {
                     .setPosition(position)
                     .setRotation(rotation)
                     .build();
-            bytes = codec.Serialize(transform);
+            bytes = code.Serialize(transform);
             writer.write(bytes);
 
             // lunch
@@ -171,7 +149,7 @@ public class Hello {
             lunchBuilder.addFoods(foodDumpling);
 
             lunchBuilder.addFoods(FoodOuterClass.Food.newBuilder().build());
-            bytes = codec.Serialize(lunchBuilder.build());
+            bytes = code.Serialize(lunchBuilder.build());
             writer.write(bytes);
         } catch (FileNotFoundException e) {
             e.printStackTrace();

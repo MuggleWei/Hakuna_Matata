@@ -30,7 +30,7 @@ mkdir -p $cpp_targetdir
 mv $cpp_outdir/* $cpp_targetdir
 
 # move into java example project
-java_targetdir=java/src/main/java/gen/proto
+java_targetdir=java/example/src/main/java/gen/proto
 if [ -d $java_targetdir ]; then
 	rm -rf $java_targetdir
 fi
@@ -38,7 +38,7 @@ mkdir -p $java_targetdir
 mv $java_outdir/gen/proto/* $java_targetdir
 
 # java need descriptor to generate message dynamiclly
-java_descdir=java/src/main/resources/proto/desc
+java_descdir=java/example/src/main/resources/proto/desc
 if [ -d $java_descdir ]; then
 	rm -rf $java_descdir
 fi

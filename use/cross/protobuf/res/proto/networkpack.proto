@@ -1,0 +1,43 @@
+syntax = "proto3";
+
+package gen.proto;
+
+message Ping
+{
+	int64 req = 1;
+}
+
+message Pong
+{
+	int64 req = 1;
+}
+
+message ErrorInfo
+{
+	int32 err_code = 1;
+	string err_message = 2;
+}
+
+message ReqLogin
+{
+	string user_name = 1;
+	string passwd = 2;
+}
+
+message RspLogin
+{
+	string user_name = 1;
+	ErrorInfo error_info = 2;
+}
+
+message TimeSign
+{
+	int64 start_ms = 1;
+	int64 end_ms = 2;
+}
+
+message TimeRecord
+{
+	string user_name = 1;
+	repeated TimeSign signs = 2;
+}
