@@ -25,18 +25,9 @@ public class ClientHandler extends ChannelInboundHandlerAdapter {
             @Override
             public void run() {
                 String msg = "message from client " + id;
-                byte[] bytes = msg.getBytes(CharsetUtil.UTF_8);
-                int len = bytes.length;
-
-                ByteBuf byteBuf = Unpooled.buffer(4 + bytes.length);
-                byteBuf.writeInt(len);
-                byteBuf.writeBytes(bytes);
-
-                channel.writeAndFlush(byteBuf);
-
-                System.out.println("send message: " + msg);
+                channel.writeAndFlush(msg);
             }
-        }, 1, 1, TimeUnit.SECONDS);
+        }, 0, 100, TimeUnit.MILLISECONDS);
     }
 
     @Override

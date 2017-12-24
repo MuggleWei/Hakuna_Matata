@@ -1,6 +1,7 @@
 package com.muggle.client;
 
 import com.muggle.MessageDecode;
+import com.muggle.MessageEncode;
 import io.netty.bootstrap.Bootstrap;
 import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelInitializer;
@@ -38,7 +39,10 @@ public class Client {
                         @Override
                         protected void initChannel(SocketChannel ch) throws Exception {
                             System.out.println("Init channel " + id);
-                            ch.pipeline().addLast(new MessageDecode(), new ClientHandler(id));
+                            ch.pipeline().addLast(
+                                    new MessageDecode(),
+                                    new MessageEncode(),
+                                    new ClientHandler(id));
                         }
                     });
             ChannelFuture f = b.connect().sync();
