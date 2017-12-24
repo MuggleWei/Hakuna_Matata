@@ -22,11 +22,11 @@ public class Server {
     }
 
     public void start(ChannelHandler handler, ByteToMessageDecoder decoder) throws Exception {
-        EventLoopGroup group = new NioEventLoopGroup();
-
+        EventLoopGroup bossGroup = new NioEventLoopGroup();
+        EventLoopGroup workerGroup = new NioEventLoopGroup();
         try {
             ServerBootstrap b = new ServerBootstrap();
-            b.group(group)
+            b.group(bossGroup, workerGroup)
                     .channel(NioServerSocketChannel.class)
                     .localAddress(new InetSocketAddress(host, port))
                     .childHandler(new ChannelInitializer<SocketChannel>() {
@@ -43,7 +43,8 @@ public class Server {
             ChannelFuture f = b.bind().sync();
             f.channel().closeFuture().sync();
         } finally {
-            group.shutdownGracefully().sync();
+            workerGroup.shutdownGracefully();
+            bossGroup.shutdownGracefully();
         }
     }
 }
