@@ -1,4 +1,4 @@
-package com.muggle;
+package com.muggle.codec;
 
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelHandlerContext;

@@ -1,5 +1,6 @@
 package com.muggle.client;
 
+import io.netty.channel.ChannelInboundHandlerAdapter;
 import io.netty.channel.EventLoopGroup;
 
 import java.util.concurrent.Callable;

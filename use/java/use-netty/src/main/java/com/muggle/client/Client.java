@@ -1,7 +1,7 @@
 package com.muggle.client;
 
-import com.muggle.MessageDecode;
-import com.muggle.MessageEncode;
+import com.muggle.codec.MessageDecode;
+import com.muggle.codec.MessageEncode;
 import io.netty.bootstrap.Bootstrap;
 import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelInitializer;
@@ -9,6 +9,7 @@ import io.netty.channel.EventLoopGroup;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioSocketChannel;
+import io.netty.util.ResourceLeakDetector;
 
 import java.net.InetSocketAddress;
 import java.util.ArrayList;
@@ -53,6 +54,8 @@ public class Client {
     }
 
     static public void main(String[] args) throws Exception {
+        ResourceLeakDetector.setLevel(ResourceLeakDetector.Level.ADVANCED);
+
         String host = "localhost";
         int port = 10102;
         EventLoopGroup group = new NioEventLoopGroup();

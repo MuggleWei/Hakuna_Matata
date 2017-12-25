@@ -8,9 +8,10 @@ import io.netty.channel.EventLoopGroup;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
-import io.netty.handler.codec.ByteToMessageDecoder;
+import io.netty.handler.timeout.IdleStateHandler;
 
 import java.net.InetSocketAddress;
+import java.util.concurrent.TimeUnit;
 
 public class Server {
     private String host;
@@ -21,7 +22,7 @@ public class Server {
         this.port = port;
     }
 
-    public void start(ChannelHandler handler, ByteToMessageDecoder decoder) throws Exception {
+    public void start(ChannelHandler handler) throws Exception {
         EventLoopGroup bossGroup = new NioEventLoopGroup();
         EventLoopGroup workerGroup = new NioEventLoopGroup();
         try {
@@ -32,12 +33,9 @@ public class Server {
                     .childHandler(new ChannelInitializer<SocketChannel>() {
                         @Override
                         protected void initChannel(SocketChannel ch) throws Exception {
-                            if (decoder != null) {
-                                ch.pipeline().addLast(decoder, handler);
-                            } else {
-                                ch.pipeline().addLast(handler);
-                            }
-
+                            ch.pipeline().addLast(new IdleStateHandler(0, 0, 15, TimeUnit.SECONDS));
+                            ch.pipeline().addLast(new IdleTimeoutHandler());
+                            ch.pipeline().addLast(handler);
                         }
                     });
             ChannelFuture f = b.bind().sync();

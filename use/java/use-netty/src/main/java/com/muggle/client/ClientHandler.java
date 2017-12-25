@@ -31,8 +31,13 @@ public class ClientHandler extends ChannelInboundHandlerAdapter {
     }
 
     @Override
+    public void channelInactive(ChannelHandlerContext ctx) throws Exception {
+        System.out.println("client " + id + " disconnected...");
+    }
+
+    @Override
     public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) throws Exception {
-        System.out.println("caught disconnected...");
+        System.out.println("client " + id + " caught disconnected...");
         ctx.close();
     }
 
