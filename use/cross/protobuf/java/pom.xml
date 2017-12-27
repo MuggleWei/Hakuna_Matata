@@ -10,6 +10,7 @@
     <version>0.0.1</version>
 	
 	<modules>
+		<module>protobuf-codec</module>
 		<module>proto-codec</module>
 		<module>example</module>
 	</modules>
