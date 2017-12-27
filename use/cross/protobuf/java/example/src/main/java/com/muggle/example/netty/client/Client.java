@@ -26,27 +26,35 @@ public class Client {
     }
 
     public void start(EventLoopGroup group) throws Exception {
-        try {
-            Bootstrap b = new Bootstrap();
-            b.group(group)
-                    .channel(NioSocketChannel.class)
-                    .remoteAddress(new InetSocketAddress(host, port))
-                    .handler(new ChannelInitializer<SocketChannel>() {
-                        @Override
-                        protected void initChannel(SocketChannel ch) throws Exception {
-                            ProtobufDecoder decoder = new ProtobufDecoder();
-                            decoder.AddDesc("proto/desc/proto.desc");
-//                            decoder.AddProtoType(Networkpack.Ping.getDefaultInstance());
-                            ch.pipeline().addLast(decoder);
-                            ch.pipeline().addLast(new ProtobufEncoder());
-                            ch.pipeline().addLast(new ClientHandler());
-                        }
-                    });
-            ChannelFuture f = b.connect().sync();
-            f.channel().closeFuture().sync();
-        } catch (Exception e) {
-            e.printStackTrace();
+        while (true) {
+            try {
+                Bootstrap b = new Bootstrap();
+                b.group(group)
+                        .channel(NioSocketChannel.class)
+                        .remoteAddress(new InetSocketAddress(host, port))
+                        .handler(new ChannelInitializer<SocketChannel>() {
+                            @Override
+                            protected void initChannel(SocketChannel ch) throws Exception {
+                                ProtobufDecoder decoder = new ProtobufDecoder();
+                                decoder.AddDesc("proto/desc/proto.desc");
+                                decoder.AddProtoType(Networkpack.Ping.getDefaultInstance());
+                                decoder.AddProtoType(Networkpack.Pong.getDefaultInstance());
+
+                                ch.pipeline().addLast(decoder);
+                                ch.pipeline().addLast(new ProtobufEncoder());
+                                ch.pipeline().addLast(new ClientHandler());
+                            }
+                        });
+                ChannelFuture f = b.connect().sync();
+                f.channel().closeFuture().sync();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+
+            Thread.sleep(2000);
+            System.out.println("try reconnect...");
         }
+
     }
 
     static public void main(String[] args) throws Exception {

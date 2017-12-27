@@ -11,7 +11,7 @@
 	
 	<modules>
 		<module>protobuf-codec</module>
-		<module>proto-codec</module>
+		<module>protobuf-dispatcher</module>
 		<module>example</module>
 	</modules>
 	

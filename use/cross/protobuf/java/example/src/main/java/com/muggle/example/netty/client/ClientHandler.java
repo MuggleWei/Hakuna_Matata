@@ -12,9 +12,12 @@ import java.util.concurrent.TimeUnit;
 public class ClientHandler extends ChannelInboundHandlerAdapter {
 
     private ScheduledFuture timeTaskFuture;
+    private ClientMessageDispatcher messageDispatcher = new ClientMessageDispatcher();
 
     @Override
     public void channelActive(ChannelHandlerContext ctx) throws Exception {
+        System.out.println("connected...");
+
         Channel channel = ctx.channel();
         timeTaskFuture = channel.eventLoop().scheduleAtFixedRate(new Runnable() {
             int cnt = 0;
@@ -24,8 +27,12 @@ public class ClientHandler extends ChannelInboundHandlerAdapter {
             public void run() {
                 channel.writeAndFlush(pingBuilder.setReq(cnt).build());
                 ++cnt;
+                if (cnt > 3) {
+                    timeTaskFuture.cancel(false);
+                    System.out.println("stop heartbeat");
+                }
             }
-        }, 0, 500, TimeUnit.MILLISECONDS);
+        }, 0, 1, TimeUnit.SECONDS);
     }
 
     @Override
@@ -43,6 +50,6 @@ public class ClientHandler extends ChannelInboundHandlerAdapter {
     @Override
     public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
         Message message = (Message)msg;
-        System.out.println("receive message: " + message.getDescriptorForType().getFullName());
+        messageDispatcher.OnMessage(ctx, message);
     }
 }

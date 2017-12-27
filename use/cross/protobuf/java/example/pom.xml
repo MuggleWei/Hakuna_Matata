@@ -16,12 +16,12 @@
 	<dependencies>
         <dependency>
             <groupId>com.muggle</groupId>
-            <artifactId>proto-codec</artifactId>
-			<version>${project.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>com.muggle</groupId>
             <artifactId>protobuf-codec</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+		<dependency>
+            <groupId>com.muggle</groupId>
+            <artifactId>protobuf-dispatcher</artifactId>
             <version>${project.version}</version>
         </dependency>
         
