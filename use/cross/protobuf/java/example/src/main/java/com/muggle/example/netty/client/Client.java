@@ -39,6 +39,7 @@ public class Client {
                                 decoder.AddDesc("proto/desc/proto.desc");
                                 decoder.AddProtoType(Networkpack.Ping.getDefaultInstance());
                                 decoder.AddProtoType(Networkpack.Pong.getDefaultInstance());
+                                decoder.AddProtoType(Networkpack.TimeRecord.getDefaultInstance());
 
                                 ch.pipeline().addLast(decoder);
                                 ch.pipeline().addLast(new ProtobufEncoder());

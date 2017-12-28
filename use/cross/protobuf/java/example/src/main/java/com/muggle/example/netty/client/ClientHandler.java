@@ -11,7 +11,8 @@ import java.util.concurrent.TimeUnit;
 
 public class ClientHandler extends ChannelInboundHandlerAdapter {
 
-    private ScheduledFuture timeTaskFuture;
+    private ScheduledFuture heartbeatTaskFuture;
+    private ScheduledFuture timeRecordTaskFuture;
     private ClientMessageDispatcher messageDispatcher = new ClientMessageDispatcher();
 
     @Override
@@ -19,7 +20,23 @@ public class ClientHandler extends ChannelInboundHandlerAdapter {
         System.out.println("connected...");
 
         Channel channel = ctx.channel();
-        timeTaskFuture = channel.eventLoop().scheduleAtFixedRate(new Runnable() {
+
+        // time record
+        timeRecordTaskFuture = channel.eventLoop().scheduleAtFixedRate(new Runnable() {
+            @Override
+            public void run() {
+                long ms = System.currentTimeMillis();
+
+                Networkpack.TimeRecord.Builder timeRecordBuilder = Networkpack.TimeRecord.newBuilder();
+                Networkpack.TimeSign.Builder timeSignBuilder = Networkpack.TimeSign.newBuilder();
+
+                Networkpack.TimeSign timeSign = timeSignBuilder.setStartMs(ms).setEndMs(ms).build();
+                channel.writeAndFlush(timeRecordBuilder.addSigns(timeSign).build());
+            }
+        }, 0, 100, TimeUnit.MILLISECONDS);
+
+        // heartbeat
+        heartbeatTaskFuture = channel.eventLoop().scheduleAtFixedRate(new Runnable() {
             int cnt = 0;
             Networkpack.Ping.Builder pingBuilder = Networkpack.Ping.newBuilder();
 
@@ -27,12 +44,13 @@ public class ClientHandler extends ChannelInboundHandlerAdapter {
             public void run() {
                 channel.writeAndFlush(pingBuilder.setReq(cnt).build());
                 ++cnt;
-                if (cnt > 3) {
-                    timeTaskFuture.cancel(false);
-                    System.out.println("stop heartbeat");
+                if (cnt > 6) {
+                    heartbeatTaskFuture.cancel(false);
+                    timeRecordTaskFuture.cancel(false);
+                    System.out.println("stop heartbeat and other task");
                 }
             }
-        }, 0, 1, TimeUnit.SECONDS);
+        }, 0, 5, TimeUnit.SECONDS);
     }
 
     @Override
