@@ -9,4 +9,6 @@ public class DecodeError {
     public static final String UnsupportedNameEncoding = "unsupported encoding in name";
     public static final String FailedParseName = "invalid protobuf name";
     public static final String FailedParseData = "invalid protobuf data";
+    public static final String RestByteLTNameLen = "rest readable bytes less than name len";
+    public static final String RestByteLTDataLen = "rest readable bytes less than data len";
 }

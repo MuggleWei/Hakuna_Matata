@@ -20,7 +20,7 @@ public class ProtobufDecoder extends ByteToMessageDecoder {
         }
 
         // total len
-        int totalLen = in.getInt(0);
+        int totalLen = in.getInt(in.readerIndex());
         if (totalLen > in.readableBytes()) {
             return;
         }
@@ -53,6 +53,9 @@ public class ProtobufDecoder extends ByteToMessageDecoder {
 
         // name
         byte[] nameBytes = new byte[nameLen];
+        if (nameLen > in.readableBytes()) {
+            throw new IllegalArgumentException(DecodeError.RestByteLTNameLen);
+        }
         in.readBytes(nameBytes);
         String name = null;
         try {
@@ -65,6 +68,9 @@ public class ProtobufDecoder extends ByteToMessageDecoder {
         Message message = null;
         int dataLen = totalLen - (4 + 16 + 4 + nameLen);
         if (dataLen > 0) {
+            if (dataLen > in.readableBytes()) {
+                throw new IllegalArgumentException(DecodeError.RestByteLTDataLen);
+            }
             byte[] data = new byte[dataLen];
             in.readBytes(data);
             message = decoder.Parse(name, data);
