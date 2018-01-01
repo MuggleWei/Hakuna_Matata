@@ -21,11 +21,11 @@ public class ProtobufDecoder extends ByteToMessageDecoder {
 
         // total len
         int totalLen = in.getInt(in.readerIndex());
-        if (totalLen > in.readableBytes()) {
-            return;
-        }
         if (totalLen > decoder.getTotalLenLimit()) {
             throw new IllegalArgumentException(DecodeError.LenBeyondLimit);
+        }
+        if (totalLen > in.readableBytes()) {
+            return;
         }
         if (totalLen < 4 + 16 + 4) {
             throw new IllegalArgumentException(DecodeError.LenTooSmall);
