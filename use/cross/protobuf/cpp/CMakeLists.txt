@@ -104,6 +104,10 @@ if (USE_PROTOBUF_WITH_SOURCE)
 	)
 	add_dependencies(hello
 		libprotobuf
+		libprotobuf-lite
+		libprotoc
+		protoc
+		js_embed
 	)
 else()
 	target_link_libraries(hello
