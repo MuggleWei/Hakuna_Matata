@@ -27,17 +27,10 @@ public class ProtobufDecoder extends ByteToMessageDecoder {
         if (totalLen > in.readableBytes()) {
             return;
         }
-        if (totalLen < 4 + 16 + 4) {
+        if (totalLen < 4 + 4) {
             throw new IllegalArgumentException(DecodeError.LenTooSmall);
         }
         totalLen = in.readInt();
-
-        // version
-        byte[] versionBytesPrepared = new byte[16];
-        in.readBytes(versionBytesPrepared);
-        if (!IsSupportedVersion(versionBytesPrepared)) {
-            throw new IllegalArgumentException(DecodeError.UnsupportedVersion);
-        }
 
         // name len
         int nameLen = in.readInt();
@@ -47,7 +40,7 @@ public class ProtobufDecoder extends ByteToMessageDecoder {
         if (nameLen <= 0) {
             throw new IllegalArgumentException(DecodeError.NameLenTooSmall);
         }
-        if (totalLen < 4 + 16 + 4 + nameLen) {
+        if (totalLen < 4 + 4 + nameLen) {
             throw new IllegalArgumentException(DecodeError.LenTooSmall);
         }
 
@@ -66,7 +59,7 @@ public class ProtobufDecoder extends ByteToMessageDecoder {
 
         // data
         Message message = null;
-        int dataLen = totalLen - (4 + 16 + 4 + nameLen);
+        int dataLen = totalLen - (4 + 4 + nameLen);
         if (dataLen > 0) {
             if (dataLen > in.readableBytes()) {
                 throw new IllegalArgumentException(DecodeError.RestByteLTDataLen);
@@ -83,10 +76,6 @@ public class ProtobufDecoder extends ByteToMessageDecoder {
         }
 
         out.add(message);
-    }
-
-    private boolean IsSupportedVersion(byte[] version) {
-        return true;
     }
 
     public int getTotalLenLimit() {

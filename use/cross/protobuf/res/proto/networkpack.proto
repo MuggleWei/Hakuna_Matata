@@ -29,15 +29,3 @@ message RspLogin
 	string user_name = 1;
 	ErrorInfo error_info = 2;
 }
-
-message TimeSign
-{
-	int64 start_ms = 1;
-	int64 end_ms = 2;
-}
-
-message TimeRecord
-{
-	string user_name = 1;
-	repeated TimeSign signs = 2;
-}

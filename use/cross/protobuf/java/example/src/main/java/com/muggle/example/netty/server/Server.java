@@ -41,7 +41,7 @@ public class Server {
                             decoder.AddDesc("proto/desc/proto.desc");
                             decoder.AddProtoType(Networkpack.Ping.getDefaultInstance());
                             decoder.AddProtoType(Networkpack.Pong.getDefaultInstance());
-                            decoder.AddProtoType(Networkpack.TimeRecord.getDefaultInstance());
+                            decoder.AddProtoType(gen.proto.Timerecord.TimeRecord.getDefaultInstance());
 
                             ch.pipeline().addLast(new IdleStateHandler(0, 0, 5, TimeUnit.SECONDS));
                             ch.pipeline().addLast(new IdleTimeoutHandler());

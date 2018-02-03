@@ -25,32 +25,30 @@ public class ClientHandler extends ChannelInboundHandlerAdapter {
         timeRecordTaskFuture = channel.eventLoop().scheduleAtFixedRate(new Runnable() {
             @Override
             public void run() {
-                long ms = System.currentTimeMillis();
+                long nano = System.nanoTime();
 
-                Networkpack.TimeRecord.Builder timeRecordBuilder = Networkpack.TimeRecord.newBuilder();
-                Networkpack.TimeSign.Builder timeSignBuilder = Networkpack.TimeSign.newBuilder();
-
-                Networkpack.TimeSign timeSign = timeSignBuilder.setStartMs(ms).setEndMs(ms).build();
-                channel.writeAndFlush(timeRecordBuilder.addSigns(timeSign).build());
+                gen.proto.Timerecord.TimeRecord.Builder timeRecordBuilder = gen.proto.Timerecord.TimeRecord.newBuilder();
+                timeRecordBuilder.addTimeRecords(nano).build();
+                channel.writeAndFlush(timeRecordBuilder.addTimeRecords(nano).build());
             }
-        }, 0, 100, TimeUnit.MILLISECONDS);
+        }, 0, 10, TimeUnit.MILLISECONDS);
 
-        // heartbeat
-        heartbeatTaskFuture = channel.eventLoop().scheduleAtFixedRate(new Runnable() {
-            int cnt = 0;
-            Networkpack.Ping.Builder pingBuilder = Networkpack.Ping.newBuilder();
-
-            @Override
-            public void run() {
-                channel.writeAndFlush(pingBuilder.setReq(cnt).build());
-                ++cnt;
-                if (cnt > 6) {
-                    heartbeatTaskFuture.cancel(false);
-                    timeRecordTaskFuture.cancel(false);
-                    System.out.println("stop heartbeat and other task");
-                }
-            }
-        }, 0, 5, TimeUnit.SECONDS);
+//        // heartbeat
+//        heartbeatTaskFuture = channel.eventLoop().scheduleAtFixedRate(new Runnable() {
+//            int cnt = 0;
+//            Networkpack.Ping.Builder pingBuilder = Networkpack.Ping.newBuilder();
+//
+//            @Override
+//            public void run() {
+//                channel.writeAndFlush(pingBuilder.setReq(cnt).build());
+//                ++cnt;
+//                if (cnt > 6) {
+//                    heartbeatTaskFuture.cancel(false);
+//                    timeRecordTaskFuture.cancel(false);
+//                    System.out.println("stop heartbeat and other task");
+//                }
+//            }
+//        }, 0, 5, TimeUnit.SECONDS);
     }
 
     @Override

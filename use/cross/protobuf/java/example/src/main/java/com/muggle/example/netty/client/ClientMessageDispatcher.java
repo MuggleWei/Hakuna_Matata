@@ -6,6 +6,8 @@ import com.muggle.protobuf.dispatcher.netty.ProtobufDispatcher;
 import gen.proto.Networkpack;
 import io.netty.channel.ChannelHandlerContext;
 
+import java.util.ArrayList;
+
 public class ClientMessageDispatcher extends ProtobufDispatcher {
     public ClientMessageDispatcher() {
         Registers();
@@ -14,7 +16,7 @@ public class ClientMessageDispatcher extends ProtobufDispatcher {
     public void Registers() {
         RegisterDefault(new DefaultCallback());
         Register(Networkpack.Pong.getDefaultInstance(), new PongCallback());
-        Register(Networkpack.TimeRecord.getDefaultInstance(), new TimeRecordCallback());
+        Register(gen.proto.Timerecord.TimeRecord.getDefaultInstance(), new TimeRecordCallback());
     }
 }
 
@@ -29,35 +31,38 @@ class PongCallback implements ProtobufCallback {
 
     @Override
     public void OnMessage(ChannelHandlerContext ctx, Message msg) {
-        Networkpack.Pong pong = (Networkpack.Pong)msg;
+        Networkpack.Pong pong = (Networkpack.Pong) msg;
         System.out.println("receive pong message: " + ((Networkpack.Pong) msg).getReq());
     }
 }
 
 class TimeRecordCallback implements ProtobufCallback {
 
-    private Networkpack.TimeSign.Builder builder = Networkpack.TimeSign.newBuilder();
+    private gen.proto.Timerecord.TimeRecord.Builder builder = gen.proto.Timerecord.TimeRecord.newBuilder();
     private long peak = 0;
-    private int accumulateCnt = 0;
-    private long accumulateMs = 0;
+    private ArrayList<Long> elapseds = new ArrayList<>();
 
     @Override
     public void OnMessage(ChannelHandlerContext ctx, Message msg) {
-        Networkpack.TimeRecord timeRecord = (Networkpack.TimeRecord)msg;
-        long ms = System.currentTimeMillis();
-        long elapsedMs = ms - timeRecord.getSigns(0).getStartMs();
-        if (elapsedMs > peak) {
-            peak = elapsedMs;
-            System.out.println(" -- new peak elapsed millisecond: " + peak);
-        }
+        gen.proto.Timerecord.TimeRecord timeRecord = (gen.proto.Timerecord.TimeRecord) msg;
+        long nanoTime = System.nanoTime();
+        long elapsedMicroSeconds = (nanoTime - timeRecord.getTimeRecords(0)) / 1000;
+        elapseds.add(elapsedMicroSeconds);
 
-        ++accumulateCnt;
-        accumulateMs += elapsedMs;
-        if (accumulateCnt > 20) {
-            double avg = (double)accumulateMs / (double)accumulateCnt;
-            System.out.println("last 20 record avg elapsed ms: " + avg);
-            accumulateMs = 0;
-            accumulateCnt = 0;
+        int n = 100;
+        if (elapseds.size() >= n) {
+            long totalMicroSeconds = 0;
+            long maxMicroSeconds = 0;
+            for (Long elapsed : elapseds) {
+                if (elapsed > maxMicroSeconds) {
+                    maxMicroSeconds = elapsed;
+                }
+                totalMicroSeconds += elapsed;
+            }
+            long avg = totalMicroSeconds / elapseds.size();
+            System.out.println("recently 100 messages avg elapsed: " + avg + " micro seconds");
+            System.out.println("recently 100 messages max elapsed: " + maxMicroSeconds + " micro seconds");
+            elapseds.clear();
         }
     }
 }

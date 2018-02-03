@@ -15,7 +15,7 @@ public class ServerMessageDispatcher extends ProtobufDispatcher {
     public void Registers() {
         RegisterDefault(new DefaultCallback());
         Register(Networkpack.Ping.getDefaultInstance(), new PingCallback());
-        Register(Networkpack.TimeRecord.getDefaultInstance(), new TimeRecordCallback());
+        Register(gen.proto.Timerecord.TimeRecord.getDefaultInstance(), new TimeRecordCallback());
     }
 }
 
@@ -43,19 +43,6 @@ class TimeRecordCallback implements ProtobufCallback {
 
     @Override
     public void OnMessage(ChannelHandlerContext ctx, Message msg) {
-        long startMs = System.currentTimeMillis();
-
-        Networkpack.TimeRecord.Builder recordBuilder = Networkpack.TimeRecord.newBuilder();
-        Networkpack.TimeSign.Builder signBuilder = Networkpack.TimeSign.newBuilder();
-
-        Networkpack.TimeRecord timeRecord = (Networkpack.TimeRecord)msg;
-        for (Networkpack.TimeSign timeSign : timeRecord.getSignsList()) {
-            recordBuilder.addSigns(timeSign);
-        }
-
-        long endMs = System.currentTimeMillis();
-
-        recordBuilder.addSigns(signBuilder.setStartMs(startMs).setEndMs(endMs).build());
-        ctx.writeAndFlush(recordBuilder.build());
+        ctx.writeAndFlush(msg);
     }
 }
