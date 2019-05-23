@@ -1,0 +1,26 @@
+[
+  {
+    "source": "hello",
+    "ip": "192.168.0.110",
+    "port": 3306,
+    "user": "hi",
+    "password": "123456",
+    "db": "hello"
+  },
+  {
+    "source": "foo",
+    "ip": "127.0.0.1",
+    "port": 3306,
+    "user": "foo",
+    "password": "123456",
+    "db": "hello"
+  },
+  {
+    "source": "foo",
+    "ip": "127.0.0.1",
+    "port": 3306,
+    "user": "bar",
+    "password": "123456",
+    "db": "hello"
+  }
+]
