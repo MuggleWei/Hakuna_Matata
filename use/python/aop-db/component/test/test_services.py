@@ -2,8 +2,9 @@ import logging.config
 import os
 import unittest
 
-from service.balance_service import *
-from service.daily_table_service import DailyTableService
+from base.db_utils import DbUtils
+from component.balance_component import *
+from component.daily_table_component import DailyTableService
 
 
 class TestServices(unittest.TestCase):
@@ -60,6 +61,7 @@ class TestServices(unittest.TestCase):
 if __name__ == '__main__':
     if not os.path.exists("log"):
         os.makedirs("log")
-    logging.config.fileConfig("../../config/log.conf")
+    cfg_path = os.path.join(__file__, '../../config')
+    DbUtils(cfg_path=cfg_path)
 
     unittest.main()

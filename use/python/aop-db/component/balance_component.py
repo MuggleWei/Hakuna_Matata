@@ -1,7 +1,7 @@
 import time
 
-from component.db_service_base import DbServiceBase
-from component.db_utils import db_utils_wrapper
+from base.db_service_base import DbServiceBase
+from base.db_utils import db_utils_wrapper
 
 BALANCE_FIELD_ID = "id"
 BALANCE_FIELD_BTC = "btc"

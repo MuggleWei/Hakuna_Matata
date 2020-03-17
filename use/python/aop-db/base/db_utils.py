@@ -3,13 +3,13 @@ import json
 import logging
 
 from base.singleton import singleton
-from component.config_utils import ConfigUtils
+from base.config_utils import ConfigUtils
 
 
 @singleton
 class DbUtils:
-    def __init__(self):
-        config_utils = ConfigUtils()
+    def __init__(self, cfg_path):
+        config_utils = ConfigUtils(cfg_path=cfg_path)
         db_config_path = config_utils.get_db_config_path()
 
         self.dbs = {}
@@ -57,7 +57,7 @@ class DbUtils:
 
 def db_utils_wrapper(func):
     def wrapper(*args, **kwargs):
-        db_utils = DbUtils()
+        db_utils = DbUtils(*args, **kwargs)
         config_utils = ConfigUtils()
 
         db_source = config_utils.get_db_source()

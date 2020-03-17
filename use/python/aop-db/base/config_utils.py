@@ -1,18 +1,18 @@
 import json
 import logging.config
 import os
+import sys
 
 from base.singleton import singleton
 
 
 @singleton
 class ConfigUtils:
-    def __init__(self):
+    def __init__(self, cfg_path=os.path.join(sys.argv[0], 'config')):
         # config files
-        module_path = os.path.dirname(__file__)
-        config_path = os.path.relpath(module_path + '/../config/config.json')
-        log_config_path = os.path.relpath(module_path + '/../config/log.conf')
-        db_config_path = os.path.relpath(module_path + '/../config/db.json')
+        config_path = os.path.join(cfg_path, 'config.json')
+        log_config_path = os.path.join(cfg_path, 'log.conf')
+        db_config_path = os.path.join(cfg_path, 'db.json')
 
         logging.info("config path: " + config_path)
         logging.info("log config path: " + log_config_path)

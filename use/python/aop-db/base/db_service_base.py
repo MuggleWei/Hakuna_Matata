@@ -1,6 +1,6 @@
 import logging
 
-from component import db_utils
+from base import db_utils
 
 
 class DbServiceBase:

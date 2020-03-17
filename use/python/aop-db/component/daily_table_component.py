@@ -1,8 +1,8 @@
 import logging
 import time
 
-from component.db_service_base import DbServiceBase
-from component.db_utils import db_utils_wrapper
+from base.db_service_base import DbServiceBase
+from base.db_utils import db_utils_wrapper
 
 
 class DailyTableService(DbServiceBase):
