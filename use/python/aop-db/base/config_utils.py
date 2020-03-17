@@ -8,20 +8,18 @@ from base.singleton import singleton
 
 @singleton
 class ConfigUtils:
-    def __init__(self, cfg_path=os.path.join(sys.argv[0], 'config')):
+    def __init__(self, cfg_path=os.path.join(os.path.dirname(sys.argv[0]), 'config')):
         # config files
         config_path = os.path.join(cfg_path, 'config.json')
         log_config_path = os.path.join(cfg_path, 'log.conf')
         db_config_path = os.path.join(cfg_path, 'db.json')
 
+        # logging config
+        logging.config.fileConfig(log_config_path)
+
         logging.info("config path: " + config_path)
         logging.info("log config path: " + log_config_path)
         logging.info("db config path: " + db_config_path)
-
-        # logging config
-        if not os.path.exists("log"):
-            os.makedirs("log")
-        logging.config.fileConfig(log_config_path)
 
         # configs
         with open(config_path, 'r') as f:

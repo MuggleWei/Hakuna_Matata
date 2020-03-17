@@ -2,6 +2,7 @@ import logging.config
 import os
 import unittest
 
+from base.config_utils import ConfigUtils
 from base.db_utils import DbUtils
 from component.balance_component import *
 from component.daily_table_component import DailyTableService
@@ -12,6 +13,13 @@ class TestServices(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         super().setUpClass()
+
+        # init config path
+        if not os.path.exists("log"):
+            os.makedirs("log")
+        cfg_path = os.path.join(os.path.dirname(__file__), '../../config')
+        ConfigUtils(cfg_path=cfg_path)
+
         daily_table_service = DailyTableService()
 
         ret = daily_table_service.create_daily_tables(
@@ -59,9 +67,4 @@ class TestServices(unittest.TestCase):
 
 
 if __name__ == '__main__':
-    if not os.path.exists("log"):
-        os.makedirs("log")
-    cfg_path = os.path.join(__file__, '../../config')
-    DbUtils(cfg_path=cfg_path)
-
     unittest.main()
