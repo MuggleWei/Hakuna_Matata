@@ -103,6 +103,7 @@
     <modules>
         <module>console</module>
         <module>rolling</module>
+        <module>custompath</module>
     </modules>
 
 

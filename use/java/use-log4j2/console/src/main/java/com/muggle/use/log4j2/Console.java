@@ -1,17 +1,11 @@
-package com.muggle.app;
+package com.muggle.use.log4j2;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-/**
- * Created by mugglewei on 2017/8/20.
- */
-public class ConsoleLog {
+public class Console {
     public static void main(String[] args) {
-        // use below or -Dlog4j.configurationFile=config/log4j2.xml
-        System.setProperty("log4j.configurationFile", "config/log4j2.xml");
-
-        Logger logger = LogManager.getLogger("myConsoleLog");
+        Logger logger = LogManager.getLogger(LogManager.ROOT_LOGGER_NAME);
         logger.trace("trace level");
         logger.debug("debug level");
         logger.info("info level");

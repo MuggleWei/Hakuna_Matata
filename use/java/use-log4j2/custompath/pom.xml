@@ -9,7 +9,7 @@
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
-    <artifactId>console</artifactId>
+    <artifactId>custompath</artifactId>
 
     <build>
         <plugins>
@@ -22,7 +22,7 @@
                     </descriptorRefs>
                     <archive>
                         <manifest>
-                            <mainClass>com.muggle.use.log4j2.Console</mainClass>
+                            <mainClass>com.muggle.use.log4j2.CustomPath</mainClass>
                         </manifest>
                     </archive>
                 </configuration>
