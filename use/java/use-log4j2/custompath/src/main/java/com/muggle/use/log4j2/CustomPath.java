@@ -12,19 +12,19 @@ public class CustomPath {
         // read from command: -Dlog4j.configurationFile=config/log4j2.xml
         // set path from property: System.setProperty("log4j.configurationFile", "config/log4j2.xml");
 
-        // read from resource
-        try {
-            InputStream inputStream = CustomPath.class.getClassLoader().getResourceAsStream("config/log4j2.xml");
-            if (inputStream == null) {
-                System.out.println("failed load from resource config/log4j2.xml");
-                System.exit(1);
-            }
-            BufferedInputStream in = new BufferedInputStream(inputStream);
-            final ConfigurationSource source = new ConfigurationSource(in);
-            Configurator.initialize(null, source);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+//        // read from resource
+//        try {
+//            InputStream inputStream = CustomPath.class.getClassLoader().getResourceAsStream("config/log4j2.xml");
+//            if (inputStream == null) {
+//                System.out.println("failed load from resource config/log4j2.xml");
+//                System.exit(1);
+//            }
+//            BufferedInputStream in = new BufferedInputStream(inputStream);
+//            final ConfigurationSource source = new ConfigurationSource(in);
+//            Configurator.initialize(null, source);
+//        } catch (IOException e) {
+//            e.printStackTrace();
+//        }
 
         Logger logger = LogManager.getLogger("myAsyncLog");
         logger.trace("trace level");
