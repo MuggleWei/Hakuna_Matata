@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+       http://www.springframework.org/schema/beans/spring-beans.xsd">
+
+    <beans profile="dev">
+        <bean id="myDataSourceProperties" class="com.muggle.use.spring.MyDataSourceProperties">
+            <property name="configName" value="dev"/>
+            <property name="url" value="jdbc:mysql://127.0.0.1:23306/sampledb?useUnicode=true&amp;characterEncoding=utf8"/>
+            <property name="userName" value="muggle"/>
+            <property name="password" value="wsz123"/>
+        </bean>
+    </beans>
+
+    <beans profile="qa">
+        <bean id="myDataSourceProperties" class="com.muggle.use.spring.MyDataSourceProperties">
+            <property name="configName" value="qa"/>
+            <property name="url" value="jdbc:mysql://192.168.0.1:6666/sampledb?useUnicode=true&amp;characterEncoding=utf8"/>
+            <property name="userName" value="aqtest"/>
+            <property name="password" value="123456"/>
+        </bean>
+    </beans>
+
+    <beans profile="prod">
+        <bean id="myDataSourceProperties" class="com.muggle.use.spring.MyDataSourceProperties">
+            <property name="configName" value="prod"/>
+            <property name="url" value="*"/>
+            <property name="userName" value="*"/>
+            <property name="password" value="*"/>
+        </bean>
+    </beans>
+
+</beans>

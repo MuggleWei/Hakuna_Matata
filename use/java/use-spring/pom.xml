@@ -12,6 +12,8 @@
         <module>autoconfig</module>
         <module>javaconfig</module>
         <module>xmlconfig</module>
+        <module>javaprofile</module>
+        <module>xmlprofile</module>
     </modules>
 
     <properties>
