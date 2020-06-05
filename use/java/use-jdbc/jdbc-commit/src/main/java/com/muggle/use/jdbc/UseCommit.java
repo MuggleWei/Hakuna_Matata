@@ -25,14 +25,14 @@ public class UseCommit {
             conn.setAutoCommit(false);
 
             // 插入用户
-            int userId = InsertUser(conn, userName);
+            int userId = insertUser(conn, userName);
             if (userId == 0) {
                 System.out.println("failed insert user");
                 System.exit(1);
             }
 
             // 查询用户
-            User user = QueryUser(conn, userName);
+            User user = queryUser(conn, userName);
             if (user == null) {
                 System.out.println("failed query user");
                 if (userId != user.getUserId()) {
@@ -41,13 +41,13 @@ public class UseCommit {
             }
 
             // 删除用户
-            DeleteUser(conn, user);
+            deleteUser(conn, user);
         } catch (SQLException throwables) {
             throwables.printStackTrace();
         }
     }
 
-    public static int InsertUser(Connection conn, String userName) {
+    public static int insertUser(Connection conn, String userName) {
         User user = new User(0, userName, "123456", new Date(System.currentTimeMillis()), "127.0.0.1");
         Player player = new Player(0, 0, "Azeroth", userName + "_player1", 0);
 
@@ -103,7 +103,7 @@ public class UseCommit {
         return retUserId;
     }
 
-    public static User QueryUser(Connection conn, String qryUserName) {
+    public static User queryUser(Connection conn, String qryUserName) {
         User user = null;
         String sql = "select user_id, user_name, password, reg_date, reg_ip from t_user where user_name=?";
         try (PreparedStatement preparedStatement = conn.prepareStatement(sql)) { // try-with-resources Statement
@@ -133,7 +133,7 @@ public class UseCommit {
         return user;
     }
 
-    public static void DeleteUser(Connection conn, User user) {
+    public static void deleteUser(Connection conn, User user) {
         String sqlDeleteUser = "delete from t_user where user_id = ?";
         String sqlDeletePlayer = "delete from t_player where user_id = ?";
         try (PreparedStatement userPreparedStatement = conn.prepareStatement(sqlDeleteUser);
