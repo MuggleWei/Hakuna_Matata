@@ -46,11 +46,12 @@ public class UsePrepareStatement {
 
     public static int InsertUser(Connection conn, String userName) {
         User user = new User(0, userName, "123456", new Date(System.currentTimeMillis()), "127.0.0.1");
-        Player player = new Player(0, 0, userName + "_player1", 0);
+        Player player = new Player(0, 0, "Azeroth", userName + "_player1", 0);
 
         String sqlInsertUser = "insert into t_user (user_name, password, reg_date, reg_ip) values (?, ?, ?, ?)";
-        String sqlInsertPlayer = "insert into t_player (user_id, player_name, player_level) values (?, ?, ?)";
+        String sqlInsertPlayer = "insert into t_player (user_id, region, player_name, player_level) values (?, ?, ?, ?)";
 
+        int retUserId = 0;
         try (PreparedStatement userPreparedStatement = conn.prepareStatement(sqlInsertUser, Statement.RETURN_GENERATED_KEYS);
              PreparedStatement playerPreparedStatement = conn.prepareStatement(sqlInsertPlayer, Statement.RETURN_GENERATED_KEYS)) { // try-with-resources Statement
             // insert user
@@ -69,8 +70,9 @@ public class UsePrepareStatement {
 
             // insert player
             playerPreparedStatement.setInt(1, player.getUserId());
-            playerPreparedStatement.setString(2, player.getPlayerName());
-            playerPreparedStatement.setInt(3, player.getPlayerLevel());
+            playerPreparedStatement.setString(2, player.getRegion());
+            playerPreparedStatement.setString(3, player.getPlayerName());
+            playerPreparedStatement.setInt(4, player.getPlayerLevel());
             cnt = playerPreparedStatement.executeUpdate();
             resultSet = playerPreparedStatement.getGeneratedKeys();
             if (resultSet.next()) {
@@ -78,11 +80,13 @@ public class UsePrepareStatement {
                 player.setPlayerId(playerId);
                 System.out.println("insert player count: " + cnt + ", player=" + player);
             }
+
+            retUserId = user.getUserId();
         } catch (SQLException throwables) {
             throwables.printStackTrace();
         }
 
-        return user.getUserId();
+        return retUserId;
     }
 
     public static User QueryUser(Connection conn, String qryUserName) {
@@ -117,7 +121,7 @@ public class UsePrepareStatement {
 
     public static void DeleteUser(Connection conn, User user) {
         String sqlDeleteUser = "delete from t_user where user_id = ?";
-        String sqlDeletePlayer = "delete from t_user where user_id = ?";
+        String sqlDeletePlayer = "delete from t_player where user_id = ?";
         try (PreparedStatement userPreparedStatement = conn.prepareStatement(sqlDeleteUser);
              PreparedStatement playerPreparedStatement = conn.prepareStatement(sqlDeletePlayer)) { // try-with-resources Statement
             // delete user

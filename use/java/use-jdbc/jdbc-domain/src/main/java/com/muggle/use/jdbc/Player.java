@@ -3,15 +3,17 @@ package com.muggle.use.jdbc;
 public class Player {
     private int playerId;
     private int userId;
+    private String region;
     private String playerName;
     private int playerLevel;
 
     public Player() {
     }
 
-    public Player(int playerId, int userId, String playerName, int playerLevel) {
+    public Player(int playerId, int userId, String region, String playerName, int playerLevel) {
         this.playerId = playerId;
         this.userId = userId;
+        this.region = region;
         this.playerName = playerName;
         this.playerLevel = playerLevel;
     }
@@ -30,6 +32,14 @@ public class Player {
 
     public void setUserId(int userId) {
         this.userId = userId;
+    }
+
+    public String getRegion() {
+        return region;
+    }
+
+    public void setRegion(String region) {
+        this.region = region;
     }
 
     public String getPlayerName() {

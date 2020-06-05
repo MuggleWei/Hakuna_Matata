@@ -37,8 +37,9 @@ public class GetStart {
 
     public static int InsertUser(Connection conn, String userName) {
         User user = new User(0, userName, "123456", new Date(System.currentTimeMillis()), "127.0.0.1");
-        Player player = new Player(0, 0, userName + "_player1", 0);
+        Player player = new Player(0, 0, "Azeroth", userName + "_player1", 0);
 
+        int retUserId = 0;
         try (Statement statement = conn.createStatement()) { // try-with-resources Statement
             // insert user
             String sql = String.format("insert into t_user (user_name, password, reg_date, reg_ip) values ('%s', %s, '%s', '%s')",
@@ -53,8 +54,8 @@ public class GetStart {
             }
 
             // insert player
-            sql = String.format("insert into t_player (user_id, player_name, player_level) values (%d, '%s', %d)",
-                    player.getUserId(), player.getPlayerName(), player.getPlayerLevel());
+            sql = String.format("insert into t_player (user_id, region, player_name, player_level) values (%d, '%s', '%s', %d)",
+                    player.getUserId(), player.getRegion(), player.getPlayerName(), player.getPlayerLevel());
             cnt = statement.executeUpdate(sql, Statement.RETURN_GENERATED_KEYS);
             resultSet = statement.getGeneratedKeys();
             if (resultSet.next()) {
@@ -62,11 +63,13 @@ public class GetStart {
                 player.setPlayerId(playerId);
                 System.out.println("insert player count: " + cnt + ", player=" + player);
             }
+
+            retUserId = user.getUserId();
         } catch (SQLException throwables) {
             throwables.printStackTrace();
         }
 
-        return user.getUserId();
+        return retUserId;
     }
 
     public static User QueryUser(Connection conn, String qryUserName) {
