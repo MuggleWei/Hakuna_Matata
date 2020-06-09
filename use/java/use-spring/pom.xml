@@ -16,6 +16,7 @@
         <module>xmlprofile</module>
         <module>javascope</module>
         <module>javaaop</module>
+        <module>javamvc</module>
     </modules>
 
     <properties>
@@ -43,18 +44,6 @@
             <groupId>org.springframework</groupId>
             <artifactId>spring-aop</artifactId>
             <version>${spring.version}</version>
-        </dependency>
-
-        <!-- aspectj -->
-        <dependency>
-            <groupId>org.aspectj</groupId>
-            <artifactId>aspectjweaver</artifactId>
-            <version>${aspectj.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.aspectj</groupId>
-            <artifactId>aspectjrt</artifactId>
-            <version>${aspectj.version}</version>
         </dependency>
 
         <!-- logs -->
@@ -215,35 +204,6 @@
                         <version>${junit-jupiter.version}</version>
                     </dependency>
                 </dependencies>
-            </plugin>
-
-            <!-- aspectj -->
-            <plugin>
-                <!--
-                use com.nickwongdev aspectj replace org.codehaus.mojo, cause org.codehaus.mojo still stay 1.11 and
-                not support jdk 11, the issue still open in github
-                see: https://github.com/mojohaus/aspectj-maven-plugin/pull/45
-                -->
-                <groupId>com.nickwongdev</groupId>
-                <artifactId>aspectj-maven-plugin</artifactId>
-                <version>1.12.6</version>
-                <configuration>
-                    <complianceLevel>${jdk.version}</complianceLevel>
-                    <source>${jdk.version}</source>
-                    <target>${jdk.version}</target>
-                    <showWeaveInfo>true</showWeaveInfo>
-                    <verbose>true</verbose>
-                    <Xlint>ignore</Xlint>
-                    <encoding>UTF-8</encoding>
-                </configuration>
-                <executions>
-                    <execution>
-                        <goals>
-                            <goal>compile</goal>       <!-- use this goal to weave all your main classes -->
-                            <goal>test-compile</goal>  <!-- use this goal to weave all your test classes -->
-                        </goals>
-                    </execution>
-                </executions>
             </plugin>
 
         </plugins>
