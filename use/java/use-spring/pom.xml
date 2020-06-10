@@ -17,6 +17,7 @@
         <module>javascope</module>
         <module>javaaop</module>
         <module>javamvc</module>
+        <module>mix-javaxml-jdbc</module>
     </modules>
 
     <properties>
