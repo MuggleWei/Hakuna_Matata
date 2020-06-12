@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.muggle.use.mybatis.mapper.UserMapper">
+
+    <resultMap id="userMapper" type="com.muggle.use.mybatis.model.User">
+        <!-- don't need map underscore to camel case manually, set mapUnderscoreToCamelCase in mybatis-config.xml -->
+        <!-- <result property="user_id" column="userId" /> -->
+    </resultMap>
+
+    <select id="selectAll" resultMap="userMapper">
+        select * from t_user;
+    </select>
+
+    <select id="findUserById" resultMap="userMapper">
+        select * from t_user where user_id = #{userId}
+    </select>
+
+    <select id="findUser" resultMap="userMapper">
+        select * from t_user
+        <where>
+            <if test="userName != null">
+                user_name = #{userName}
+            </if>
+            <if test="regIp != null">
+                AND reg_ip = #{regIp}
+            </if>
+        </where>
+    </select>
+
+    <insert id="insertUser" useGeneratedKeys="true" keyProperty="userId" keyColumn="user_id">
+        insert into t_user (user_name, reg_date, reg_ip) values
+        (#{userName}, #{regDate}, #{regIp})
+    </insert>
+
+    <insert id="insertUserArray" useGeneratedKeys="true" keyProperty="userId" keyColumn="user_id">
+        insert into t_user (user_name, reg_date, reg_ip) values
+        <foreach collection="list" item="user" index="index" separator=",">
+            (#{user.userName}, #{user.regDate}, #{user.regIp})
+        </foreach>
+    </insert>
+
+    <update id="updateUser">
+        update t_user
+        <set>
+            <if test="userName != null">user_name=#{userName},</if>
+            <if test="regIp != null">reg_ip=#{regIp},</if>
+            <if test="regDate != null">reg_date=#{regDate}</if>
+        </set>
+        where user_id=#{userId}
+    </update>
+
+    <delete id="deleteUser">
+        delete from t_user
+        <where>
+            <choose>
+                <when test="userId != null">
+                    user_id=#{userId}
+                </when>
+                <when test="userName != null">
+                    user_name=#{userName}
+                </when>
+                <otherwise>
+                    user_id is null and user_name is null
+                </otherwise>
+            </choose>
+        </where>
+    </delete>
+
+</mapper>
