@@ -96,3 +96,25 @@ def euclidean_linear_combination(a, b, show_trace=False):
         else:
             continue
     return x1, y1, g
+
+
+def linear_congruence(a, c, m):
+    """
+    求线性同余方程 ax=c(mod m) 的解
+    :param a:
+    :param c:
+    :param m:
+    :return: 解的列表
+    """
+    if a == 0 or m == 0:
+        raise Exception("linear congruence input invalid arguments")
+
+    u, v, g = euclidean_linear_combination(a, m)
+    if int(c / g) * g != c:
+        return []
+
+    sol_list = []
+    x0 = int(u * c / g)
+    for k in range(0, g):
+        sol_list.append(x0 + int(k * m / g))
+    return sol_list
