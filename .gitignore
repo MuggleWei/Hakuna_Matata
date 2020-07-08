@@ -7,6 +7,9 @@ build/
 # vscode
 .vscode/
 
+# log dir
+**/log/
+
 # gen proto
 **/gen/proto/
 **/proto/desc/
