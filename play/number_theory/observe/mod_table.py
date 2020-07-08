@@ -5,12 +5,12 @@ import os
 
 if __name__ == '__main__':
     p_list = [3, 5, 7, 11, 13, 17]
-    a_list = [x for x in range(1, 10)]
-    k_list = [x for x in range(1, 10)]
 
     # 生成表
     tables = {}
     for p in p_list:
+        a_list = [x for x in range(1, p*2+1)]
+        k_list = [x for x in range(1, p*2+1)]
         table = []
         for a in a_list:
             row = []
@@ -23,6 +23,8 @@ if __name__ == '__main__':
     if not os.path.exists('log'):
         os.mkdir('log')
     for p, table in tables.items():
+        a_list = [x for x in range(1, p * 2 + 1)]
+        k_list = [x for x in range(1, p * 2 + 1)]
         with open('log/a_power_k_mod_{}.csv'.format(p), 'w') as f:
             f.write('p={}|a^k(mod p),'.format(p))
             for k in k_list:
