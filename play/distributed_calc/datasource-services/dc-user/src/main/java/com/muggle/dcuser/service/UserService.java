@@ -71,34 +71,71 @@ public class UserService {
         return errorIdUtils.errIdPassword;
     }
 
+    @Transactional(rollbackFor = Exception.class)
     public int addUser(User user) {
-        int ret = 0;
+        if (user.getName() == null || user.getName().length() > 32 || user.getName().length() == 0) {
+            return errorIdUtils.errIdInvalidUser;
+        }
+
+        if (user.getPassword() == null || user.getPassword().length() > 32 || user.getPassword().length() < 8) {
+            return errorIdUtils.errIdPasswordLen;
+        }
+
+        // generate bcrypt hash
+        String hashed = "";
         try {
-            ret = realAddUser(user);
-            user.setPassword(null);
-            if (ret != errorIdUtils.ok) {
-                logger.warn("failed add user " + user);
-            }
-        } catch (Exception e) {
-            user.setPassword(null);
-            logger.warn(e.getMessage(), e);
+            hashed = passwordUtils.bcryptHash(user.getPassword());
+        } catch (NoSuchAlgorithmException e) {
+            logger.error(e.getMessage(), e);
             return -1;
         }
-        return ret;
+        user.setPassword(hashed);
+
+        // add user
+        int addCnt = userMapper.addUser(user);
+        if (addCnt != 1) {
+            logger.warn("failed add user: " + user);
+            throw new RuntimeException("failed add user");
+        }
+
+        // add authority
+        Authority authority = new Authority();
+        authority.setUserId(user.getId());
+        authority.setNumTasks(1);
+
+        addCnt = authorityMapper.addAuthority(authority);
+        if (addCnt != 1) {
+            logger.warn("failed add authority: " + authority);
+            throw new RuntimeException("failed add authority");
+        }
+
+        user.setPassword(null);
+
+        return 0;
     }
 
+    @Transactional(rollbackFor = Exception.class)
     public int delUser(User user) {
-        int ret = 0;
-        try {
-            ret = realDelUser(user);
-            if (ret != errorIdUtils.ok) {
-                logger.warn("failed del user " + user);
-            }
-        } catch (Exception e) {
-            logger.warn(e.getMessage(), e);
-            return -1;
+        List<User> userList = userMapper.queryUser(user);
+        if (userList.size() != 1) {
+            return errorIdUtils.errIdInvalidUser;
         }
-        return ret;
+
+        user = userList.get(0);
+        Long userId = user.getId();
+        int delCnt = userMapper.delUser(user);
+        if (delCnt != 1) {
+            String errMsg = "failed delete user " + user.getId();
+            throw new RuntimeException(errMsg);
+        }
+
+        delCnt = authorityMapper.delAuthority(userId);
+        if (delCnt != 1) {
+            String errMsg = "failed delete authority " + userId;
+            throw new RuntimeException(errMsg);
+        }
+
+        return errorIdUtils.ok;
     }
 
     public int updateUser(User user, User updateUser) {
@@ -129,77 +166,6 @@ public class UserService {
         } catch (Exception e) {
             logger.warn(e.getMessage(), e);
             return -1;
-        }
-
-        return errorIdUtils.ok;
-    }
-
-    @Transactional(propagation = Propagation.REQUIRED, rollbackFor = Exception.class)
-    public int realAddUser(User user) {
-        if (user.getName() == null || user.getName().length() > 32 || user.getName().length() == 0) {
-            return errorIdUtils.errIdInvalidUser;
-        }
-
-        if (user.getPassword() == null || user.getPassword().length() > 32 || user.getPassword().length() < 8) {
-            return errorIdUtils.errIdPasswordLen;
-        }
-
-        // generate bcrypt hash
-        String hashed = "";
-        try {
-            hashed = passwordUtils.bcryptHash(user.getPassword());
-        } catch (NoSuchAlgorithmException e) {
-            logger.error(e.getMessage(), e);
-            return -1;
-        }
-        user.setPassword(hashed);
-
-        // add user
-        try {
-            int addCnt = userMapper.addUser(user);
-            if (addCnt != 1) {
-                logger.warn("failed add user: " + user);
-                return -1;
-            }
-        } catch (Exception e) {
-            logger.warn(e.toString());
-            return errorIdUtils.errIdRepeatedUserName;
-        }
-
-        // add authority
-        Authority authority = new Authority();
-        authority.setUserId(user.getId());
-        authority.setNumTasks(1);
-
-        try {
-            authorityMapper.addAuthority(authority);
-        } catch (Exception e) {
-            logger.error(e.getMessage(), e);
-            throw e;
-        }
-
-        return 0;
-    }
-
-    @Transactional(rollbackFor = Exception.class)
-    public int realDelUser(User user) {
-        List<User> userList = userMapper.queryUser(user);
-        if (userList.size() != 1) {
-            return errorIdUtils.errIdInvalidUser;
-        }
-
-        user = userList.get(0);
-        Long userId = user.getId();
-        int delCnt = userMapper.delUser(user);
-        if (delCnt != 1) {
-            String errMsg = "failed delete user " + user.getId();
-            throw new RuntimeException(errMsg);
-        }
-
-        delCnt = authorityMapper.delAuthority(userId);
-        if (delCnt != 1) {
-            String errMsg = "failed delete authority " + userId;
-            throw new RuntimeException(errMsg);
         }
 
         return errorIdUtils.ok;

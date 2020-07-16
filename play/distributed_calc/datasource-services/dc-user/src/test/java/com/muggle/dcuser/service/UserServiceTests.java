@@ -125,10 +125,9 @@ public class UserServiceTests {
     }
 
     @Test
-    public void testAddUser() {
+    public void testAddUserSuccess() {
         String userName = "test_user";
         String plainPassword = "xyz123456abc";
-        Long nextUserId = 0L;
 
         // successful add user
         {
@@ -141,16 +140,19 @@ public class UserServiceTests {
             User rspUser = userService.queryUser(user);
             Assertions.assertEquals(user.getId(), user.getId());
             Assertions.assertEquals(user.getName(), user.getName());
-
-            nextUserId = user.getId() + 1L;
         }
+    }
 
-        userName = "test_user_authority_repeated";
+    @Test
+    public void testAddUserFailedTransaction() {
+        String userName = "test_user";
+        String plainPassword = "xyz123456abc";
+        Long userId = 10003L;
 
         // failed add user cause authority
         {
             Authority authority = new Authority();
-            authority.setUserId(nextUserId);
+            authority.setUserId(userId);
             authority.setNumTasks(1);
             int ret = authorityMapper.addAuthority(authority);
             Assertions.assertEquals(ret, 1);
@@ -161,7 +163,8 @@ public class UserServiceTests {
             try {
                 ret = userService.addUser(user);
                 Assertions.assertTrue(ret != errorIdUtils.ok);
-            } catch (Exception e) {}
+            } catch (Exception e) {
+            }
 
             user.setId(null);
             User rspUser = userService.queryUser(user);
