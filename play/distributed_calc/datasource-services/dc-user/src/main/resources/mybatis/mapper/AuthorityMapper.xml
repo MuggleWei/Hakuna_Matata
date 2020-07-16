@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.muggle.dcuser.mapper.AuthorityMapper">
+    <resultMap id="authorityMapperResult" type="com.muggle.dcuser.model.Authority">
+        <result property="userId" column="user_id" />
+        <result property="numTasks" column="num_tasks" />
+    </resultMap>
+
+    <sql id="authorityTable">t_authority</sql>
+    <sql id="authorityCol">user_id, num_tasks</sql>
+
+    <select id="queryAuthority" resultMap="authorityMapperResult">
+        select
+        <include refid="authorityCol"/>
+        from
+        <include refid="authorityTable"/>
+        where user_id=#{user_id}
+    </select>
+
+    <insert id="addAuthority">
+        insert into
+        <include refid="authorityTable"/>
+        (user_id, num_tasks)
+        values (#{authority.userId}, #{authority.numTasks})
+    </insert>
+
+    <delete id="delAuthority">
+        delete from
+        <include refid="authorityTable"/>
+        where user_id=#{user_id}
+    </delete>
+
+    <update id="updateAuthority">
+        update
+        <include refid="authorityTable"/>
+        <set>
+            <if test="authority.numTasks != null">num_tasks=#{authority.numTasks}</if>
+        </set>
+        where user_id=#{authority.userId}
+    </update>
+</mapper>
