@@ -1,4 +1,4 @@
-package com.muggle.dcuser.model;
+package com.muggle.dcuser.entity;
 
 public class Authority {
     private Long userId;

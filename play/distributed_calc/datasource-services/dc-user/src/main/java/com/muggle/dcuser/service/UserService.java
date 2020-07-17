@@ -4,18 +4,16 @@ import com.muggle.common.utils.ErrorIdUtils;
 import com.muggle.dcuser.componenet.PasswordUtils;
 import com.muggle.dcuser.mapper.AuthorityMapper;
 import com.muggle.dcuser.mapper.UserMapper;
-import com.muggle.dcuser.model.Authority;
-import com.muggle.dcuser.model.User;
+import com.muggle.dcuser.entity.Authority;
+import com.muggle.dcuser.entity.User;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.security.NoSuchAlgorithmException;
 import java.util.List;
-import java.util.Objects;
 
 @Service
 public class UserService {
@@ -111,7 +109,7 @@ public class UserService {
 
         user.setPassword(null);
 
-        return 0;
+        return errorIdUtils.ok;
     }
 
     @Transactional(rollbackFor = Exception.class)
@@ -139,6 +137,10 @@ public class UserService {
     }
 
     public int updateUser(User user, User updateUser) {
+        if (updateUser.getName() != null && (updateUser.getName().length() > 32 || updateUser.getName().length() == 0)) {
+            return errorIdUtils.errIdInvalidUser;
+        }
+
         try {
             int updateCnt = userMapper.updateUser(user, updateUser);
             if (updateCnt != 1) {
@@ -150,6 +152,29 @@ public class UserService {
             return -1;
         }
 
+        return errorIdUtils.ok;
+    }
+
+    public int updatePassword(User user, String password) {
+        if (password == null || password.length() > 32 || password.length() < 8) {
+            return errorIdUtils.errIdPasswordLen;
+        }
+
+        // generate bcrypt hash
+        String hashed = "";
+        try {
+            hashed = passwordUtils.bcryptHash(password);
+        } catch (NoSuchAlgorithmException e) {
+            logger.error(e.getMessage(), e);
+            return -1;
+        }
+        user.setPassword(hashed);
+
+        int updateCnt = userMapper.updateUserPassword(user);
+        if (updateCnt != 1) {
+            logger.warn("failed update user password, user: " + user);
+            return -1;
+        }
         return errorIdUtils.ok;
     }
 

@@ -1,11 +1,16 @@
 package com.muggle.dcuser.model;
 
-//@JsonInclude(JsonInclude.Include.NON_NULL)
-public class User {
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.databind.PropertyNamingStrategy;
+import com.fasterxml.jackson.databind.annotation.JsonNaming;
+
+@JsonInclude(JsonInclude.Include.NON_NULL)
+@JsonNaming(PropertyNamingStrategy.SnakeCaseStrategy.class)
+public class UserPasswdModel {
     private Long id;
     private String name;
     private String password;
-    private Integer status;
+    private String newPassword;
 
     public Long getId() {
         return id;
@@ -31,11 +36,11 @@ public class User {
         this.password = password;
     }
 
-    public Integer getStatus() {
-        return status;
+    public String getNewPassword() {
+        return newPassword;
     }
 
-    public void setStatus(Integer status) {
-        this.status = status;
+    public void setNewPassword(String newPassword) {
+        this.newPassword = newPassword;
     }
 }

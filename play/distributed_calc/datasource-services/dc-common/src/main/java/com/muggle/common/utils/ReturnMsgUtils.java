@@ -28,4 +28,14 @@ public class ReturnMsgUtils {
         }
         return mapObj;
     }
+
+    public Map<String, Object> failedMap(Object data, int errId, String errMsg) {
+        Map<String, Object> mapObj = new HashMap<>();
+        mapObj.put("error_msg", errMsg);
+        mapObj.put("error_id", errId);
+        if (data != null) {
+            mapObj.put("data", data);
+        }
+        return mapObj;
+    }
 }

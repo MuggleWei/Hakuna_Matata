@@ -1,6 +1,6 @@
 package com.muggle.dcuser.mapper;
 
-import com.muggle.dcuser.model.User;
+import com.muggle.dcuser.entity.User;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 
