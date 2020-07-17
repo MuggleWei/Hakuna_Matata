@@ -20,7 +20,10 @@ public class TomcatCustomizer implements WebServerFactoryCustomizer<TomcatServle
             int originKeepAliveTimeout = protocol.getKeepAliveTimeout();
             int originConnectionTimeout = protocol.getConnectionTimeout();
             int originMaxConnection = protocol.getMaxConnections();
-            protocol.setMaxKeepAliveRequests(-1);
+
+            // https://httpd.apache.org/docs/2.4/mod/core.html
+            // MaxKeepAliveRequests: If it is set to 0, unlimited requests will be allowed
+            protocol.setMaxKeepAliveRequests(0);
 
             logger.info("####################################################################################");
             logger.info("#");
@@ -30,7 +33,7 @@ public class TomcatCustomizer implements WebServerFactoryCustomizer<TomcatServle
             logger.info("# origin keepalive timeout: {} ms", originKeepAliveTimeout);
             logger.info("# origin connection timeout: {} ms", originConnectionTimeout);
             logger.info("# origin max connections: {}", originMaxConnection);
-            logger.info("# custom maxKeepAliveRequests: {} ms", protocol.getMaxKeepAliveRequests());
+            logger.info("# custom maxKeepAliveRequests: {}", protocol.getMaxKeepAliveRequests());
             logger.info("#");
             logger.info("####################################################################################");
         });
