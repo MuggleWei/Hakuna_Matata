@@ -3,6 +3,7 @@ package com.muggle.dcuser.config;
 import org.apache.coyote.http11.AbstractHttp11Protocol;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.web.embedded.tomcat.TomcatServletWebServerFactory;
 import org.springframework.boot.web.server.WebServerFactoryCustomizer;
 import org.springframework.context.annotation.Configuration;
@@ -10,6 +11,9 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 public class TomcatCustomizer implements WebServerFactoryCustomizer<TomcatServletWebServerFactory> {
     private final Logger logger = LoggerFactory.getLogger(this.getClass());
+
+    @Value("${customizer.tomcat.max-keep-alive-requests}")
+    private int tomcatMaxKeepAliveRequests;
 
     @Override
     public void customize(TomcatServletWebServerFactory factory) {
@@ -21,9 +25,8 @@ public class TomcatCustomizer implements WebServerFactoryCustomizer<TomcatServle
             int originConnectionTimeout = protocol.getConnectionTimeout();
             int originMaxConnection = protocol.getMaxConnections();
 
-            // https://httpd.apache.org/docs/2.4/mod/core.html
-            // MaxKeepAliveRequests: If it is set to 0, unlimited requests will be allowed
-            protocol.setMaxKeepAliveRequests(0);
+            // See: https://httpd.apache.org/docs/2.4/mod/core.html#maxkeepaliverequests
+            protocol.setMaxKeepAliveRequests(tomcatMaxKeepAliveRequests);
 
             logger.info("####################################################################################");
             logger.info("#");
