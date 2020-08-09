@@ -4,10 +4,13 @@ import com.google.protobuf.*;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 public class Decoder {
+    protected Map<String, DescriptorProtos.FileDescriptorProto> fileProtoCache = new HashMap<>();
     protected Map<String, Descriptors.Descriptor> descriptors = new HashMap<>();;
     protected Map<String, Message> messageMap = new HashMap<>();
     protected int totalLenLimit = 4096;
@@ -34,16 +37,30 @@ public class Decoder {
         try (InputStream inputStream = classloader.getResourceAsStream(fileName)) {
             DescriptorProtos.FileDescriptorSet descriptorSet = DescriptorProtos.FileDescriptorSet.parseFrom(inputStream);
             for (DescriptorProtos.FileDescriptorProto fdp : descriptorSet.getFileList()) {
-                Descriptors.FileDescriptor desc = Descriptors.FileDescriptor.buildFrom(fdp, new Descriptors.FileDescriptor[]{});
+//                Descriptors.FileDescriptor desc = Descriptors.FileDescriptor.buildFrom(fdp, new Descriptors.FileDescriptor[]{});
+                Descriptors.FileDescriptor desc = buildFileDescriptor(fdp);
                 for (Descriptors.Descriptor descriptor : desc.getMessageTypes()) {
                     String className = descriptor.getFullName();
                     this.descriptors.put(className, descriptor);
                 }
+                fileProtoCache.put(desc.getName(), fdp);
             }
         } catch (IOException e) {
             e.printStackTrace();
+        }
+    }
+
+    private Descriptors.FileDescriptor buildFileDescriptor(DescriptorProtos.FileDescriptorProto currentFileProto) {
+        List<Descriptors.FileDescriptor> dependencyFileDescriptorList = new ArrayList<>();
+        currentFileProto.getDependencyList().forEach(dependencyStr -> {
+            DescriptorProtos.FileDescriptorProto dependencyFileProto = fileProtoCache.get(dependencyStr);
+            Descriptors.FileDescriptor dependencyFileDescriptor = buildFileDescriptor(dependencyFileProto);
+            dependencyFileDescriptorList.add(dependencyFileDescriptor);
+        });
+        try {
+            return Descriptors.FileDescriptor.buildFrom(currentFileProto, dependencyFileDescriptorList.toArray(new Descriptors.FileDescriptor[0]));
         } catch (Descriptors.DescriptorValidationException e) {
-            e.printStackTrace();
+            throw new IllegalStateException("FileDescriptor build fail!", e);
         }
     }
 
