@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.muggle.mapper.UserMapper">
+    <resultMap id="userMapperResult" type="com.muggle.entity.User">
+        <result property="id" column="id"/>
+        <result property="name" column="name"/>
+        <result property="password" column="password"/>
+        <result property="status" column="status"/>
+    </resultMap>
+
+    <sql id="userTable">t_user</sql>
+    <sql id="userCol">id, name, password, status</sql>
+
+    <select id="queryUser" resultMap="userMapperResult">
+        select
+        <include refid="userCol"/>
+        from
+        <include refid="userTable"/>
+        <choose>
+            <when test="user.id != null">where id=#{user.id}</when>
+            <when test="user.name != null">where name=#{user.name}</when>
+            <otherwise>where id=null</otherwise>
+        </choose>
+    </select>
+
+    <insert id="addUser" useGeneratedKeys="true" keyProperty="user.id" keyColumn="id">
+        insert into
+        <include refid="userTable"/>
+        (name, password, status, reg_ip, reg_date, update_date)
+        values (#{user.name}, #{user.password}, #{user.status}, #{user.reg_ip}, now(), now())
+    </insert>
+
+    <delete id="delUser">
+        delete from
+        <include refid="userTable"/>
+        <choose>
+            <when test="user.id != null">where id=#{user.id}</when>
+            <when test="user.name != null">where name=#{user.name}</when>
+            <otherwise>where id=null</otherwise>
+        </choose>
+    </delete>
+
+    <update id="updateUser">
+        update
+        <include refid="userTable"/>
+        <set>
+            <if test="user.name != null">name=#{user.name},</if>
+            <if test="user.password != null">password=#{user.password},</if>
+            <if test="user.status != null">status=#{user.status},</if>
+            update_date=now()
+        </set>
+        <choose>
+            <when test="id != null">where id=#{id}</when>
+            <when test="name != null">where name=#{name}</when>
+            <otherwise>where id=null</otherwise>
+        </choose>
+    </update>
+
+</mapper>

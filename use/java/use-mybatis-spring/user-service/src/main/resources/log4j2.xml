@@ -1,0 +1,37 @@
+<Configuration status="WARN" monitorInterval="300">
+    <properties>
+        <property name="LOG_HOME">log</property>
+        <property name="FILE_NAME">user-service</property>
+    </properties>
+    <Appenders>
+        <Console name="MyConsole" target="SYSTEM_OUT">
+            <PatternLayout pattern="%d{HH:mm:ss.SSS} [%t] %-5level %logger{36} - %msg%n"/>
+        </Console>
+<!--        <File name="MyFile" fileName="${LOG_HOME}/singlefile_${FILE_NAME}.log">-->
+<!--            <PatternLayout pattern="%d{HH:mm:ss.SSS} [%t] %-5level %logger{36} - %msg%n"/>-->
+<!--        </File>-->
+        <RollingRandomAccessFile name="MyRoll"
+                                 fileName="${LOG_HOME}/${FILE_NAME}.log"
+                                 filePattern="${LOG_HOME}/$${date:yyyy-MM}/${FILE_NAME}-%d{yyyy-MM-dd}-%i.log">
+            <PatternLayout pattern="%d{yyyy-MM-dd HH:mm:ss.SSS} [%t] %-5level %logger{36} - %msg%n"/>
+            <Policies>
+                <TimeBasedTriggeringPolicy interval="1"/>
+                <SizeBasedTriggeringPolicy size="10 MB"/>
+            </Policies>
+            <DefaultRolloverStrategy max="20"/>
+        </RollingRandomAccessFile>
+<!--        <Async name="MyFileAsync">-->
+<!--            <AppenderRef ref="MyFile"/>-->
+<!--        </Async>-->
+        <Async name="MyRollAsync">
+            <AppenderRef ref="MyRoll"/>
+        </Async>
+    </Appenders>
+
+    <Loggers>
+        <Root level="trace">
+            <AppenderRef ref="MyConsole" level="warn"/>
+            <AppenderRef ref="MyRoll"/>
+        </Root>
+    </Loggers>
+</Configuration>
