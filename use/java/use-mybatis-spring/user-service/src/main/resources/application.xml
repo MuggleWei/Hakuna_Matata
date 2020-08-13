@@ -44,7 +44,14 @@
 
     <bean id="sqlSessionFactory" class="org.mybatis.spring.SqlSessionFactoryBean">
         <property name="dataSource" ref="dataSource"/>
-        <property name="configLocation" value="classpath:mybatis/mybatis-config.xml"/>
+        <!-- <property name="configLocation" value="classpath:mybatis/mybatis-config.xml"/> -->
+        <!-- use configuration replace mybatis-config.xml -->
+        <property name="configuration">
+
+            <bean class="org.apache.ibatis.session.Configuration">
+                <property name="mapUnderscoreToCamelCase" value="true"/>
+            </bean>
+        </property>
         <property name="mapperLocations">
             <array>
                 <value>classpath:mybatis/mapper/*.xml</value>
