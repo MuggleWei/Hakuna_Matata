@@ -7,6 +7,8 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
@@ -14,6 +16,7 @@ import java.util.List;
 
 @ExtendWith(SpringExtension.class)
 @ContextConfiguration("/test.xml") // jdbc:initialize-database will init db and tables
+@ActiveProfiles("dev")
 public class TestUserMapper {
     private static final Logger logger = LoggerFactory.getLogger(TestUserMapper.class);
 
@@ -24,6 +27,9 @@ public class TestUserMapper {
     private String testUserName = "testuser1";
     private int testUserStatus = 0;
     private String testUserPassword = "123456";
+
+    @Value("${server.address}")
+    private String serviceAddress;
 
     @Test
     public void testQueryUserById() {
