@@ -50,7 +50,10 @@ class TimeTaskManager:
                     if callback is None:
                         logging.error('failed find callback function for {}'.format(task_name))
                     logging.info('{}  run time task {}'.format(hm, task_name))
-                    callback()
+                    try:
+                        callback()
+                    except Exception as e:
+                        logging.exception('hm={}, task_name={}'.format(hm, task_name))
             time.sleep(5)
 
     def get_time_hm(self, ts):

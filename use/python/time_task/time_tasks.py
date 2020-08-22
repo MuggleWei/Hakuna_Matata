@@ -15,6 +15,10 @@ def say_hello():
     print("hello [UTC]{} | [UTC+8]{}".format(dt_utc, dt_utc8))
 
 
+def throw_except():
+    raise Exception("throw except")
+
+
 if __name__ == '__main__':
     if not os.path.exists("./log"):
         os.mkdir("./log")
@@ -28,4 +32,5 @@ if __name__ == '__main__':
     for i in range(60):
         hm_list.append(time_task_manager.get_time_hm(cur_ts + i * 60))
     time_task_manager.add_task('say_hello', say_hello, hm_list)
+    time_task_manager.add_task('throw_except', throw_except, hm_list)
     time_task_manager.run()
