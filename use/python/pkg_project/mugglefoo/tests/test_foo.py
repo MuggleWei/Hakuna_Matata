@@ -18,6 +18,12 @@ class TestFoo(unittest.TestCase):
             "bar", "unknown")
         self.assertEqual(msg, expect_str)
 
+    def test_get_res(self):
+        content = self._foo.get_res_content()
+        content = content.strip()
+        expect_str = "foo"
+        self.assertEqual(content, expect_str)
+
 
 if __name__ == "__main__":
     unittest.main()

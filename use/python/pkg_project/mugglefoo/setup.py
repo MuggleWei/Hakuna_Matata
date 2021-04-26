@@ -21,6 +21,7 @@ setuptools.setup(
     url="",
     package_dir={"": "src"},
     packages=setuptools.find_packages(where="src"),
+    include_package_data=True,
     python_requires=">=3.6",
     install_requires=requires,
 )
