@@ -24,7 +24,8 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 set(LIB_TYPE "SHARED" CACHE STRING "build lib type")
 
 # cmake
-include(${CMAKE_CURRENT_LIST_DIR}/../cmake/muggle_utils.cmake)
+set(COMMON_CMAKE_DIR ${CMAKE_CURRENT_LIST_DIR}/../../../../common/cmake)
+include(${COMMON_CMAKE_DIR}/muggle_utils.cmake)
 
 # set use folder in vs
 set_property(GLOBAL PROPERTY USE_FOLDERS ON)

@@ -25,7 +25,8 @@ set(LIB_TYPE "SHARED" CACHE STRING "build lib type")
 set(LIB_BASE_TYPE "SHARED" CACHE STRING "link libbase type")
 
 # cmake
-include(${CMAKE_CURRENT_LIST_DIR}/../cmake/muggle_utils.cmake)
+set(COMMON_CMAKE_DIR ${CMAKE_CURRENT_LIST_DIR}/../../../../common/cmake)
+include(${COMMON_CMAKE_DIR}/muggle_utils.cmake)
 
 # set use folder in vs
 set_property(GLOBAL PROPERTY USE_FOLDERS ON)
