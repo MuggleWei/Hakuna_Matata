@@ -1,0 +1,31 @@
+<APP>
+    <!--
+    日志配置
+    :param path: 日志路径
+    :param console_level: 屏幕输出日志等级 debug|info|warning|error|fatal
+    :param file_level: 文件输出日志等级
+    -->
+    <log path="log" console_level="warning" file_level="info" />
+
+    <!--
+    数据源配置
+    :param filepath: 数据源配置文件
+    -->
+    <datasource filepath="config/data_source.json"/>
+
+    <!--
+    数据库名称与datasource的映射
+    :param name: 数据库识别名称
+    :param source: datasource配置中的source名称
+    -->
+    <db_map>
+        <db name="product" source="db1"/>
+        <db name="backup" source="db2"/>
+    </db_map>
+
+    <!--
+    其余选项
+    :param batch: 单次批量插入的数量
+    -->
+    <options batch="128" />
+</APP>
