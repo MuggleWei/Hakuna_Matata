@@ -9,6 +9,9 @@ build/
 # vscode
 .vscode/
 
+# clangd
+.clangd/
+
 # log dir
 **/log/
 **/logs/
