@@ -19,7 +19,7 @@ class LogHandle(object):
         """
         # 生成日志输出目录
         folder = os.path.dirname(filename)
-        if not os.path.exists(folder):
+        if len(folder) > 0 and (not os.path.exists(folder)):
             os.makedirs(folder, exist_ok=True)
 
         # 获取格式化
