@@ -59,8 +59,8 @@ if (${bar_type} STREQUAL STATIC)
 		POSITION_INDEPENDENT_CODE ON
 	)
 endif()
-target_link_libraries(${foo} ${bar})
-add_dependencies(${foo} ${bar})
+target_link_libraries(${bar} ${foo})
+add_dependencies(${bar} ${foo})
 
 # hello
 set(hello hello)
