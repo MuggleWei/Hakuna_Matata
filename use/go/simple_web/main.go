@@ -98,6 +98,7 @@ func main() {
 	albumController := controller.GetAlbumController()
 	albumRouter := router.PathPrefix("/api/v1/album").Subrouter()
 	albumRouter.HandleFunc("/query", albumController.Query).Methods("GET")
+	albumRouter.HandleFunc("/query_by_price", albumController.QueryByPrice).Methods("POST")
 
 	router.Use(controller.MiddlewareTimeElapsed)
 

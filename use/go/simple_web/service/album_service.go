@@ -31,3 +31,8 @@ func GetAlbumService() *AlbumService {
 func (this *AlbumService) FindAlbum(title, artist string) ([]entity.AlbumEntity, error) {
 	return this.albumMapper.Query(title, artist)
 }
+
+// find album by price range
+func (this *AlbumService) FindAlbumByPriceRange(lower, upper float64) ([]entity.AlbumEntity, error) {
+	return this.albumMapper.QueryByPriceRange(lower, upper)
+}
