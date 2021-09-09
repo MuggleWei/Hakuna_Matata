@@ -1,0 +1,4 @@
+<server>
+	<log file="log/hello.log" level="info"/>
+	<db user="muggle" passwd="wsz123" addr="127.0.0.1:3306" db="db_hello" />
+</server>
