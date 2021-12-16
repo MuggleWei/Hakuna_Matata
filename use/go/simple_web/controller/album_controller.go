@@ -48,10 +48,10 @@ func (this *AlbumController) ConvertEntityToModel(albums []entity.AlbumEntity) [
 }
 
 // response album models
-func (this *AlbumController) Response(w http.ResponseWriter, albums []*model.AlbumModel) {
-	b, err := json.Marshal(albums)
+func (this *AlbumController) Response(w http.ResponseWriter, res *model.Response) {
+	b, err := json.Marshal(*res)
 	if err != nil {
-		log.Warning("failed marshal album models")
+		log.Warning("failed marshal response model")
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
@@ -65,7 +65,10 @@ func (this *AlbumController) ResponseEntity(w http.ResponseWriter, albums []enti
 	albumsModels := this.ConvertEntityToModel(albums)
 
 	// response
-	this.Response(w, albumsModels)
+	res := model.Response{}
+	res.Code = 0
+	res.Data = albumsModels
+	this.Response(w, &res)
 }
 
 // query by title and artist
