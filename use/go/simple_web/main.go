@@ -95,6 +95,11 @@ func main() {
 	// http server
 	router := mux.NewRouter()
 
+	helloController := controller.GetHelloController()
+	helloRouter := router.PathPrefix("/api/v1/hello").Subrouter()
+	helloRouter.HandleFunc("/echo", helloController.Echo)
+	helloRouter.HandleFunc("/greet", helloController.Greet)
+
 	albumController := controller.GetAlbumController()
 	albumRouter := router.PathPrefix("/api/v1/album").Subrouter()
 	albumRouter.HandleFunc("/query", albumController.Query).Methods("GET")

@@ -2,7 +2,6 @@ package controller
 
 import (
 	"encoding/json"
-	"io"
 	"net/http"
 	"sync"
 
@@ -17,19 +16,19 @@ type AlbumController struct {
 }
 
 var (
-	singleton *AlbumController
-	once      sync.Once
+	singletonAlbum *AlbumController
+	onceAlbum      sync.Once
 )
 
 func GetAlbumController() *AlbumController {
-	if singleton == nil {
-		once.Do(func() {
-			singleton = &AlbumController{
+	if singletonAlbum == nil {
+		onceAlbum.Do(func() {
+			singletonAlbum = &AlbumController{
 				albumService: service.GetAlbumService(),
 			}
 		})
 	}
-	return singleton
+	return singletonAlbum
 }
 
 // convert album entity to models
@@ -47,19 +46,6 @@ func (this *AlbumController) ConvertEntityToModel(albums []entity.AlbumEntity) [
 	return albumModels
 }
 
-// response album models
-func (this *AlbumController) Response(w http.ResponseWriter, res *model.Response) {
-	b, err := json.Marshal(*res)
-	if err != nil {
-		log.Warning("failed marshal response model")
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
-
-	w.Header().Set("Content-Type", "application/json")
-	w.Write(b)
-}
-
 func (this *AlbumController) ResponseEntity(w http.ResponseWriter, albums []entity.AlbumEntity) {
 	// convert entity to model
 	albumsModels := this.ConvertEntityToModel(albums)
@@ -68,7 +54,7 @@ func (this *AlbumController) ResponseEntity(w http.ResponseWriter, albums []enti
 	res := model.Response{}
 	res.Code = 0
 	res.Data = albumsModels
-	this.Response(w, &res)
+	HttpResponse(w, &res)
 }
 
 // query by title and artist
@@ -100,20 +86,10 @@ func (this *AlbumController) Query(w http.ResponseWriter, r *http.Request) {
 
 // query by price range
 func (this *AlbumController) QueryByPrice(w http.ResponseWriter, r *http.Request) {
-	// get query payload
-	b, err := io.ReadAll(r.Body)
-	defer r.Body.Close()
-
-	if err != nil {
-		log.Warning("failed read http payload body")
-		http.Error(w, err.Error(), http.StatusBadRequest)
-		return
-	}
-
 	var qry model.QueryByPriceModel
-	err = json.Unmarshal(b, &qry)
+	err := json.NewDecoder(r.Body).Decode(&qry)
 	if err != nil {
-		log.Warning("failed parse body: %v", string(b))
+		log.Warning("failed parse body: %v", err.Error())
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
