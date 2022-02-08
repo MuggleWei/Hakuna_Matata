@@ -123,7 +123,7 @@ function(add_example name folder)
 		${FETCHCONTENT_BASE_DIR}/libpcap-src
 	)
 	target_compile_definitions(${name} PRIVATE
-		PRIVATE MUGGLE_HOLD_LOG_MACRO=1
+		MUGGLE_HOLD_LOG_MACRO=1
 	)
 endfunction()
 
