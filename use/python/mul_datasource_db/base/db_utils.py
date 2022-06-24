@@ -212,6 +212,7 @@ class DbUtils:
         with self.get_cursor(conn) as cursor:
             affect_row = cursor.execute(strsql)
             conn.commit()
+        self.recycle_conn(conn)
         logging.debug("complete DbUtils update, affect row: {}, source: {}, do sql: {}".format(
             affect_row, source, strsql))
         return affect_row
