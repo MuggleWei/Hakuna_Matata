@@ -63,7 +63,7 @@ def sync(source_from, source_to):
     :return:
     """
     table_user = TableUser(table_name="t_user")
-    daos = table_user.fetch_all(source=source_from)
+    daos = table_user.query(source=source_from)
     backup_table_user = TableUser(table_name="t_backup_user")
     backup_table_user.insert(source=source_to, daos=daos, batch_cnt=cfg.options_batch)
 
@@ -90,6 +90,19 @@ def new_fund_stream_records(source, batch):
     ]
     table_fund_record = TableFundStreamRecord(table_name="t_fund_stream_record")
     table_fund_record.insert(source=source, records=records, batch_cnt=batch)
+
+
+def update_fund_stream_records(source):
+    """
+    更新资金流水
+    """
+    table_fund_record = TableFundStreamRecord(table_name="t_fund_stream_record")
+    record = DaoFundStreamRecord(id=5, user_id=1002, fund_dir=1, amount=8000.0)
+    affect_row = table_fund_record.update_amount(
+        source=source,
+        record=record)
+    logging.info("update fund stream record, id: {}, amount: {}, affect row: {}".format(
+        record.id, record.amount, affect_row))
 
 
 class FundRecordHandler(object):
@@ -127,10 +140,46 @@ class FundRecordHandler(object):
         logging.info("{} | on row: id={}, user_id={}, dir={}, amount={}".format(
             extra_info, row[self._id], row[self._user_id], row[self._dir], row[self._amount]))
 
+    def on_dict_row(self, row, extra_info):
+        """
+        当读取到字典行
+        :param row:
+        :param extra_info:
+        """
+        logging.info("{} | on row: id={}, user_id={}, dir={}, amount={}".format(
+            extra_info,
+            row.get("id", None),
+            row.get("user_id", None),
+            row.get("dir", None),
+            row.get("amount", None)))
+
+    def on_dao(self, dao, extra_info):
+        """
+        当读取到对象
+        """
+        logging.info("{} | on row: id={}, user_id={}, dir={}, amount={}".format(
+            extra_info,
+            dao.id,
+            dao.user_id,
+            dao.dir,
+            dao.amount))
+
 
 def load_fund_stream_records(source, extra_info):
     """
     读取资金流水
+    """
+    handler = FundRecordHandler()
+    table_fund_record = TableFundStreamRecord(table_name="t_fund_stream_record")
+
+    daos = table_fund_record.query(source=source, user_id=1001)
+    for dao in daos:
+        handler.on_dao(dao=dao, extra_info=extra_info)
+
+
+def ss_load_fund_stream_records(source, extra_info):
+    """
+    流式读取资金流水
     """
     handler = FundRecordHandler()
     table_fund_record = TableFundStreamRecord(table_name="t_fund_stream_record")
@@ -140,6 +189,17 @@ def load_fund_stream_records(source, extra_info):
 
     table_fund_record.stream_fetch(
         source=source, callback=handler.on_row, user_id=1001, extra_info=extra_info)
+
+
+def ss_dict_load_func_stream_records(source, extra_info):
+    """
+    流式字典读取资金流水
+    """
+    handler = FundRecordHandler()
+    table_fund_record = TableFundStreamRecord(table_name="t_fund_stream_record")
+
+    table_fund_record.stream_dict_fetch(
+        source=source, callback=handler.on_dict_row, user_id=1001, extra_info=extra_info)
 
 
 if __name__ == "__main__":
@@ -183,5 +243,17 @@ if __name__ == "__main__":
     # 往product中插入资金流水
     new_fund_stream_records(source=source_product, batch=cfg.options_batch)
 
+    # 更新资金流水
+    update_fund_stream_records(source=source_product)
+
+    # 读取资金流水
+    load_fund_stream_records(
+        source=source_product, extra_info="yo~ fetch")
+
     # 流式读取资金流水
-    load_fund_stream_records(source=source_product, extra_info="yo yo yo~")
+    ss_load_fund_stream_records(
+        source=source_product, extra_info="yo~ stream fetch")
+
+    # 流式字典读取资金硫酸
+    ss_dict_load_func_stream_records(
+        source=source_product, extra_info="yo~ stream dict fetch")

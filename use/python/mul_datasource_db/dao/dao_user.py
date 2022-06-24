@@ -19,14 +19,30 @@ class DaoUser(object):
     def id(self):
         return self._id
 
+    @id.setter
+    def id(self, val):
+        self._id = val
+
     @property
     def name(self):
         return self._name
+
+    @name.setter
+    def name(self, val):
+        self._name = val
 
     @property
     def user_type(self):
         return self._user_type
 
+    @user_type.setter
+    def user_type(self, val):
+        self._user_type = val
+
     @property
     def status(self):
         return self._status
+
+    @status.setter
+    def status(self, val):
+        self._status = val
