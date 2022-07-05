@@ -9,6 +9,27 @@ from base.singleton import singleton
 
 @singleton
 class DbUtils:
+    class DbUtilsConn:
+        def __init__(self, handle, source):
+            self._handle = handle
+            self._source = source
+            self._conn = self._handle.get_conn(source=source)
+
+        def __enter__(self):
+            return self._conn
+
+        def __exit__(self, exc_type, exc_val, exc_tb):
+            self._handle.recycle_conn(self._conn)
+
+    def fetch_conn(self, source):
+        """
+        获取source的连接, 支持with语法
+        :param source: 数据源名
+        :return:
+        """
+        dbconn = self.DbUtilsConn(handle=self, source=source)
+        return dbconn
+
     def get_conn(self, source):
         """
         获取source的连接
@@ -83,7 +104,7 @@ class DbUtils:
         流式执行
 
         注意: 有的版本流式游标复用连接会出现问题, 所以这里每次使用流式读取都
-              使用new_conn新建一个连接, 而不是使用get_conn获取连接
+              使用new_conn新建一个连接, 而不是使用fetch_conn/get_conn获取连接
 
         :param source: 数据源名
         :param strsql: sql语句
@@ -115,7 +136,7 @@ class DbUtils:
         流式字典执行
 
         注意: 有的版本流式游标复用连接会出现问题, 所以这里每次使用流式读取都
-              使用new_conn新建一个连接, 而不是使用get_conn获取连接
+              使用new_conn新建一个连接, 而不是使用fetch_conn/get_conn获取连接
 
         :param source: 数据源名
         :param strsql: sql语句
@@ -150,11 +171,10 @@ class DbUtils:
         :return: 返回所有数据
         """
         logging.debug("DbUtils fetch_all, source: {}, do sql: {}".format(source, strsql))
-        conn = self.get_conn(source)
-        with self.get_cursor(conn) as cursor:
-            cursor.execute(strsql)
-            rows = cursor.fetchall()
-        self.recycle_conn(conn)
+        with self.fetch_conn(source) as conn:
+            with self.get_cursor(conn) as cursor:
+                cursor.execute(strsql)
+                rows = cursor.fetchall()
         logging.debug("complete DbUtils fetch_all, source: {}, do sql: {}".format(source, strsql))
         return rows
 
@@ -166,11 +186,10 @@ class DbUtils:
         :return: 返回所有数据
         """
         logging.debug("DbUtils fetch_all_dict, source: {}, do sql: {}".format(source, strsql))
-        conn = self.get_conn(source)
-        with self.get_dict_cursor(conn) as cursor:
-            cursor.execute(strsql)
-            rows = cursor.fetchall()
-        self.recycle_conn(conn)
+        with self.fetch_conn(source) as conn:
+            with self.get_dict_cursor(conn) as cursor:
+                cursor.execute(strsql)
+                rows = cursor.fetchall()
         logging.debug("complete DbUtils fetch_all_dict, source: {}, do sql: {}".format(source, strsql))
         return rows
 
@@ -185,19 +204,18 @@ class DbUtils:
         """
         logging.debug("DbUtils batch_insert, source: {}, do sql: {}".format(source, strsql))
         insert_cnt = 0
-        conn = self.get_conn(source)
-        with self.get_cursor(conn) as cursor:
-            vals = []
-            for row in rows:
-                vals.append(row)
-                if len(vals) >= batch_cnt:
+        with self.fetch_conn(source) as conn:
+            with self.get_cursor(conn) as cursor:
+                vals = []
+                for row in rows:
+                    vals.append(row)
+                    if len(vals) >= batch_cnt:
+                        insert_cnt += cursor.executemany(strsql, vals)
+                        conn.commit()
+                        vals.clear()
+                if len(vals) > 0:
                     insert_cnt += cursor.executemany(strsql, vals)
                     conn.commit()
-                    vals.clear()
-            if len(vals) > 0:
-                insert_cnt += cursor.executemany(strsql, vals)
-                conn.commit()
-        self.recycle_conn(conn)
         logging.debug("complete DbUtils batch_insert, affect row: {}, source: {}, do sql: {}".format(
             insert_cnt, source, strsql))
         return insert_cnt
@@ -208,11 +226,10 @@ class DbUtils:
         """
         logging.debug("DbUtils update, source: {}, do sql: {}".format(source, strsql))
         affect_row = 0
-        conn = self.get_conn(source)
-        with self.get_cursor(conn) as cursor:
-            affect_row = cursor.execute(strsql)
-            conn.commit()
-        self.recycle_conn(conn)
+        with self.fetch_conn(source) as conn:
+            with self.get_cursor(conn) as cursor:
+                affect_row = cursor.execute(strsql)
+                conn.commit()
         logging.debug("complete DbUtils update, affect row: {}, source: {}, do sql: {}".format(
             affect_row, source, strsql))
         return affect_row
