@@ -10,16 +10,16 @@ from base.singleton import singleton
 @singleton
 class DbUtils:
     class DbUtilsConn:
-        def __init__(self, handle, source):
-            self._handle = handle
+        def __init__(self, source, fn_get, fn_recycle):
             self._source = source
-            self._conn = self._handle.get_conn(source=source)
+            self._conn = fn_get(source=source)
+            self._recycle = fn_recycle
 
         def __enter__(self):
             return self._conn
 
         def __exit__(self, exc_type, exc_val, exc_tb):
-            self._handle.recycle_conn(self._conn)
+            self._recycle(self._conn)
 
     def fetch_conn(self, source):
         """
@@ -27,77 +27,11 @@ class DbUtils:
         :param source: 数据源名
         :return:
         """
-        dbconn = self.DbUtilsConn(handle=self, source=source)
+        dbconn = self.DbUtilsConn(
+            source=source,
+            fn_get=self._get_conn,
+            fn_recycle=self._recycle_conn)
         return dbconn
-
-    def get_conn(self, source):
-        """
-        获取source的连接
-        :param source: 数据源名
-        :return:
-        """
-        # TODO: 使用连接池
-        return self.new_conn(source)
-
-    def recycle_conn(self, conn):
-        """
-        回收连接
-        :param conn:
-        :return:
-        """
-        # TODO: 使用连接池
-        conn.close()
-
-    def new_conn(self, source):
-        """
-        新建一个连接
-        :param source: 数据源名
-        :return:
-        """
-        ds_cfg = DataSourceConfig()
-        ds_item: DataSource = ds_cfg.get(source)
-        if ds_item is None:
-            logging.error("failed get db source by name: {}".format(source))
-            return None
-
-        conn = pymysql.connect(
-            host=ds_item.ip,
-            port=ds_item.port,
-            user=ds_item.user,
-            passwd=ds_item.passwd,
-            db=ds_item.db,
-            charset=ds_item.charset)
-        return conn
-
-    def get_cursor(self, conn):
-        """
-        获取游标
-        :param conn:
-        :return:
-        """
-        return conn.cursor()
-
-    def get_dict_cursor(self, conn):
-        """
-        获取字典游标
-        :param conn: 数据库连接
-        """
-        return conn.cursor(cursor=pymysql.cursors.DictCursor)
-
-    def get_stream_cursor(self, conn):
-        """
-        获取流式游标
-        :param conn: 数据库连接
-        :return:
-        """
-        return conn.cursor(cursor=pymysql.cursors.SSCursor)
-
-    def get_stream_dict_cursor(self, conn):
-        """
-        获取流式字典邮编
-        :param conn: 数据库连接
-        """
-        return conn.cursor(cursor=pymysql.cursors.SSDictCursor)
 
     def stream_execute(self, source, strsql, callback, *args, **kwargs):
         """
@@ -116,8 +50,8 @@ class DbUtils:
         cnt = 0
         logging.debug("DbUtils stream_execute, source: {}, do sql: {}".format(source, strsql))
         try:
-            with self.new_conn(source) as conn:
-                with self.get_stream_cursor(conn) as cursor:
+            with self._new_conn(source) as conn:
+                with self._get_stream_cursor(conn) as cursor:
                     cursor.execute(strsql)
                     while True:
                         row = cursor.fetchone()
@@ -148,8 +82,8 @@ class DbUtils:
         cnt = 0
         logging.debug("DbUtils stream_dict_execute, source: {}, do sql: {}".format(source, strsql))
         try:
-            with self.new_conn(source) as conn:
-                with self.get_stream_dict_cursor(conn) as cursor:
+            with self._new_conn(source) as conn:
+                with self._get_stream_dict_cursor(conn) as cursor:
                     cursor.execute(strsql)
                     while True:
                         row = cursor.fetchone()
@@ -172,7 +106,7 @@ class DbUtils:
         """
         logging.debug("DbUtils fetch_all, source: {}, do sql: {}".format(source, strsql))
         with self.fetch_conn(source) as conn:
-            with self.get_cursor(conn) as cursor:
+            with self._get_cursor(conn) as cursor:
                 cursor.execute(strsql)
                 rows = cursor.fetchall()
         logging.debug("complete DbUtils fetch_all, source: {}, do sql: {}".format(source, strsql))
@@ -187,7 +121,7 @@ class DbUtils:
         """
         logging.debug("DbUtils fetch_all_dict, source: {}, do sql: {}".format(source, strsql))
         with self.fetch_conn(source) as conn:
-            with self.get_dict_cursor(conn) as cursor:
+            with self._get_dict_cursor(conn) as cursor:
                 cursor.execute(strsql)
                 rows = cursor.fetchall()
         logging.debug("complete DbUtils fetch_all_dict, source: {}, do sql: {}".format(source, strsql))
@@ -205,7 +139,7 @@ class DbUtils:
         logging.debug("DbUtils batch_insert, source: {}, do sql: {}".format(source, strsql))
         insert_cnt = 0
         with self.fetch_conn(source) as conn:
-            with self.get_cursor(conn) as cursor:
+            with self._get_cursor(conn) as cursor:
                 vals = []
                 for row in rows:
                     vals.append(row)
@@ -227,9 +161,78 @@ class DbUtils:
         logging.debug("DbUtils update, source: {}, do sql: {}".format(source, strsql))
         affect_row = 0
         with self.fetch_conn(source) as conn:
-            with self.get_cursor(conn) as cursor:
+            with self._get_cursor(conn) as cursor:
                 affect_row = cursor.execute(strsql)
                 conn.commit()
         logging.debug("complete DbUtils update, affect row: {}, source: {}, do sql: {}".format(
             affect_row, source, strsql))
         return affect_row
+
+    def _get_conn(self, source):
+        """
+        获取source的连接
+        :param source: 数据源名
+        :return:
+        """
+        # TODO: 使用连接池
+        return self._new_conn(source)
+
+    def _recycle_conn(self, conn):
+        """
+        回收连接
+        :param conn:
+        :return:
+        """
+        # TODO: 使用连接池
+        conn.close()
+
+    def _new_conn(self, source):
+        """
+        新建一个连接
+        :param source: 数据源名
+        :return:
+        """
+        ds_cfg = DataSourceConfig()
+        ds_item: DataSource = ds_cfg.get(source)
+        if ds_item is None:
+            logging.error("failed get db source by name: {}".format(source))
+            return None
+
+        conn = pymysql.connect(
+            host=ds_item.ip,
+            port=ds_item.port,
+            user=ds_item.user,
+            passwd=ds_item.passwd,
+            db=ds_item.db,
+            charset=ds_item.charset)
+        return conn
+
+    def _get_cursor(self, conn):
+        """
+        获取游标
+        :param conn:
+        :return:
+        """
+        return conn.cursor()
+
+    def _get_dict_cursor(self, conn):
+        """
+        获取字典游标
+        :param conn: 数据库连接
+        """
+        return conn.cursor(cursor=pymysql.cursors.DictCursor)
+
+    def _get_stream_cursor(self, conn):
+        """
+        获取流式游标
+        :param conn: 数据库连接
+        :return:
+        """
+        return conn.cursor(cursor=pymysql.cursors.SSCursor)
+
+    def _get_stream_dict_cursor(self, conn):
+        """
+        获取流式字典邮编
+        :param conn: 数据库连接
+        """
+        return conn.cursor(cursor=pymysql.cursors.SSDictCursor)
