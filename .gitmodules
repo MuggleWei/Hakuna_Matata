@@ -1,6 +1,3 @@
 [submodule "use/c/use-libevent_2.1.8/thirdparty/libevent"]
 	path = use/c/use-libevent_2.1.8/thirdparty/libevent
 	url = https://github.com/nmathewson/Libevent.git
-[submodule "use/cross/protobuf/cpp/thirdparty/google/protobuf"]
-	path = use/cross/protobuf/cpp/thirdparty/google/protobuf
-	url = https://github.com/google/protobuf.git
