@@ -60,15 +60,19 @@ if %build_protobuf% EQU 1 (
 
 :: build cpp
 echo "------------------------"
+
+cd %origin_dir%
+
+set cpp_dir=%origin_dir%cpp
+set cpp_build_dir=%cpp_dir%\build
+set cpp_proto_dir=%cpp_build_dir%\gen\proto
+
 if %build_cpp% EQU 1 (
 	echo "build cpp"
 
-	cd %origin_dir%
-
-	set cpp_dir=%origin_dir%cpp
-	set cpp_build_dir=%cpp_dir%\build
-	set cpp_proto_dir=%cpp_build_dir%\gen\proto
-
+	if exist %cpp_proto_dir% (
+		rd /s /q %cpp_proto_dir%
+	)
 	md %cpp_proto_dir%
 
 	echo "------------------------"
@@ -98,15 +102,16 @@ if %build_cpp% EQU 1 (
 
 :: build java
 echo "------------------------"
+
+cd %origin_dir%
+
+set java_dir=%origin_dir%java
+set java_proto_dir=%java_dir%\example\src\main\java
+set java_desc_dir=%java_dir%\example\src\main\resources\proto\desc
+set java_proto_gen_dir=%java_proto_dir%\gen
+
 if %build_java% EQU 1 (
 	echo "build java"
-
-	cd %origin_dir%
-
-	set java_dir=%origin_dir%java
-	set java_proto_dir=%java_dir%\example\src\main\java
-	set java_desc_dir=%java_dir%\example\src\main\resources\proto\desc
-	set java_proto_gen_dir=%java_proto_dir%\gen
 
 	if exist %java_proto_gen_dir% (
 		rd /s /q %java_proto_gen_dir%
