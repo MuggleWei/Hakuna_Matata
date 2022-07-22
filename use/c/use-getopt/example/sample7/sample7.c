@@ -95,15 +95,6 @@ int main(int argc, char *argv[])
 			}break;
 		}
 	}
-	
-	/* Deal with non-option arguments here */
-	if ( optind < argc )
-	{
-		while ( optind < argc )
-		{
-			
-		}
-	}
 
 	return 0;
 }
