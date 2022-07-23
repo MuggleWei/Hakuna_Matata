@@ -14,6 +14,7 @@ import (
 	"github.com/go-sql-driver/mysql"
 	"github.com/gorilla/mux"
 	log "github.com/sirupsen/logrus"
+	"gopkg.in/natefinch/lumberjack.v2"
 )
 
 func initLog(cfg *config.MyConfig) error {
@@ -25,14 +26,17 @@ func initLog(cfg *config.MyConfig) error {
 		return errors.New("invalid log leve")
 	}
 
-	//log.SetOutput(&lumberjack.Logger{
-	//    Filename:   cfg.Config.Log.File,
-	//    MaxSize:    500, // megabytes
-	//    MaxBackups: 3,
-	//    MaxAge:     28,   //days
-	//    Compress:   true, // disabled by default
-	//})
-	log.SetOutput(os.Stdout)
+	if cfg.Config.Log.File == "" {
+		log.SetOutput(os.Stdout)
+	} else {
+		log.SetOutput(&lumberjack.Logger{
+			Filename:   cfg.Config.Log.File,
+			MaxSize:    128, // megabytes
+			MaxBackups: 3,
+			MaxAge:     28,   //days
+			Compress:   true, // disabled by default
+		})
+	}
 	log.SetReportCaller(true)
 	log.SetFormatter(&config.MyLogFormat{})
 	log.SetLevel(lvl)
@@ -45,16 +49,20 @@ func initLog(cfg *config.MyConfig) error {
 func initDB(cfg *config.MyConfig) error {
 	log.Info("start initialize db")
 
-	mysqlCfg := mysql.Config{
-		User:                 cfg.Config.Db.User,
-		Passwd:               cfg.Config.Db.Passwd,
-		Net:                  "tcp",
-		Addr:                 cfg.Config.Db.Addr,
-		DBName:               cfg.Config.Db.Db,
-		AllowNativePasswords: true,
+	dbMap := make(map[string]string)
+	for _, db := range cfg.Config.DataSources.Dbs {
+		mysqlCfg := mysql.Config{
+			User:                 db.User,
+			Passwd:               db.Passwd,
+			Net:                  "tcp",
+			Addr:                 db.Addr,
+			DBName:               db.Db,
+			AllowNativePasswords: true,
+		}
+		dbMap[db.Name] = mysqlCfg.FormatDSN()
 	}
 
-	err := db.InitInstance(mysqlCfg.FormatDSN())
+	err := db.InitInstance(dbMap)
 	if err != nil {
 		log.Errorf("failed init db instance: err=%v", err)
 		return err
@@ -109,7 +117,7 @@ func main() {
 
 	srv := &http.Server{
 		Handler:      router,
-		Addr:         "127.0.0.1:10102",
+		Addr:         cfg.Config.Http.Addr,
 		WriteTimeout: 15 * time.Second,
 		ReadTimeout:  15 * time.Second,
 	}

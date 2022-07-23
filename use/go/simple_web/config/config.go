@@ -14,9 +14,10 @@ type MyConfig struct {
 }
 
 type Server struct {
-	XMLName xml.Name  `xml:"server"`
-	Db      DbConfig  `xml:"db"`
-	Log     LogConfig `xml:"log"`
+	XMLName     xml.Name          `xml:"server"`
+	Log         LogConfig         `xml:"log"`
+	DataSources DataSourcesConfig `xml:"datasources"`
+	Http        HttpConfig        `xml:"http"`
 }
 
 type LogConfig struct {
@@ -25,12 +26,23 @@ type LogConfig struct {
 	Level   string   `xml:"level,attr"`
 }
 
+type DataSourcesConfig struct {
+	XMLName xml.Name   `xml:"datasources"`
+	Dbs     []DbConfig `xml:"db"`
+}
+
 type DbConfig struct {
 	XMLName xml.Name `xml:"db"`
+	Name    string   `xml:"name,attr"`
 	User    string   `xml:"user,attr"`
 	Passwd  string   `xml:"passwd,attr"`
 	Addr    string   `xml:"addr,attr"`
 	Db      string   `xml:"db,attr"`
+}
+
+type HttpConfig struct {
+	XMLName xml.Name `xml:"http"`
+	Addr    string   `xml:"addr,attr"`
 }
 
 // load config file
@@ -59,8 +71,11 @@ func (this *MyConfig) Load(filepath string) error {
 	fmt.Printf("complete load config: filepath=%v\n", filepath)
 	fmt.Printf("-------------------------\n")
 	fmt.Printf("log config: file=%v, level=%v\n", this.Config.Log.File, this.Config.Log.Level)
-	fmt.Printf("db config: user=%v, passwd=******, addr=%v, db_name=%v\n",
-		this.Config.Db.User, this.Config.Db.Addr, this.Config.Db.Db)
+	for _, db := range this.Config.DataSources.Dbs {
+		fmt.Printf("db config: name=%v, user=%v, passwd=******, addr=%v, database=%v\n",
+			db.Name, db.User, db.Addr, db.Db)
+	}
+	fmt.Printf("http config: addr:%v\n", this.Config.Http.Addr)
 
 	return nil
 }

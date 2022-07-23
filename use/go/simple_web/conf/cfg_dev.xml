@@ -1,4 +1,26 @@
 <server>
+	<!--
+	日志配置
+	:param file: 日志文件路径, 若为"", 则代表输出到屏幕
+	:param level: 日志过滤等级
+	-->
 	<log file="log/hello.log" level="info"/>
-	<db user="muggle" passwd="wsz123" addr="127.0.0.1:3306" db="db_hello" />
+
+	<!--
+	数据库配置
+	:param name: 数据库名词, 用于多数据源的识别
+	:param user: 用户名
+	:param passwd: 密码
+	:param addr: 地址
+	:param db: 使用的database
+	-->
+	<datasources>
+		<db name="hello" user="muggle" passwd="wsz123" addr="127.0.0.1:3306" db="db_hello" />
+	</datasources>
+
+	<!--
+	http服务配置
+	:param addr: 监听的地址
+	-->
+	<http addr="127.0.0.1:8080" />
 </server>

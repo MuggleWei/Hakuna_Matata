@@ -33,14 +33,20 @@ func GetAlbumMapper() *AlbumMapper {
 func (this *AlbumMapper) Query(title, artist string) ([]entity.AlbumEntity, error) {
 	var albums []entity.AlbumEntity
 
-	chain := db.Instance().Cols(this.DefaultCols...).Where("")
+	engine, err := db.GetInstance("hello")
+	if err != nil {
+		log.Error("failed get db instance 'hello'")
+		return nil, err
+	}
+
+	chain := engine.Cols(this.DefaultCols...).Where("")
 	if title != "" {
 		chain = chain.And("title=?", title)
 	}
 	if artist != "" {
 		chain = chain.And("artist=?", artist)
 	}
-	err := chain.Find(&albums)
+	err = chain.Find(&albums)
 	if err != nil {
 		log.Errorf("failed query album: title=%v, artist=%v", title, artist)
 		return nil, err
@@ -53,8 +59,14 @@ func (this *AlbumMapper) Query(title, artist string) ([]entity.AlbumEntity, erro
 func (this *AlbumMapper) QueryByPriceRange(lower, upper float64) ([]entity.AlbumEntity, error) {
 	var albums []entity.AlbumEntity
 
-	chain := db.Instance().Cols(this.DefaultCols...).Where("price >= ? AND price <= ?", lower, upper)
-	err := chain.Find(&albums)
+	engine, err := db.GetInstance("hello")
+	if err != nil {
+		log.Error("failed get db instance 'hello'")
+		return nil, err
+	}
+
+	chain := engine.Cols(this.DefaultCols...).Where("price >= ? AND price <= ?", lower, upper)
+	err = chain.Find(&albums)
 	if err != nil {
 		log.Errorf("failed query album by price range: lower=%v, upper=%v", lower, upper)
 		return nil, err
