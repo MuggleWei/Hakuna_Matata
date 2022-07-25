@@ -2,6 +2,8 @@
 
 origin_dir="$(dirname "$(readlink -f "$0")")"
 
+clear_protobuf=1
+
 # clean package
 echo "--------------------------------"
 echo "clean package directory"
@@ -13,12 +15,16 @@ rm -rf $pkg_dir
 
 # clean protobuf
 echo "--------------------------------"
-echo "clean protobuf directory"
+if [ $clear_protobuf -eq 1 ]; then
+	echo "clean protobuf directory"
 
-protobuf_build_dir=$origin_dir/protobuf/build
+	protobuf_build_dir=$origin_dir/protobuf/build
 
-echo "remove dir: $protobuf_build_dir"
-rm -rf $protobuf_build_dir
+	echo "remove dir: $protobuf_build_dir"
+	rm -rf $protobuf_build_dir
+else
+	echo "clear_protobuf off, ignore clear protobuf"
+fi
 
 # clean cpp example
 echo "--------------------------------"

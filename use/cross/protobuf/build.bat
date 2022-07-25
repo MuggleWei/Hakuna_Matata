@@ -141,7 +141,8 @@ if %build_java% EQU 1 (
 		echo "build java project"
 
 		cd %java_dir%
-		mvn clean package -Dmaven.test.skip=true
+		REM mvn clean package -Dmaven.test.skip=true
+		mvn clean package
 	) else (
 		echo "build source off, ignore build java source"
 	)

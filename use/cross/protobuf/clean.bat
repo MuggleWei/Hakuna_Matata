@@ -2,6 +2,8 @@
 
 set origin_dir=%~dp0
 
+set clear_protobuf=1
+
 :: clean package
 echo "--------------------------------"
 echo "clean package directory"
@@ -15,13 +17,17 @@ if exist %pkg_dir% (
 
 :: clean protobuf
 echo "--------------------------------"
-echo "clean protobuf directory"
+if %clear_protobuf% EQU 1 (
+	echo "clean protobuf directory"
 
-set protobuf_build_dir=%origin_dir%protobuf\build
+	set protobuf_build_dir=%origin_dir%protobuf\build
 
-echo remove dir: %protobuf_build_dir%
-if exist %protobuf_build_dir% (
-    RD /S /Q %protobuf_build_dir%
+	echo remove dir: %protobuf_build_dir%
+	if exist %protobuf_build_dir% (
+	    RD /S /Q %protobuf_build_dir%
+	)
+) else (
+	echo "clear_protobuf off, ignore clear protobuf"
 )
 
 :: clean cpp example

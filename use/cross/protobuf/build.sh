@@ -124,7 +124,8 @@ if [ $build_java -eq 1 ]; then
 		echo "build java project"
 
 		cd $java_dir
-		mvn clean package -Dmaven.test.skip=true
+		# mvn clean package -Dmaven.test.skip=true
+		mvn clean package
 	else
 		echo "build source off, ignore build java source"
 	fi
