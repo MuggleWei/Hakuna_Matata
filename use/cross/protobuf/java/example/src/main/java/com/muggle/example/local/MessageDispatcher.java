@@ -36,8 +36,8 @@ class PositionCallback implements ProtobufCallback {
         System.out.println("========");
         System.out.println("OnMessagePosition: \n"
                 + pos.getX() + ", "
-                + pos.getX() + ", "
-                + pos.getX());
+                + pos.getY() + ", "
+                + pos.getZ());
     }
 }
 

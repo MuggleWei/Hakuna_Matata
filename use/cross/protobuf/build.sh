@@ -126,9 +126,18 @@ if [ $build_java -eq 1 ]; then
 		cd $java_dir
 		# mvn clean package -Dmaven.test.skip=true
 		mvn clean package
+
+		cp $java_dir/example/target/example-0.0.1-jar-with-dependencies.jar $pkg_dir
 	else
 		echo "build source off, ignore build java source"
 	fi
 else
 	echo "build java off, ignore java"
 fi
+
+# copy run scripts
+cd $origin_dir
+cp ./run_local_example.sh $pkg_dir
+
+# back to origin directory
+cd $origin_dir
