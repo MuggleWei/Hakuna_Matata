@@ -11,7 +11,9 @@ class ProtoMessageHandler
 	class MsgCallback
 	{
 	public:
-		virtual void OnMessage(std::shared_ptr<google::protobuf::Message> &msg) {}
+		virtual ~MsgCallback() {}
+
+		virtual void OnMessage(std::shared_ptr<google::protobuf::Message>& /*msg*/) {}
 	};
 
 	template<typename T>

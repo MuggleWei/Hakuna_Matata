@@ -1,14 +1,6 @@
 #include "codec.h"
-#if WIN32
-#include <WinSock2.h>
-#include <malloc.h>
+#include "muggle/c/muggle_c.h"
 
-#pragma comment(lib,"ws2_32.lib")
-#else
-#include <arpa/inet.h>
-#include <alloca.h>
-#endif
-#include <string.h>
 #include <google/protobuf/io/coded_stream.h>
 
 static google::protobuf::Message* CreateProtoMessage(const std::string &message_name)
@@ -29,7 +21,7 @@ char* Codec::Serialize(const google::protobuf::Message *msg, int32_t &total_len)
 	 |   total_len(include itself)    |   version info   |    name_len    |   name    |    data    |
 	 */
 
-	static char *version = "0.0.1";
+	static const char *version = "0.0.1";
 	size_t size = msg->ByteSizeLong();
 	const std::string &type_name = msg->GetDescriptor()->full_name();
 	total_len = (int32_t)(sizeof(int32_t) + 16 + sizeof(int32_t) + type_name.size() + size);
