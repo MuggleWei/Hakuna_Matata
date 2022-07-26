@@ -73,7 +73,10 @@ include(${FETCHCONTENT_BASE_DIR}/mugglec-src/cmake/muggle_utils.cmake)
 set(msg_handle protobuf_msg_handle)
 muggle_add_project(${msg_handle} ${CMAKE_CURRENT_LIST_DIR}/src/msg_handle SHARED)
 add_dependencies(${msg_handle} ${mugglec})
-target_include_directories(${msg_handle} PUBLIC ${CMAKE_BINARY_DIR} ${PROTOBUF_INCLUDE_DIR})
+target_include_directories(${msg_handle} PUBLIC
+	${CMAKE_BINARY_DIR}
+	${FETCHCONTENT_BASE_DIR}/mugglec-src
+	${PROTOBUF_INCLUDE_DIR})
 target_link_libraries(${msg_handle} PUBLIC ${mugglec} ${PROTOBUF_LIBS})
 if (WIN32)
 	target_compile_definitions(${msg_handle} PUBLIC PROTOBUF_USE_DLLS)
