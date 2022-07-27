@@ -71,7 +71,7 @@ include(${FETCHCONTENT_BASE_DIR}/mugglec-src/cmake/muggle_utils.cmake)
 #############################
 # protobuf message handle
 set(msg_handle protobuf_msg_handle)
-muggle_add_project(${msg_handle} ${CMAKE_CURRENT_LIST_DIR}/src/msg_handle SHARED)
+muggle_add_project(${msg_handle} ${CMAKE_CURRENT_LIST_DIR}/src/msg_handle STATIC)
 add_dependencies(${msg_handle} ${mugglec})
 target_include_directories(${msg_handle} PUBLIC
 	${CMAKE_BINARY_DIR}
