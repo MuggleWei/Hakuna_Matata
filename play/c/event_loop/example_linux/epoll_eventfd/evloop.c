@@ -32,12 +32,13 @@ static void evloop_handle_timer(ev_loop_t *evloop)
 int evloop_init(ev_loop_t *evloop)
 {
 	memset(evloop, 0, sizeof(*evloop));
+	evloop->epfd = -1;
+	evloop->evfd_ctx.fd = -1;
 
 	// create epoll fd
 	evloop->epfd = epoll_create1(EPOLL_CLOEXEC);
 	if (evloop->epfd == -1)
 	{
-		evloop->epfd = 0;
 		sys_err("failed epoll_create1");
 		goto init_evloop_except;
 	}
@@ -46,7 +47,6 @@ int evloop_init(ev_loop_t *evloop)
 	evloop->evfd_ctx.fd = eventfd(0, EFD_CLOEXEC | EFD_NONBLOCK);
 	if (evloop->evfd_ctx.fd == -1)
 	{
-		evloop->evfd_ctx.fd = 0;
 		sys_err("failed eventfd");
 		goto init_evloop_except;
 	}
@@ -77,16 +77,16 @@ init_evloop_except:
 
 void evloop_destroy(ev_loop_t *evloop)
 {
-	if (evloop->epfd > 0)
+	if (evloop->epfd != -1)
 	{
 		close(evloop->epfd);
-		evloop->epfd = 0;
+		evloop->epfd = -1;
 	}
 
-	if (evloop->evfd_ctx.fd > 0)
+	if (evloop->evfd_ctx.fd != -1)
 	{
 		close(evloop->evfd_ctx.fd);
-		evloop->evfd_ctx.fd = 0;
+		evloop->evfd_ctx.fd = -1;
 	}
 }
 
