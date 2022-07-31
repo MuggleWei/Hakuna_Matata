@@ -1,4 +1,4 @@
-#include "evloop.h"
+#include "evloop_select.h"
 
 #define PRODUCER_NUM 16
 
@@ -15,7 +15,7 @@ typedef struct thread_args
 	muggle_queue_t    *queue;     //!< message queue
 	muggle_mutex_t    *mtx;       //!< mutex for message queue
 	muggle_atomic_int *completed; //!< task completed
-	int                cnt;       //!< producer total send
+	int               cnt;        //!< producer total send
 } thread_args_t;
 
 typedef struct consumer_info
@@ -90,6 +90,7 @@ void on_wakeup(struct ev_loop *evloop, struct ev_context *ctx)
 	muggle_mutex_unlock(info->mtx);
 }
 
+
 int main(int argc, char *argv[])
 {
 	// init log
@@ -123,7 +124,7 @@ int main(int argc, char *argv[])
 
 	// create event loop
 	ev_loop_t evloop;
-	if (evloop_init(&evloop) != 0)
+	if (evloop_init(&evloop, 0, 0) != 0)
 	{
 		LOG_ERROR("failed init event loop");
 		exit(EXIT_FAILURE);
@@ -191,6 +192,6 @@ int main(int argc, char *argv[])
 
 	LOG_INFO("producer total send: %d, consumer total recv: %d",
 		producer_total_send, info.cnt);
-
+	
 	return 0;
 }

@@ -71,6 +71,7 @@ set(muggle_c mugglec)
 
 include(${CMAKE_BINARY_DIR}/_deps/mugglec-src/cmake/muggle_utils.cmake)
 
+# functions
 function(add_example name folder)
 	message("add example ${name} ${folder}")
 	

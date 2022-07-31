@@ -1,13 +1,6 @@
-#include "evloop.h"
+#include "evloop_epoll.h"
 #include <sys/epoll.h>
 #include <sys/eventfd.h>
-
-static void sys_err(const char *msg)
-{
-	char buf[512];
-	muggle_sys_strerror(muggle_sys_lasterror(), buf, sizeof(buf));
-	LOG_ERROR("%s: %s", msg, buf);
-}
 
 static void evloop_handle_timer(ev_loop_t *evloop)
 {
@@ -32,14 +25,13 @@ static void evloop_handle_timer(ev_loop_t *evloop)
 int evloop_init(ev_loop_t *evloop)
 {
 	memset(evloop, 0, sizeof(*evloop));
-	evloop->epfd = -1;
-	evloop->evfd_ctx.fd = -1;
 
 	// create epoll fd
 	evloop->epfd = epoll_create1(EPOLL_CLOEXEC);
 	if (evloop->epfd == -1)
 	{
-		sys_err("failed epoll_create1");
+		evloop->epfd = 0;
+		MUGGLE_LOG_SYS_ERR(LOG_LEVEL_ERROR, "failed epoll_create1");
 		goto init_evloop_except;
 	}
 
@@ -47,7 +39,8 @@ int evloop_init(ev_loop_t *evloop)
 	evloop->evfd_ctx.fd = eventfd(0, EFD_CLOEXEC | EFD_NONBLOCK);
 	if (evloop->evfd_ctx.fd == -1)
 	{
-		sys_err("failed eventfd");
+		evloop->evfd_ctx.fd = 0;
+		MUGGLE_LOG_SYS_ERR(LOG_LEVEL_ERROR, "failed eventfd");
 		goto init_evloop_except;
 	}
 
@@ -57,7 +50,7 @@ int evloop_init(ev_loop_t *evloop)
 	evfd_event.data.ptr = &evloop->evfd_ctx;
 	if (epoll_ctl(evloop->epfd, EPOLL_CTL_ADD, evloop->evfd_ctx.fd, &evfd_event) != 0)
 	{
-		sys_err("failed epoll_ctl add eventfd");
+		MUGGLE_LOG_SYS_ERR(LOG_LEVEL_ERROR, "failed epoll_ctl add eventfd");
 		goto init_evloop_except;
 	}
 
@@ -77,16 +70,16 @@ init_evloop_except:
 
 void evloop_destroy(ev_loop_t *evloop)
 {
-	if (evloop->epfd != -1)
+	if (evloop->epfd > 0)
 	{
 		close(evloop->epfd);
-		evloop->epfd = -1;
+		evloop->epfd = 0;
 	}
 
-	if (evloop->evfd_ctx.fd != -1)
+	if (evloop->evfd_ctx.fd > 0)
 	{
 		close(evloop->evfd_ctx.fd);
-		evloop->evfd_ctx.fd = -1;
+		evloop->evfd_ctx.fd = 0;
 	}
 }
 
@@ -123,24 +116,17 @@ void evloop_wakeup(ev_loop_t *evloop)
 	// don't need use lock here, write eventfd is thread safe
 	if (write(evloop->evfd_ctx.fd, &v, sizeof(uint64_t)) != sizeof(uint64_t))
 	{
-		sys_err("write eventfd");
+		MUGGLE_LOG_SYS_ERR(LOG_LEVEL_ERROR, "write eventfd");
 	}
 }
 
 int evloop_add_ctx(ev_loop_t *evloop, ev_context_t *ctx)
 {
 	// only support add context in the same thread of event loop run
-#if MUGGLE_PLATFORM_WINDOWS
-	if (evloop->loop_thread != muggle_thread_current_id())
+	if (!muggle_thread_equal(evloop->loop_thread, muggle_thread_current_id()))
 	{
 		return -1;
 	}
-#else
-	if (!pthread_equal(evloop->loop_thread, muggle_thread_current_id()))
-	{
-		return -1;
-	}
-#endif
 
 	struct epoll_event event;
 	memset(&event, 0, sizeof(event));
@@ -148,7 +134,7 @@ int evloop_add_ctx(ev_loop_t *evloop, ev_context_t *ctx)
 	event.events = EPOLLIN | EPOLLET;
 	if (epoll_ctl(evloop->epfd, EPOLL_CTL_ADD, ctx->fd, &event) != 0)
 	{
-		sys_err("failed epoll_ctl add");
+		MUGGLE_LOG_SYS_ERR(LOG_LEVEL_ERROR, "failed epoll_ctl add");
 		return -1;
 	}
 
@@ -177,7 +163,7 @@ void evloop_run(ev_loop_t *evloop)
 						ssize_t n = read(ctx->fd, &v, sizeof(v));
 						if (n != sizeof(v))
 						{
-							sys_err("failed read eventfd");
+							MUGGLE_LOG_SYS_ERR(LOG_LEVEL_ERROR, "failed read eventfd");
 						}
 
 						if (evloop->wake_cb)
@@ -216,7 +202,7 @@ void evloop_run(ev_loop_t *evloop)
 		}
 		else
 		{
-			sys_err("failed epoll_wait");
+			MUGGLE_LOG_SYS_ERR(LOG_LEVEL_ERROR, "failed epoll_wait");
 			evloop->exit = 1;
 		}
 

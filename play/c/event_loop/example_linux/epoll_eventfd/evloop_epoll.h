@@ -1,5 +1,5 @@
-#ifndef MY_EVLOOP_H_
-#define MY_EVLOOP_H_
+#ifndef EVLOOP_EPOLL_H_
+#define EVLOOP_EPOLL_H_
 
 #include "muggle/c/muggle_c.h"
 
