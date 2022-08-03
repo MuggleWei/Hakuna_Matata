@@ -147,7 +147,7 @@ ENDFOREACH()
 # copy config and certs
 if (WIN32)
 	add_custom_target(COPY_CONFIG ALL
-		COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_BINARY_DIR}/certs $(OutDir))
+		COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_BINARY_DIR}/certs ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/$(Configuration)/certs)
 else()
 	add_custom_target(COPY_CONFIG ALL
 		COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_BINARY_DIR}/certs ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/certs)
