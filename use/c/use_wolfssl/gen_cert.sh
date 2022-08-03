@@ -3,9 +3,9 @@
 origin_dir=$(readlink -f "$(dirname "$0")")
 cd $origin_dir
 
-mkdir build/certs
-cd build/certs
-rm -rf *
+mkdir -p $origin_dir/build/certs
+rm -rf $origin_dir/build/certs/*
+cd $origin_dir/build/certs
 
 # -------- 生成CA根证书 --------
 # 生成CA私钥(.key) -> 生成CA证书请求(.csr) -> 自签名得到根证书
