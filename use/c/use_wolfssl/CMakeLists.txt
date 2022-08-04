@@ -27,22 +27,22 @@ set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 # dependencies
 
 # set deps dir
-set(DEPS_DIR ${CMAKE_BINARY_DIR}/_deps)
+set(FETCHCONTENT_BASE_DIR ${CMAKE_BINARY_DIR}/_deps)
 
 ###############################
 # wolfssl
 configure_file(
         ${CMAKE_CURRENT_LIST_DIR}/cmake/wolfssl.cmake.in
-		${DEPS_DIR}/wolfssl-download/CMakeLists.txt)
+		${FETCHCONTENT_BASE_DIR}/wolfssl-download/CMakeLists.txt)
 execute_process(COMMAND ${CMAKE_COMMAND} -G "${CMAKE_GENERATOR}" .
         RESULT_VARIABLE result
-        WORKING_DIRECTORY ${DEPS_DIR}/wolfssl-download)
+        WORKING_DIRECTORY ${FETCHCONTENT_BASE_DIR}/wolfssl-download)
 if (result)
         message(FATAL_ERROR "cmake step for wolfssl failed: ${result}")
 endif()
 execute_process(COMMAND ${CMAKE_COMMAND} --build .
         RESULT_VARIABLE result
-		WORKING_DIRECTORY ${DEPS_DIR}/wolfssl-download)
+		WORKING_DIRECTORY ${FETCHCONTENT_BASE_DIR}/wolfssl-download)
 if (result)
         message(FATAL_ERROR "build step for wolfssl failed: ${result}")
 endif()
@@ -52,23 +52,23 @@ set(WOLFSSL_DTLS ON CACHE BOOL "")
 set(WOLFSSL_DTLS13 ON CACHE BOOL "")
 
 add_subdirectory(
-	${DEPS_DIR}/wolfssl-src
-    ${DEPS_DIR}/wolfssl-build)
+	${FETCHCONTENT_BASE_DIR}/wolfssl-src
+    ${FETCHCONTENT_BASE_DIR}/wolfssl-build)
 
 ###############################
 # mugglec
 configure_file(
 	${CMAKE_CURRENT_LIST_DIR}/cmake/mugglec.cmake.in
-	${DEPS_DIR}/mugglec-download/CMakeLists.txt)
+	${FETCHCONTENT_BASE_DIR}/mugglec-download/CMakeLists.txt)
 execute_process(COMMAND ${CMAKE_COMMAND} -G "${CMAKE_GENERATOR}" .
 	RESULT_VARIABLE result
-	WORKING_DIRECTORY ${DEPS_DIR}/mugglec-download)
+	WORKING_DIRECTORY ${FETCHCONTENT_BASE_DIR}/mugglec-download)
 if (result)
 	message(FATAL_ERROR "cmake step for mugglec failed: ${result}")
 endif()
 execute_process(COMMAND ${CMAKE_COMMAND} --build .
 	RESULT_VARIABLE result
-	WORKING_DIRECTORY ${DEPS_DIR}/mugglec-download)
+	WORKING_DIRECTORY ${FETCHCONTENT_BASE_DIR}/mugglec-download)
 if (result)
 	message(FATAL_ERROR "build step for mugglec failed: ${result}")
 endif()
@@ -81,13 +81,13 @@ set(MUGGLE_BUILD_TESTING OFF CACHE BOOL "")
 set(MUGGLE_BUILD_EXAMPLE OFF CACHE BOOL "")
 
 add_subdirectory(
-	${DEPS_DIR}/mugglec-src
-	${DEPS_DIR}/mugglec-build)
+	${FETCHCONTENT_BASE_DIR}/mugglec-src
+	${FETCHCONTENT_BASE_DIR}/mugglec-build)
 
 #------------------------------
 
 # include cmake
-include(${DEPS_DIR}/mugglec-src/cmake/muggle_utils.cmake)
+include(${FETCHCONTENT_BASE_DIR}/mugglec-src/cmake/muggle_utils.cmake)
 
 #------------------------------
 
@@ -115,8 +115,8 @@ function(add_example name folder)
 
 	target_include_directories(${name} PUBLIC
 		${PROJECT_BINARY_DIR}
-		${DEPS_DIR}/mugglec-src
-		${DEPS_DIR}/wolfssl-src
+		${FETCHCONTENT_BASE_DIR}/mugglec-src
+		${FETCHCONTENT_BASE_DIR}/wolfssl-src
 	)
 
 	add_dependencies(${name} mugglec wolfssl)
