@@ -28,28 +28,31 @@ set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 
+# set FetchContent base dir
+set(FETCHCONTENT_BASE_DIR ${CMAKE_BINARY_DIR}/_deps)
+
 # gflags
 message("-- prepare thirdparty: gflags")
 configure_file(
 	${CMAKE_CURRENT_LIST_DIR}/cmake/gflags.cmake.in
-	${CMAKE_CURRENT_BINARY_DIR}/gflags-download/CMakeLists.txt)
+	${FETCHCONTENT_BASE_DIR}/gflags-download/CMakeLists.txt)
 execute_process(COMMAND ${CMAKE_COMMAND} -G "${CMAKE_GENERATOR}" .
 	RESULT_VARIABLE result
-	WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/gflags-download)
+	WORKING_DIRECTORY ${FETCHCONTENT_BASE_DIR}/gflags-download)
 if (result)
 	message(FATAL_ERROR "cmake step for gflags failed: ${result}")
 endif()
 execute_process(COMMAND ${CMAKE_COMMAND} --build .
 	RESULT_VARIABLE result
-	WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/gflags-download)
+	WORKING_DIRECTORY ${FETCHCONTENT_BASE_DIR}/gflags-download)
 if (result)
 	message(FATAL_ERROR "build step for gflags failed: ${result}")
 endif()
 
-add_subdirectory(${CMAKE_CURRENT_BINARY_DIR}/gflags-src
-	${CMAKE_CURRENT_BINARY_DIR}/gflags-build)
+add_subdirectory(${FETCHCONTENT_BASE_DIR}/gflags-src
+	${FETCHCONTENT_BASE_DIR}/gflags-build)
 
-include_directories(${CMAKE_CURRENT_BINARY_DIR}/gflags-build/include)
+include_directories(${FETCHCONTENT_BASE_DIR}/gflags-build/include)
 
 add_executable(example src/example.cpp)
 add_dependencies(example gflags)

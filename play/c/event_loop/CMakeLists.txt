@@ -31,30 +31,32 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 # set use folder in vs
 set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 
+set(FETCHCONTENT_BASE_DIR ${CMAKE_BINARY_DIR}/_deps)
+
 ################################
 # mugglec
 
 # Download and unpack mugglec at configure time
 configure_file(
         ${CMAKE_CURRENT_LIST_DIR}/cmake/mugglec.cmake.in
-        ${CMAKE_BINARY_DIR}/_deps/mugglec-download/CMakeLists.txt)
+        ${FETCHCONTENT_BASE_DIR}/mugglec-download/CMakeLists.txt)
 execute_process(COMMAND ${CMAKE_COMMAND} -G "${CMAKE_GENERATOR}" .
         RESULT_VARIABLE result
-        WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/_deps/mugglec-download)
+        WORKING_DIRECTORY ${FETCHCONTENT_BASE_DIR}/mugglec-download)
 if (result)
         message(FATAL_ERROR "cmake step for mugglec failed: ${result}")
 endif()
 execute_process(COMMAND ${CMAKE_COMMAND} --build .
         RESULT_VARIABLE result
-        WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/_deps/mugglec-download)
+        WORKING_DIRECTORY ${FETCHCONTENT_BASE_DIR}/mugglec-download)
 if (result)
         message(FATAL_ERROR "build step for mugglec failed: ${result}")
 endif()
 
 # add mugglec to build
 add_subdirectory(
-        ${CMAKE_BINARY_DIR}/_deps/mugglec-src
-        ${CMAKE_BINARY_DIR}/_deps/mugglec-build)
+        ${FETCHCONTENT_BASE_DIR}/mugglec-src
+        ${FETCHCONTENT_BASE_DIR}/mugglec-build)
 
 # set mugglec compile options
 set(MUGGLE_BUILD_TRACE OFF CACHE BOOL "")
@@ -69,7 +71,7 @@ set(MUGGLE_BUILD_EXAMPLE OFF CACHE BOOL "")
 
 set(muggle_c mugglec)
 
-include(${CMAKE_BINARY_DIR}/_deps/mugglec-src/cmake/muggle_utils.cmake)
+include(${FETCHCONTENT_BASE_DIR}/mugglec-src/cmake/muggle_utils.cmake)
 
 # functions
 function(add_example name folder)
@@ -95,7 +97,7 @@ function(add_example name folder)
 	add_dependencies(${name} ${muggle_c})
 	target_link_libraries(${name} ${muggle_c})
 	target_include_directories(${name} PUBLIC
-		${CMAKE_BINARY_DIR}/_deps/mugglec-src)
+		${FETCHCONTENT_BASE_DIR}/mugglec-src)
 	target_compile_definitions(${name} PUBLIC MUGGLE_HOLD_LOG_MACRO)
 endfunction()
 
