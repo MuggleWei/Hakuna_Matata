@@ -19,8 +19,8 @@ ExternalProject_Add(protobuf
         GIT_REPOSITORY    https://github.com/protocolbuffers/protobuf.git
         GIT_TAG           v3.21.2
         GIT_SHALLOW       TRUE
-        SOURCE_DIR        "${CMAKE_BINARY_DIR}/_deps/protobuf-src"
-        BINARY_DIR        "${CMAKE_BINARY_DIR}/_deps/protobuf-build"
+        SOURCE_DIR        "${FETCHCONTENT_BASE_DIR}/protobuf-src"
+        BINARY_DIR        "${FETCHCONTENT_BASE_DIR}/protobuf-build"
         CONFIGURE_COMMAND ""
         BUILD_COMMAND     ""
         INSTALL_COMMAND   ""

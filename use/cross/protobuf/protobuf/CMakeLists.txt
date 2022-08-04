@@ -24,22 +24,22 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 
 # set deps dir
-set(DEPS_DIR ${CMAKE_BINARY_DIR}/_deps)
+set(FETCHCONTENT_BASE_DIR ${CMAKE_BINARY_DIR}/_deps)
 
 ###############################
 # protobuf
 configure_file(
         ${CMAKE_CURRENT_LIST_DIR}/cmake/protobuf.cmake.in
-		${DEPS_DIR}/protobuf-download/CMakeLists.txt)
+		${FETCHCONTENT_BASE_DIR}/protobuf-download/CMakeLists.txt)
 execute_process(COMMAND ${CMAKE_COMMAND} -G "${CMAKE_GENERATOR}" .
         RESULT_VARIABLE result
-        WORKING_DIRECTORY ${DEPS_DIR}/protobuf-download)
+        WORKING_DIRECTORY ${FETCHCONTENT_BASE_DIR}/protobuf-download)
 if (result)
         message(FATAL_ERROR "cmake step for protobuf failed: ${result}")
 endif()
 execute_process(COMMAND ${CMAKE_COMMAND} --build .
         RESULT_VARIABLE result
-		WORKING_DIRECTORY ${DEPS_DIR}/protobuf-download)
+		WORKING_DIRECTORY ${FETCHCONTENT_BASE_DIR}/protobuf-download)
 if (result)
         message(FATAL_ERROR "build step for protobuf failed: ${result}")
 endif()
@@ -48,5 +48,5 @@ set(protobuf_BUILD_TESTS OFF)
 
 # add protobuf to build
 add_subdirectory(
-	${DEPS_DIR}/protobuf-src
-    ${DEPS_DIR}/protobuf-build)
+	${FETCHCONTENT_BASE_DIR}/protobuf-src
+    ${FETCHCONTENT_BASE_DIR}/protobuf-build)
