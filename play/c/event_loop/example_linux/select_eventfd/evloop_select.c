@@ -243,7 +243,7 @@ void evloop_run(ev_loop_t *evloop)
 
 				if (FD_ISSET(ctx->fd, &eset))
 				{
-					muggle_linked_list_remove(linked_list, node, NULL, NULL);
+					node = muggle_linked_list_remove(linked_list, node, NULL, NULL);
 					if (evloop->err_cb)
 					{
 						evloop->err_cb(evloop, ctx);
@@ -256,7 +256,7 @@ void evloop_run(ev_loop_t *evloop)
 					{
 						evloop->nfds = ctx->fd;
 					}
-					node = node->next;
+					node = muggle_linked_list_next(linked_list, node);
 				}
 			}
 
