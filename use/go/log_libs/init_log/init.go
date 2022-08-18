@@ -3,6 +3,8 @@ package main
 import (
 	"bytes"
 	"fmt"
+	"io"
+	"os"
 	"path/filepath"
 	"runtime"
 	"strconv"
@@ -18,16 +20,18 @@ type MyLogFormat struct{}
 var log = logrus.New()
 
 func init() {
-	log.SetOutput(&lumberjack.Logger{
+	lumberjackLogger := &lumberjack.Logger{
 		Filename:   "./log/hello.log",
-		MaxSize:    500, // megabytes
+		MaxSize:    8, // MB
 		MaxBackups: 3,
 		MaxAge:     28,   //days
 		Compress:   true, // disabled by default
-	})
+	}
 	log.SetLevel(logrus.InfoLevel)
 	log.SetFormatter(&MyLogFormat{})
 	log.SetReportCaller(true)
+	//log.SetOutput(lumberjackLogger)
+	log.SetOutput(io.MultiWriter(os.Stdout, lumberjackLogger))
 }
 
 func (m *MyLogFormat) Format(entry *logrus.Entry) ([]byte, error) {
@@ -44,7 +48,7 @@ func (m *MyLogFormat) Format(entry *logrus.Entry) ([]byte, error) {
 	var newLog string
 	if entry.HasCaller() {
 		fName := filepath.Base(entry.Caller.File)
-		newLog = fmt.Sprintf("%s|%s|%d|%s:%d %s - %s\n",
+		newLog = fmt.Sprintf("%s|%s|%d|%s:%d|%s - %s\n",
 			entry.Level, timestamp, goid, fName, entry.Caller.Line, entry.Caller.Function, entry.Message)
 	} else {
 		newLog = fmt.Sprintf("%s|%s - %s\n", timestamp, entry.Level, entry.Message)
