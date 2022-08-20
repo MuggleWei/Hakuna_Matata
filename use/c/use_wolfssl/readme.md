@@ -5,6 +5,7 @@
 先运行gen_cert.sh生成根证书、私钥和服务器的私钥、证书，再运行build脚本生成项目构建文件，接着去编译项目即可
 
 ## 例子简介
+详见[example](./example/readme.md)
 此项目中包含一个echo服务和一个发送时间的客户端，都使用wolfssl TLS对通信进行加密
 
 ## set_fd的问题
