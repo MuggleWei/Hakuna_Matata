@@ -58,32 +58,6 @@ int gen_hash(const char *passwd, uint32_t passwd_len, byte *salt, byte *hash)
 	return 0;
 }
 
-void bytes_to_hex(byte *bytes, char *hex, uint32_t len)
-{
-	for (int i = 0; i < (int)len; i++)
-	{
-		snprintf(hex + 2 * i, 3, "%02x", bytes[i]);
-	}
-}
-
-byte hex_to_byte(char c)
-{
-	if ('0' <= c && c <= '9') return (byte)(c - '0');
-    if ('A' <= c && c <= 'F') return (byte)(c - 'A' + 10);
-    if ('a' <= c && c <= 'f') return (byte)(c - 'a' + 10);
-    return (byte)(-1);
-}
-
-void hex_to_bytes(const char *hex, byte *bytes, uint32_t len)
-{
-	for (int i = 0; i < (int)(len / 2); i++)
-	{
-		byte h = hex_to_byte(hex[i*2 + 0]);
-		byte l = hex_to_byte(hex[i*2 + 1]);
-		bytes[i] = h << 4 | l;
-	}
-}
-
 int passwd_hash(const char *passwd, char *salt_hex, char *hash_hex)
 {
 	uint32_t passwd_len = (uint32_t)strlen(passwd);
@@ -109,8 +83,8 @@ int passwd_hash(const char *passwd, char *salt_hex, char *hash_hex)
 		return -1;
 	}
 
-	bytes_to_hex(salt, salt_hex, SALT_SIZE);
-	bytes_to_hex(hash, hash_hex, WC_SHA256_DIGEST_SIZE);
+	muggle_hex_from_bytes((uint8_t*)salt, salt_hex, SALT_SIZE);
+	muggle_hex_from_bytes((uint8_t*)hash, hash_hex, WC_SHA256_DIGEST_SIZE);
 
 	return 0;
 }
@@ -125,7 +99,7 @@ bool verify_hash(const char *passwd, const char *salt_hex, const char *hash_hex)
 	}
 
 	byte salt[SALT_SIZE];
-	hex_to_bytes(salt_hex, salt, strlen(salt_hex));
+	muggle_hex_to_bytes(salt_hex, (uint8_t*)salt, strlen(salt_hex));
 
 	byte hash[WC_SHA256_DIGEST_SIZE];
 	if (gen_hash(passwd, passwd_len, salt, hash) != 0)
@@ -136,7 +110,7 @@ bool verify_hash(const char *passwd, const char *salt_hex, const char *hash_hex)
 
 	char verify_hash_hex[WC_SHA256_DIGEST_SIZE * 2 + 1];
 	memset(verify_hash_hex, 0, sizeof(verify_hash_hex));
-	bytes_to_hex(hash, verify_hash_hex, WC_SHA256_DIGEST_SIZE);
+	muggle_hex_from_bytes((uint8_t*)hash, verify_hash_hex, WC_SHA256_DIGEST_SIZE);
 
 	return strncmp(verify_hash_hex, hash_hex, WC_SHA256_DIGEST_SIZE * 2) == 0;
 }
