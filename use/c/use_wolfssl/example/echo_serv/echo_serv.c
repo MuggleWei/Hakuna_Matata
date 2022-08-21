@@ -1,4 +1,6 @@
 #include "muggle/c/muggle_c.h"
+#include "wolfssl/options.h"
+#include "wolfssl/wolfcrypt/settings.h"
 #include "wolfssl/ssl.h"
 
 typedef struct evloop_data
