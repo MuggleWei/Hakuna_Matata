@@ -113,6 +113,7 @@ function(add_example name folder)
 		${PROJECT_BINARY_DIR}
 		${FETCHCONTENT_BASE_DIR}/mugglec-src
 		${FETCHCONTENT_BASE_DIR}/zlib-src
+		${FETCHCONTENT_BASE_DIR}/zlib-build
 	)
 
 	add_dependencies(${name} mugglec zlib)
