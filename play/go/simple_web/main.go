@@ -4,6 +4,7 @@ import (
 	"errors"
 	"flag"
 	"fmt"
+	"io"
 	"net/http"
 	"os"
 	"time"
@@ -26,16 +27,29 @@ func initLog(cfg *config.MyConfig) error {
 		return errors.New("invalid log leve")
 	}
 
-	if cfg.Config.Log.File == "" {
-		log.SetOutput(os.Stdout)
-	} else {
-		log.SetOutput(&lumberjack.Logger{
+	var logger *lumberjack.Logger = nil
+	if cfg.Config.Log.File != "" {
+		logger = &lumberjack.Logger{
 			Filename:   cfg.Config.Log.File,
 			MaxSize:    128, // megabytes
 			MaxBackups: 3,
 			MaxAge:     28,   //days
 			Compress:   true, // disabled by default
-		})
+		}
+	}
+
+	if cfg.Config.Log.Console == "0" {
+		if logger == nil {
+			// log don't output
+		} else {
+			log.SetOutput(logger)
+		}
+	} else {
+		if logger == nil {
+			log.SetOutput(os.Stdout)
+		} else {
+			log.SetOutput(io.MultiWriter(os.Stdout, logger))
+		}
 	}
 	log.SetReportCaller(true)
 	log.SetFormatter(&config.MyLogFormat{})

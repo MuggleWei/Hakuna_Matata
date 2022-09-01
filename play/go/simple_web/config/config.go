@@ -24,6 +24,7 @@ type LogConfig struct {
 	XMLName xml.Name `xml:"log"`
 	File    string   `xml:"file,attr"`
 	Level   string   `xml:"level,attr"`
+	Console string   `xml:"console,attr"`
 }
 
 type DataSourcesConfig struct {
@@ -70,7 +71,7 @@ func (this *MyConfig) Load(filepath string) error {
 
 	fmt.Printf("complete load config: filepath=%v\n", filepath)
 	fmt.Printf("-------------------------\n")
-	fmt.Printf("log config: file=%v, level=%v\n", this.Config.Log.File, this.Config.Log.Level)
+	fmt.Printf("log config: file=%v, level=%v, console=%v\n", this.Config.Log.File, this.Config.Log.Level, this.Config.Log.Console)
 	for _, db := range this.Config.DataSources.Dbs {
 		fmt.Printf("db config: name=%v, user=%v, passwd=******, addr=%v, database=%v\n",
 			db.Name, db.User, db.Addr, db.Db)

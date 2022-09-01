@@ -1,10 +1,11 @@
 <server>
 	<!--
 	日志配置
-	:param file: 日志文件路径, 若为"", 则代表输出到屏幕
+	:param console: 是否在终端输出; 1-是, 0-否
+	:param file: 日志文件路径, 若为"", 则代表不输出到文件
 	:param level: 日志过滤等级
 	-->
-	<log file="log/hello.log" level="info"/>
+	<log console="1" file="log/hello.log" level="info" />
 
 	<!--
 	数据库配置
