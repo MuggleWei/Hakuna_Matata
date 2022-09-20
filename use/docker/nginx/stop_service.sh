@@ -1,11 +1,10 @@
 #!/bin/bash
 
-name=hello-service
+echo "docker kill hello-service"
+sudo docker kill $(sudo docker ps -a -q --filter ancestor=hello-service:0.0.1)
 
-origin_dir=$(readlink -f "$(dirname "$0")")
-cd $origin_dir/$name
+echo "docker rm hello-service"
+sudo docker rm $(sudo docker ps -a -q --filter ancestor=hello-service:0.0.1)
 
-killall $name
-
-rm -rf ./nohup*
-go clean
+echo "docker rm image: hello-service"
+sudo docker rmi $(sudo docker images  -a -q hello-service)
