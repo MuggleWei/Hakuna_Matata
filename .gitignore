@@ -24,6 +24,9 @@ nohup.out
 **/gen/proto/
 **/proto/desc/
 
+# mysql data
+mysql_data/
+
 # Intellij
 .idea/
 **/java/**/.idea/

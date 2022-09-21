@@ -1,0 +1,14 @@
+version: "8.0.30"
+services:
+  mysql:
+    image: "mysql:8.0.30"
+    restart: always
+    ports:
+      - 3306:3306
+    volumes:
+      - ./mysql_data:/var/lib/mysql
+      - ./init:/docker-entrypoint-initdb.d/:ro
+    environment:
+      #- MYSQL_ROOT_PASSWORD=wsz123
+      #- MYSQL_RANDOM_ROOT_PASSWORD=true
+      - MYSQL_ALLOW_EMPTY_PASSWORD=true
