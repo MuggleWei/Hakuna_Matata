@@ -4,8 +4,10 @@ import (
 	"flag"
 	"fmt"
 	"log"
+	"net"
 	"net/http"
 	"os"
+	"strings"
 
 	"github.com/gorilla/mux"
 )
@@ -37,5 +39,32 @@ func HelloIndex(w http.ResponseWriter, r *http.Request) {
 func Hello(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	name := vars["name"]
-	fmt.Fprint(w, "hello ", name)
+	msg := fmt.Sprintf("hello %v[%v]", name, GetClientIp(r))
+	fmt.Fprint(w, msg)
+}
+
+func GetClientIp(r *http.Request) string {
+	ip := ""
+
+	// X-Forwarded-For
+	xForwardedFor := r.Header.Get("X-Forwarded-For")
+	ipArray := strings.Split(xForwardedFor, ",")
+	if len(ipArray) > 0 {
+		ip = strings.TrimSpace(ipArray[0])
+		if ip != "" {
+			return ip
+		}
+	}
+
+	// X-Real-IP
+	ip = strings.TrimSpace(r.Header.Get("X-Real-IP"))
+	if ip != "" {
+		return ip
+	}
+
+	if ip, _, err := net.SplitHostPort(strings.TrimSpace(r.RemoteAddr)); err == nil {
+		return ip
+	}
+
+	return ""
 }
