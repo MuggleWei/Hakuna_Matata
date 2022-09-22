@@ -18,35 +18,35 @@ services:
   serv1:
     build: ./hello-service
     image: hello-service:0.0.1
-    ports:
-      - 10001:8080
+    #ports:
+    #  - 10001:8080
     environment:
       - service_number=1
   serv2:
     build: ./hello-service
     image: hello-service:0.0.1
-    ports:
-      - 10002:8080
+    #ports:
+    #  - 10002:8080
     environment:
       - service_number=2
   serv3:
     build: ./hello-service
     image: hello-service:0.0.1
-    ports:
-      - 10003:8080
+    #ports:
+    #  - 10003:8080
     environment:
       - service_number=3
   serv4:
     build: ./hello-service
     image: hello-service:0.0.1
-    ports:
-      - 10004:8080
+    #ports:
+    #  - 10004:8080
     environment:
       - service_number=4
   serv5:
     build: ./hello-service
     image: hello-service:0.0.1
-    ports:
-      - 10005:8080
+    #ports:
+    #  - 10005:8080
     environment:
       - service_number=5
