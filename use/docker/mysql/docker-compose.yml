@@ -6,9 +6,14 @@ services:
     ports:
       - 3306:3306
     volumes:
-      - ./mysql_data:/var/lib/mysql
+      - ./docker_volume/mysql:/var/lib/mysql
       - ./init:/docker-entrypoint-initdb.d/:ro
     environment:
       #- MYSQL_ROOT_PASSWORD=wsz123
       #- MYSQL_RANDOM_ROOT_PASSWORD=true
       - MYSQL_ALLOW_EMPTY_PASSWORD=true
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "512m"
+        max-file: 3

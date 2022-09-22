@@ -24,8 +24,8 @@ nohup.out
 **/gen/proto/
 **/proto/desc/
 
-# mysql data
-mysql_data/
+# docker volume
+docker_volume/
 
 # Intellij
 .idea/
