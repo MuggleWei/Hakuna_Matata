@@ -1,0 +1,9 @@
+host: 10.0.2.5
+port: 8888
+lang:
+  c: "I love it"
+  c++: "aha"
+  python: "life is short, use python"
+  go: "yes, let's go"
+  c#: "good"
+  rust: "expectation"
