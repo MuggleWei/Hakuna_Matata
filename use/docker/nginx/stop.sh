@@ -3,20 +3,15 @@
 origin_dir=$(readlink -f "$(dirname "$0")")
 cd $origin_dir
 
-echo "###########################"
-echo "# stop nginx"
-echo "###########################"
+echo "---------------------------"
+echo "- stop docker"
+echo "---------------------------"
 
-./stop_nginx.sh
+sudo docker compose stop
+sudo docker compose rm -f
 
-echo "###########################"
-echo "# stop hello-service"
-echo "###########################"
-
-./stop_service.sh
-
-echo "###########################"
-echo "# clean ca"
-echo "###########################"
+echo "---------------------------"
+echo "- clean ca"
+echo "---------------------------"
 
 ./clean_ca.sh

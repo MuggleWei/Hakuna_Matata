@@ -3,20 +3,14 @@
 origin_dir=$(readlink -f "$(dirname "$0")")
 cd $origin_dir
 
-echo "###########################"
-echo "# generate CA"
-echo "###########################"
+echo "---------------------------"
+echo "- generate CA"
+echo "---------------------------"
 
 ./gen_ca.sh
 
-echo "###########################"
-echo "# run hello-service"
-echo "###########################"
+echo "---------------------------"
+echo "- run docker"
+echo "---------------------------"
 
-./run_service.sh
-
-echo "###########################"
-echo "# run nginx"
-echo "###########################"
-
-./run_nginx.sh
+sudo docker compose up -d
