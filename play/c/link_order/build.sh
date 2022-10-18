@@ -37,6 +37,7 @@ cd $origin_dir
 
 # build bar
 rm -rf $pkg_dir/lib/static
+rm -rf $pkg_dir/include/base
 
 cd $origin_dir/base-1.1
 mkdir build
