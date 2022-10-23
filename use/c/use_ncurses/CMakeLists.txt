@@ -54,6 +54,9 @@ endif()
 # include cmake
 include(${CMAKE_CURRENT_LIST_DIR}/_deps/mugglec-v1.0.0-alpha.3/cmake/muggle_utils.cmake)
 
+# threads
+find_package(Threads)
+
 #------------------------------
 
 # functions
@@ -88,7 +91,11 @@ function(add_example name folder)
 		${NCURSES_INCLUDE_DIR}
 	)
 
-	target_link_libraries(${name} ${MUGGLEC_LIBRARIES} ${NCURSES_LIBRARIES})
+	target_link_libraries(${name}
+		${MUGGLEC_LIBRARIES}
+		${NCURSES_LIBRARIES}
+		${CMAKE_THREAD_LIBS_INIT}
+	)
 
 	target_compile_definitions(${name}
 		PUBLIC MUGGLE_HOLD_LOG_MACRO)
