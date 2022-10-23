@@ -1,6 +1,10 @@
 # cmake directory
 build/
 
+# deps directory
+_deps/
+.deps/
+
 # vim
 *~
 compile_commands.json
@@ -11,6 +15,9 @@ compile_commands.json
 
 # clangd
 .clangd/
+
+# clang-format
+.clang-format
 
 # log dir
 **/log/
