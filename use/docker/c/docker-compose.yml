@@ -1,0 +1,13 @@
+version: "0.0.1"
+services:
+  hello:
+    build:
+      context: ./hello
+      dockerfile: ./Dockerfile
+      args:
+        OS_VER: "22.10"
+    image: c-hello:0.0.1
+    restart: "no"
+    volumes:
+      - ./docker_volume/hello/log:/app/bin/log
+    command: "example_hello"
