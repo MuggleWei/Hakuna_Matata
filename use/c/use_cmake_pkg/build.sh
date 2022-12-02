@@ -26,5 +26,17 @@ mkdir -p build
 cd build
 cmake .. \
 	-DCMAKE_BUILD_TYPE=Release \
-	-DCMAKE_PREFIX_PATH=$install_dir
+	-DCMAKE_PREFIX_PATH=$install_dir \
+	-DCMAKE_INSTALL_PREFIX=$install_dir
 cmake --build .
+cmake --build . --target install
+
+cd $origin_dir/baz
+mkdir -p build
+cd build
+cmake .. \
+	-DCMAKE_BUILD_TYPE=Release \
+	-DCMAKE_PREFIX_PATH=$install_dir \
+	-DCMAKE_INSTALL_PREFIX=$install_dir
+cmake --build .
+cmake --build . --target install

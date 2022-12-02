@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.18.6)
-project(bar)
+project(baz)
 
 # set compile parameter
 if (${CMAKE_C_COMPILER_ID} STREQUAL GNU)
@@ -26,27 +26,31 @@ set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 
-find_package(foo 1 REQUIRED)
-if (foo_FOUND)
-	message("found foo: ${foo_DIR}")
-else()
-	message(FATAL_ERROR "Failed found foo")
+set(ENV{PKG_CONFIG_PATH} ${CMAKE_PREFIX_PATH}/lib/)
+find_package(PkgConfig REQUIRED)
+pkg_check_modules(foo REQUIRED IMPORTED_TARGET foo)
+if (${foo_FOUND})
+	message("--------------------")
+	message("foo was found")
+	message("use pkg-config: ${PKG_CONFIG_EXECUTABLE}")
+	message("foo libraries: ${foo_LIBRARIES}")
+	message("foo include dirs: ${foo_INCLUDE_DIRS}")
 endif()
 
-add_executable(bar bar/bar.c)
-target_link_libraries(bar foo)
+add_executable(baz baz/baz.c)
+target_link_libraries(baz PUBLIC PkgConfig::foo)
 
 # install
 if (APPLE)
-	set_target_properties(bar
+	set_target_properties(baz
 		PROPERTIES
 		INSTALL_RPATH "@executable_path/../lib"
 	)
 elseif (UNIX)
-	set_target_properties(bar
+	set_target_properties(baz
 		PROPERTIES
 		INSTALL_RPATH "\$ORIGIN/../lib"
 	)
 endif()
-install(TARGETS bar
+install(TARGETS baz
 	RUNTIME DESTINATION bin)

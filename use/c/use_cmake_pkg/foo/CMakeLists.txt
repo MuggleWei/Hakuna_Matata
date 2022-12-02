@@ -85,12 +85,12 @@ write_basic_package_version_file(
     COMPATIBILITY SameMajorVersion
 )
 install(FILES
-    ${CMAKE_CURRENT_BINARY_DIR}/fooConfig.cmake
-    ${CMAKE_CURRENT_BINARY_DIR}/fooConfigVersion.cmake
+    "${CMAKE_CURRENT_BINARY_DIR}/fooConfig.cmake"
+    "${CMAKE_CURRENT_BINARY_DIR}/fooConfigVersion.cmake"
     DESTINATION lib/cmake/foo
 )
-install(FILES foo/foo.h DESTINATION include/foo)
-install(FILES ${generated_dir}/foo/foo_config.h DESTINATION include/foo)
+install(FILES "${CMAKE_CURRENT_LIST_DIR}/foo/foo.h" DESTINATION include/foo)
+install(FILES "${generated_dir}/foo/foo_config.h" DESTINATION include/foo)
 
 # cpack
 include(InstallRequiredSystemLibraries)
@@ -100,3 +100,12 @@ set(CPACK_PACKAGE_VERSION_MINOR ${FOO_VER_MINOR})
 set(CPACK_PACKAGE_VERSION_PATCH ${FOO_VER_PATCH})
 set(CPACK_SOURCE_GENERATOR "TGZ")
 include(CPack)
+
+# pkg-config
+include(GNUInstallDirs)
+configure_file(
+	"${CMAKE_CURRENT_LIST_DIR}/foo.pc.in"
+	"${generated_dir}/foo.pc" @ONLY)
+install(FILES
+	"${generated_dir}/foo.pc"
+	DESTINATION lib/pkgconfig)

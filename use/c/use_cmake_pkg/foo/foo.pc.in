@@ -1,0 +1,9 @@
+libdir=@CMAKE_INSTALL_FULL_LIBDIR@
+includedir=@CMAKE_INSTALL_FULL_INCLUDEDIR@
+
+Name: foo
+Description: foo
+Version: @FOO_VERSION@
+URL: https://foo.com
+Libs: -L${libdir} -lfoo
+Cflags: -I${includedir}

@@ -4,7 +4,7 @@
 int main()
 {
 	int s = foo_add(5, 6);
-	printf("bar call: foo_add(5, 6) = %d\n", s);
+	printf("baz call: foo_add(5, 6) = %d\n", s);
 
 	return 0;
 }
