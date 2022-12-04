@@ -7,6 +7,8 @@ mkdir -p $install_dir
 mkdir -p $pkg_dir
 
 # build and install lib
+echo "--------------------"
+echo "build foo"
 cd $origin_dir/foo
 mkdir -p build
 cd build
@@ -21,6 +23,8 @@ cpack
 mv ./foo-*.tar.gz $pkg_dir
 
 # build bin
+echo "--------------------"
+echo "build bar"
 cd $origin_dir/bar
 mkdir -p build
 cd build
@@ -31,6 +35,8 @@ cmake .. \
 cmake --build .
 cmake --build . --target install
 
+echo "--------------------"
+echo "build baz"
 cd $origin_dir/baz
 mkdir -p build
 cd build
@@ -40,3 +46,11 @@ cmake .. \
 	-DCMAKE_INSTALL_PREFIX=$install_dir
 cmake --build .
 cmake --build . --target install
+
+echo "--------------------"
+echo "build bob"
+cd $origin_dir/bob
+PKG_CONFIG_PATH=$install_dir/lib/pkgconfig meson setup -Dprefix=$install_dir build
+cd build
+PKG_CONFIG_PATH=$install_dir/lib/pkgconfig meson compile
+meson install
