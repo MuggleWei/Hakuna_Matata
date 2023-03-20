@@ -46,7 +46,7 @@ set(MUGGLE_CPP_BUILD_EXAMPLE OFF CACHE BOOL "")
 FetchContent_Declare(
 		mugglecpp
 		GIT_REPOSITORY https://github.com/MuggleWei/mugglecpp.git
-		GIT_TAG v1.0.0-alpha.5
+		GIT_TAG v1.0.0
 )
 FetchContent_MakeAvailable(mugglecpp)
 
