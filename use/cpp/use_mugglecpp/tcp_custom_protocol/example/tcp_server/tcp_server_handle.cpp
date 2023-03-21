@@ -71,7 +71,7 @@ void TcpServerHandle::OnRelease(NetEventLoop *evloop, SocketContext *ctx)
 
 	delete peer;
 	delete session;
-	ctx->Close();
+
 	ctx_set_.erase(ctx);
 }
 void TcpServerHandle::OnTimer(NetEventLoop *evloop)

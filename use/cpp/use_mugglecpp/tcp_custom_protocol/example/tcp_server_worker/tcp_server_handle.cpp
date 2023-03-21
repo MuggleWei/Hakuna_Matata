@@ -47,9 +47,7 @@ void TcpServerHandle::OnRelease(NetEventLoop *evloop, SocketContext *ctx)
 	LOG_INFO("release, addr=%s", session->getAddr());
 
 	delete peer;
-
 	delete session;
-	ctx->Close();
 
 	ctx_set_.erase(ctx);
 }
