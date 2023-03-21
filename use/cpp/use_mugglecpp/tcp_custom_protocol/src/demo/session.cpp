@@ -1,4 +1,5 @@
 #include "session.h"
+#include "demo/msg.h"
 #include "muggle/cpp/muggle_cpp.h"
 #include "dispatcher.h"
 

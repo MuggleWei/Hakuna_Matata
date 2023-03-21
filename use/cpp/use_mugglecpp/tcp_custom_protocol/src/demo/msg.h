@@ -24,6 +24,18 @@ typedef struct msg_header
 	uint32_t payload_len; //!< payload length(not include header)
 } msg_hdr_t;
 
+#define NEW_STACK_DEMO_MSG(demo_msg_id, msg_type, var) \
+	char msg_placeholder_##var[sizeof(msg_hdr_t) + sizeof(msg_type)]; \
+	memset(&msg_placeholder_##var, 0, sizeof(msg_placeholder_##var)); \
+	msg_hdr_t *hdr_##var = (msg_hdr_t*)msg_placeholder_##var; \
+	hdr_##var->msg_id = demo_msg_id; \
+	msg_type *var = (msg_type*)(hdr_##var + 1);
+
+#define DEMO_MSG_SIZE(var) (sizeof(msg_hdr_t) + sizeof(var))
+
+#define DEMO_SESSION_SEND_MSG(session, var) \
+	session->sendMessage(hdr_##var, sizeof(msg_hdr_t) + sizeof(*var));
+
 NS_MUGGLE_DEMO_END
 
 #pragma pack(pop)

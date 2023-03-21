@@ -1,4 +1,5 @@
 #include "server_peer.h"
+#include "demo/msg.h"
 #include "muggle/cpp/muggle_cpp.h"
 
 #define CALLBACK_IMPL(name, msg_type) \
@@ -10,7 +11,7 @@ void ServerPeer::s_##name(Session *session, void *msg) \
 		LOG_ERROR("failed get peer"); \
 		return; \
 	} \
-	peer->name((msg_type*)msg); \
+	peer->name((msg_type*)((msg_hdr_t*)msg + 1)); \
 } \
 \
 void ServerPeer::name(msg_type *msg)
@@ -48,16 +49,11 @@ CALLBACK_IMPL(onPing, demo_msg_ping_t)
 
 	session_->updateActiveTime(time(NULL));
 
-	struct timespec ts;
-	timespec_get(&ts, TIME_UTC);
-
 	// rsp
-	demo_msg_pong_t rsp;
-	memset(&rsp, 0, sizeof(rsp));
-	rsp.hdr.msg_id = DEMO_MSG_ID_PONG;
-	rsp.sec = (uint64_t)ts.tv_sec;
-	rsp.nsec = (uint32_t)ts.tv_nsec;
-	session_->sendMessage(&rsp, sizeof(rsp));
+	NEW_STACK_DEMO_MSG(DEMO_MSG_ID_PONG, demo_msg_pong_t, rsp);
+	rsp->sec = (uint64_t)msg->sec;
+	rsp->nsec = (uint32_t)msg->nsec;
+	DEMO_SESSION_SEND_MSG(session_, rsp);
 }
 
 CALLBACK_IMPL(onLogin, demo_msg_req_login_t)
@@ -81,12 +77,10 @@ CALLBACK_IMPL(onLogin, demo_msg_req_login_t)
 	is_logined_ = true;
 
 	// rsp
-	demo_msg_rsp_login_t rsp;
-	memset(&rsp, 0, sizeof(rsp));
-	rsp.hdr.msg_id = DEMO_MSG_ID_RSP_LOGIN;
-	rsp.req_id = msg->req_id;
-	rsp.login_result = 1;
-	session_->sendMessage(&rsp, sizeof(rsp));
+	NEW_STACK_DEMO_MSG(DEMO_MSG_ID_RSP_LOGIN, demo_msg_rsp_login_t, rsp);
+	rsp->req_id = msg->req_id;
+	rsp->login_result = 1;
+	DEMO_SESSION_SEND_MSG(session_, rsp);
 }
 
 CALLBACK_IMPL(onReqSum, demo_msg_req_sum_t)
@@ -114,10 +108,8 @@ CALLBACK_IMPL(onReqSum, demo_msg_req_sum_t)
 	}
 
 	// rsp
-	demo_msg_rsp_sum_t rsp;
-	memset(&rsp, 0, sizeof(rsp));
-	rsp.hdr.msg_id = DEMO_MSG_ID_RSP_SUM;
-	rsp.req_id = msg->req_id;
-	rsp.sum = sum;
-	session_->sendMessage(&rsp, sizeof(rsp));
+	NEW_STACK_DEMO_MSG(DEMO_MSG_ID_RSP_SUM, demo_msg_rsp_sum_t, rsp);
+	rsp->req_id = msg->req_id;
+	rsp->sum = sum;
+	DEMO_SESSION_SEND_MSG(session_, rsp);
 }
