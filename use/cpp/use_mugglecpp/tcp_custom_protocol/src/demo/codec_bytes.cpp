@@ -27,7 +27,7 @@ bool CodecBytes::encode(
 	memcpy(hdr->magic, s_magic, 4);
 	hdr->flags[MUGGLE_DEMO_FLAG_ENDIAN] = s_endianess;
 	hdr->flags[MUGGLE_DEMO_FLAG_VER] = s_protocol_ver;
-	hdr->flags[MUGGLE_DEMO_FLAG_COMPRESSED] = s_endianess;
+	hdr->flags[MUGGLE_DEMO_FLAG_COMPRESSED] = 0;
 	hdr->payload_len = datalen - sizeof(msg_hdr_t);
 
 	Dispatcher *dispatcher = session->getDispatcher();
@@ -94,6 +94,13 @@ bool CodecBytes::decode(
 		{
 			// readable bytes less than sizeof message header
 			break;
+		}
+
+		// check magic word
+		if (*(uint32_t*)msg_header.magic != *(uint32_t*)s_magic)
+		{
+			LOG_ERROR("invalid magic word: addr=%s", session->getAddr());
+			return false;
 		}
 
 		// check endianness
