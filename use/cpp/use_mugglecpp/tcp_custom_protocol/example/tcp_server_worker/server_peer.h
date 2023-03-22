@@ -7,11 +7,6 @@
 USING_NS_MUGGLE;
 USING_NS_MUGGLE_DEMO;
 
-#define CALLBACK_DECLARE(name, msg_type) \
-static void s_##name(Session *session, void *msg); \
-void name(msg_type *msg)
-
-
 class ServerPeer
 {
 public:
@@ -26,9 +21,9 @@ public:
 	const std::string& getUserID();
 
 	//////////////// callbacks ////////////////
-	CALLBACK_DECLARE(onPing, demo_msg_ping_t);
-	CALLBACK_DECLARE(onLogin, demo_msg_req_login_t);
-	CALLBACK_DECLARE(onReqSum, demo_msg_req_sum_t);
+	void onPing(demo_msg_ping_t *msg);
+	void onLogin(demo_msg_req_login_t *msg);
+	void onReqSum(demo_msg_req_sum_t *msg);
 
 private:
 	Session *session_;

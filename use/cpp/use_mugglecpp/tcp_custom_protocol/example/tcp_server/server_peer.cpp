@@ -2,20 +2,6 @@
 #include "demo/msg.h"
 #include "muggle/cpp/muggle_cpp.h"
 
-#define CALLBACK_IMPL(name, msg_type) \
-void ServerPeer::s_##name(Session *session, void *msg) \
-{ \
-	ServerPeer *peer = (ServerPeer*)session->getUserData(); \
-	if (peer == nullptr) \
-	{ \
-		LOG_ERROR("failed get peer"); \
-		return; \
-	} \
-	peer->name((msg_type*)((msg_hdr_t*)msg + 1)); \
-} \
-\
-void ServerPeer::name(msg_type *msg)
-
 //////////////// constructor & destructor ////////////////
 ServerPeer::ServerPeer()
 	: session_(nullptr)
@@ -41,7 +27,7 @@ const std::string& ServerPeer::getUserID()
 }
 
 //////////////// callbacks ////////////////
-CALLBACK_IMPL(onPing, demo_msg_ping_t)
+void ServerPeer::onPing(demo_msg_ping_t *msg)
 {
 	LOG_INFO("recv req ping: addr=%s, sec=%llu, nsec=%09lu",
 		session_->getAddr(),
@@ -55,8 +41,7 @@ CALLBACK_IMPL(onPing, demo_msg_ping_t)
 	rsp->nsec = (uint32_t)msg->nsec;
 	DEMO_SESSION_SEND_MSG(session_, rsp);
 }
-
-CALLBACK_IMPL(onLogin, demo_msg_req_login_t)
+void ServerPeer::onLogin(demo_msg_req_login_t *msg)
 {
 	if (strlen(msg->user_id) >= sizeof(msg->user_id))
 	{
@@ -82,8 +67,7 @@ CALLBACK_IMPL(onLogin, demo_msg_req_login_t)
 	rsp->login_result = 1;
 	DEMO_SESSION_SEND_MSG(session_, rsp);
 }
-
-CALLBACK_IMPL(onReqSum, demo_msg_req_sum_t)
+void ServerPeer::onReqSum(demo_msg_req_sum_t *msg)
 {
 	if (msg->arr_len > 16)
 	{

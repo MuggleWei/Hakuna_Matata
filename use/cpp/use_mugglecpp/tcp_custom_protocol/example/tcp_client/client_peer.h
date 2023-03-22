@@ -7,10 +7,6 @@
 USING_NS_MUGGLE;
 USING_NS_MUGGLE_DEMO;
 
-#define CALLBACK_DECLARE(name, msg_type) \
-static void s_##name(Session *session, void *msg); \
-void name(msg_type *msg)
-
 class ClientPeer
 {
 public:
@@ -25,9 +21,9 @@ public:
 	void onTimer();
 
 	//////////////// callbacks ////////////////
-	CALLBACK_DECLARE(onPong, demo_msg_pong_t);
-	CALLBACK_DECLARE(onRspLogin, demo_msg_rsp_login_t);
-	CALLBACK_DECLARE(onRspSum, demo_msg_rsp_sum_t);
+	void onPong(demo_msg_pong_t *msg);
+	void onRspLogin(demo_msg_rsp_login_t *msg);
+	void onRspSum(demo_msg_rsp_sum_t *msg);
 
 private:
 	Session *session_;

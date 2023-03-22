@@ -2,20 +2,6 @@
 #include "muggle/cpp/muggle_cpp.h"
 #include "demo_msg.h"
 
-#define CALLBACK_IMPL(name, msg_type) \
-void ClientPeer::s_##name(Session *session, void *msg) \
-{ \
-	ClientPeer *peer = (ClientPeer*)session->getUserData(); \
-	if (peer == nullptr) \
-	{ \
-		LOG_ERROR("failed get peer"); \
-		return; \
-	} \
-	peer->name((msg_type*)((msg_hdr_t*)msg + 1)); \
-} \
-\
-void ClientPeer::name(msg_type *msg)
-
 //////////////// constructor & destructor ////////////////
 ClientPeer::ClientPeer()
 	: session_(nullptr)
@@ -100,7 +86,7 @@ void ClientPeer::onTimer()
 }
 
 //////////////// callbacks ////////////////
-CALLBACK_IMPL(onPong, demo_msg_pong_t)
+void ClientPeer::onPong(demo_msg_pong_t *msg)
 {
 	LOG_INFO("recv rsp pong: addr=%s, sec=%llu, nsec=%09lu",
 		session_->getAddr(),
@@ -108,7 +94,7 @@ CALLBACK_IMPL(onPong, demo_msg_pong_t)
 
 	session_->updateActiveTime(time(NULL));
 }
-CALLBACK_IMPL(onRspLogin, demo_msg_rsp_login_t)
+void ClientPeer::onRspLogin(demo_msg_rsp_login_t *msg)
 {
 	if (!msg->login_result)
 	{
@@ -120,7 +106,7 @@ CALLBACK_IMPL(onRspLogin, demo_msg_rsp_login_t)
 
 	LOG_INFO("recv rsp login success");
 }
-CALLBACK_IMPL(onRspSum, demo_msg_rsp_sum_t)
+void ClientPeer::onRspSum(demo_msg_rsp_sum_t *msg)
 {
 	LOG_INFO(
 		"recv rsp sum: "

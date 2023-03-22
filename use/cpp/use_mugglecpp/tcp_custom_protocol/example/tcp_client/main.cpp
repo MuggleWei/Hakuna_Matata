@@ -5,6 +5,21 @@
 #include "tcp_client_handle.h"
 #include "client_peer.h"
 
+#define CALLBACK_IMPL(func, msg_type) \
+	static void s_##func(Session *session, void *msg) \
+	{ \
+		ClientPeer *peer = (ClientPeer*)session->getUserData(); \
+		if (peer == nullptr) \
+		{ \
+			LOG_ERROR("failed get peer"); \
+			return; \
+		} \
+		peer->func((msg_type*)((msg_hdr_t*)msg + 1)); \
+	}
+
+#define DISPATCHER_REGISTER(msg_id, func) \
+	dispatcher.registerCallback(msg_id, s_##func);
+
 typedef struct sys_args
 {
 	char host[64];
@@ -60,8 +75,9 @@ void parse_sys_args(int argc, char **argv, sys_args_t *args)
 		args->host, args->port);
 }
 
-#define DISPATCHER_REGISTER(msg_id, func) \
-	dispatcher.registerCallback(msg_id, ClientPeer::s_##func);
+CALLBACK_IMPL(onPong, demo_msg_pong_t);
+CALLBACK_IMPL(onRspLogin, demo_msg_rsp_login_t);
+CALLBACK_IMPL(onRspSum, demo_msg_rsp_sum_t);
 
 void initDispatcher(Dispatcher &dispatcher)
 {
