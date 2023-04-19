@@ -34,6 +34,10 @@ nohup.out
 # docker volume
 docker_volume/
 
+# hpb
+_hpb/
+_artifacts/
+
 # Intellij
 .idea/
 **/java/**/.idea/
