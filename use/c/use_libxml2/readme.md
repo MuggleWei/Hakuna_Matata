@@ -1,4 +1,5 @@
 # 使用 libxml2
+本工程中的所有例子均来源于 https://gnome.pages.gitlab.gnome.org/libxml2/tutorial/index.html
 
 ## 编译
 进入工程根目录, 执行
