@@ -55,7 +55,7 @@ int main(int argc, char *argv[])
 
 	if (argc <= 1)
 	{
-		LOG_ERROR("Usage: %s filepath", argv[0]);
+		LOG_ERROR("Usage: %s <xml filepath>", argv[0]);
 		exit(1);
 	}
 
