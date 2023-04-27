@@ -1,0 +1,31 @@
+name: mugglec
+variables:
+  - build_type: release
+  - mugglec_tag: v1.0.2
+source:
+  maintainer: mugglewei
+  name: mugglec
+jobs:
+  build:
+    steps:
+      - run: >
+          cmake \
+            -S ${HPKG_SOURCE_PATH} \
+            -B ${HPKG_BUILD_DIR} \
+            -DCMAKE_BUILD_TYPE=${build_type} \
+            -DBUILD_SHARED_LIBS=ON \
+            -DCMAKE_INSTALL_PREFIX=${HPKG_OUTPUT_DIR};
+          cmake --build ${HPKG_BUILD_DIR};
+          cmake --build ${HPKG_BUILD_DIR} --target install;
+  package:
+    needs: [build]
+    steps:
+      - run: >
+          cd ${HPKG_TASK_DIR};
+          hpkg pack;
+  upload:
+    needs: [package]
+    steps:
+      - name: upload
+        run: >
+          hpkg push;

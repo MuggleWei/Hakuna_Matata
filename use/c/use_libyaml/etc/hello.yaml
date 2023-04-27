@@ -1,0 +1,20 @@
+name: Hello World
+path: ~/hello_world
+
+author: mugglewei
+email: mugglewei@gmail.com
+
+chapters:
+  - title: Chapter1
+    md: content/chapter1
+  - title: Chapter2
+    md: content/chapter2
+  - title: Chapter3
+    md: content/chapter3
+
+root:
+  usr:
+    local:
+      lib:
+        - libyaml.so
+        - hello.so
