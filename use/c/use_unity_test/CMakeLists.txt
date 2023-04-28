@@ -43,6 +43,63 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 
 ################################
+# coverage
+################################
+
+if (BUILD_COVERAGE)
+	if (${CMAKE_C_COMPILER_ID} MATCHES Clang)
+		set(COVERAGE_COMPILER_FLAGS "-fprofile-instr-generate -fcoverage-mapping")
+
+		find_program(LLVM_PROFDATA llvm-profdata)
+		find_program(LLVM_COV_PATH llvm-cov)
+		if (LLVM_PROFDATA AND LLVM_COV_PATH)
+			set(COV_OUT_NAME foo_coverage)
+			add_custom_target(
+				coverage
+				COMMAND echo "run converage"
+				COMMAND rm -rf ${COV_OUT_NAME}
+				COMMAND rm -rf foo-*profraw
+				COMMAND rm -rf foo.profdata
+				COMMAND LLVM_PROFILE_FILE=foo-%m.profraw make test
+				COMMAND ${LLVM_PROFDATA} merge foo-*.profraw -o foo.profdata
+				COMMAND ${LLVM_COV_PATH} report ./lib/libfoo.* -instr-profile=foo.profdata
+				COMMAND ${LLVM_COV_PATH} show ./lib/libfoo.* -instr-profile=foo.profdata -output-dir=${COV_OUT_NAME} -format=html
+				)
+		else()
+			message(SEND_ERROR "failed generate coverage report, llvm-profdata or llvm-cov not found")
+		endif()
+	elseif(${CMAKE_C_COMPILER_ID} STREQUAL GNU)
+		set(COVERAGE_COMPILER_FLAGS "--coverage")
+
+		find_program(LCOV_PATH lcov)
+		find_program(GENHTML_PATH genhtml)
+		if (LCOV_PATH AND GENHTML_PATH)
+			set(COV_OUT_NAME foo_coverage)
+			set(COV_DIR ./CMakeFiles/foo.dir)
+			add_custom_target(
+				coverage
+				COMMAND echo "run converage"
+				COMMAND rm -rf ${COV_OUT_NAME}.info ${COV_OUT_NAME}
+				COMMAND ${LCOV_PATH} --zerocounters -d ${COV_DIR}
+				COMMAND rm -rf ${COV_OUT_NAME} ${COV_OUT_NAME}.info
+				COMMAND make test
+				COMMAND ${LCOV_PATH} -d ${COV_DIR} -c -o ${COV_OUT_NAME}.info
+				COMMAND ${GENHTML_PATH} ${COV_OUT_NAME}.info -o ${COV_OUT_NAME}
+				)
+		else()
+			message(SEND_ERROR "failed generate coverage report, lcov or genhtml not found")
+		endif()
+	else()
+		message("Failed add coverage flags")
+		set(COVERAGE_COMPILER_FLAGS "")
+	endif()
+
+	message("add coverage flags: ${COVERAGE_COMPILER_FLAGS}")
+	set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${COVERAGE_COMPILER_FLAGS}")
+	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${COVERAGE_COMPILER_FLAGS}")
+endif()
+
+################################
 # foo
 ################################
 

@@ -11,9 +11,11 @@ else
 fi
 
 build_share_libs=ON
+coverage=ON
 
 echo "Build Type: $BUILD_TYPE"
 echo "Build Shared Lib: $build_shared_libs"
+echo "Build Coverage: $coverage"
 
 # directories
 origin_dir="$(dirname "$(readlink -f "$0")")"
@@ -78,4 +80,5 @@ cmake \
 	-DBUILD_SHARED_LIBS=$build_share_libs \
 	-DCMAKE_PREFIX_PATH="$dep_pkg_dir;$test_dep_pkg_dir" \
 	-DCMAKE_INSTALL_PREFIX=$pkg_dir \
-	-DBUILD_TESTING=ON
+	-DBUILD_TESTING=ON \
+	-DBUILD_COVERAGE=$coverage
