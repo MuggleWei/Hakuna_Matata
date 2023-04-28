@@ -4,7 +4,7 @@
 ## 编译
 进入工程根目录, 执行
 ```
-.bootstrap.sh
+.bootstrap.sh [debug|release]
 cd build
 make
 ```
