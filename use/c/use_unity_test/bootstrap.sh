@@ -3,15 +3,21 @@
 # handle argv
 if [ "$#" -lt 1 ]; then
 	echo "[ERROR] bootstrap without build type"
-	echo "[ERROR] Usage: bootstrap.sh <Debug|Release>"
+	echo "[ERROR] Usage: bootstrap.sh <Debug|Release|Coverage>"
 	exit 1
 else
 	# to lowercase
 	BUILD_TYPE=$(echo $1 | tr '[:upper:]' '[:lower:]')
 fi
 
+if [ "$BUILD_TYPE" = "coverage" ]; then
+	BUILD_TYPE=release
+	coverage=ON
+else
+	coverage=OFF
+fi
+
 build_share_libs=ON
-coverage=ON
 
 echo "Build Type: $BUILD_TYPE"
 echo "Build Shared Lib: $build_shared_libs"
