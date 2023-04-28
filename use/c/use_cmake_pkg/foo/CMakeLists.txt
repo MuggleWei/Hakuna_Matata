@@ -1,10 +1,9 @@
 cmake_minimum_required(VERSION 3.18.6)
 project(foo)
 
-set(FOO_VERSION "1.0.0")
-set(FOO_VER_MAJOR "1")
-set(FOO_VER_MINOR "0")
-set(FOO_VER_PATCH "0")
+# print compiler
+message("-- use c compiler ${CMAKE_C_COMPILER}")
+message("-- use c++ compiler ${CMAKE_CXX_COMPILER}")
 
 # set compile parameter
 if (${CMAKE_C_COMPILER_ID} STREQUAL GNU)
@@ -39,73 +38,104 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 # set use folder in vs
 set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 
-# set shared or static, and configure file
+################################
+# foo
+################################
+
+# version
+file(STRINGS "version.txt" foo_version)
+string(REPLACE "-" ";" foo_semver_ext ${foo_version})
+list(GET foo_semver_ext 0 foo_semver)
+string(REPLACE "." ";" foo_semver_list ${foo_semver})
+
+list(GET foo_semver_list 0 FOO_VERSION_MAJOR)
+list(GET foo_semver_list 1 FOO_VERSION_MINOR)
+list(GET foo_semver_list 2 FOO_VERSION_PATCH)
+set(FOO_VERSION "${FOO_VERSION_MAJOR}.${FOO_VERSION_MINOR}.${FOO_VERSION_PATCH}")
+
+# configure
+set(foo_src_dir ${CMAKE_CURRENT_LIST_DIR}/foo)
+set(foo_gen_dir ${CMAKE_CURRENT_BINARY_DIR}/generated)
 if (BUILD_SHARED_LIBS)
 	set(FOO_USE_DLL ON)
+	set(FOO_LIB_TYPE SHARED)
 else()
 	set(FOO_USE_DLL OFF)
+	set(FOO_LIB_TYPE STATIC)
 endif()
 
-set(generated_dir ${CMAKE_CURRENT_BINARY_DIR}/generated)
 configure_file(
 	${CMAKE_CURRENT_LIST_DIR}/foo/foo_config.h.in
-	${generated_dir}/foo/foo_config.h)
+	${foo_gen_dir}/foo/foo_config.h)
 
 # add library
-add_library(foo
-	${CMAKE_CURRENT_LIST_DIR}/foo/foo.c)
+FILE(GLOB_RECURSE foo_src_c "${foo_src_dir}/*.c")
+FILE(GLOB_RECURSE foo_src_h "${foo_src_dir}/*.h")
+FILE(GLOB_RECURSE foo_gen_h "${foo_gen_dir}/*.h")
+add_library(foo ${FOO_LIB_TYPE}
+	${foo_src_c}
+	${foo_src_h}
+	${foo_gen_h})
 target_include_directories(foo PUBLIC 
 	$<BUILD_INTERFACE:${CMAKE_CURRENT_LIST_DIR}>
-	$<BUILD_INTERFACE:${generated_dir}>
+	$<BUILD_INTERFACE:${foo_gen_dir}>
 	$<INSTALL_INTERFACE:include>)
+
 target_compile_definitions(foo PRIVATE FOO_EXPORTS)
 set_target_properties(foo PROPERTIES
 	LINKER_LANGUAGE C
 	DEBUG_POSTFIX d
 	VERSION ${FOO_VERSION}
-	SOVERSION ${FOO_VER_MAJOR})
+	SOVERSION ${FOO_VERSION_MAJOR})
 
-# install and add export configuration
+# install
+include(GNUInstallDirs)
 install(TARGETS foo
-    DESTINATION lib
-    EXPORT fooTargets)
+	EXPORT fooTargets
+	RUNTIME DESTINATION "${CMAKE_INSTALL_BINDIR}"
+	ARCHIVE DESTINATION "${CMAKE_INSTALL_LIBDIR}"
+	LIBRARY DESTINATION "${CMAKE_INSTALL_LIBDIR}")
+install(DIRECTORY "${foo_src_dir}" "${foo_gen_dir}/foo"
+	DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}"
+	FILES_MATCHING
+	PATTERN "*.h"
+	PATTERN "*.hpp")
+
+# cmake package config
+set(foo_export_dir "${CMAKE_INSTALL_LIBDIR}/cmake/foo")
 install(EXPORT fooTargets
-    FILE fooTargets.cmake
-    DESTINATION lib/cmake/foo)
+	FILE fooTargets.cmake
+	DESTINATION "${foo_export_dir}")
 
 include(CMakePackageConfigHelpers)
-configure_package_config_file(${CMAKE_CURRENT_SOURCE_DIR}/Config.cmake.in
-    "${CMAKE_CURRENT_BINARY_DIR}/fooConfig.cmake"
-    INSTALL_DESTINATION "lib/cmake/foo"
+configure_package_config_file(
+	"${CMAKE_CURRENT_LIST_DIR}/cmake/fooConfig.cmake.in"
+    "${foo_gen_dir}/fooConfig.cmake"
+	INSTALL_DESTINATION "${foo_export_dir}"
     NO_SET_AND_CHECK_MACRO
     NO_CHECK_REQUIRED_COMPONENTS_MACRO)
 write_basic_package_version_file(
-    "${CMAKE_CURRENT_BINARY_DIR}/fooConfigVersion.cmake"
-    VERSION ${FOO_VERSION}
-    COMPATIBILITY SameMajorVersion
-)
+    "${foo_gen_dir}/fooConfigVersion.cmake"
+	VERSION ${FOO_VERSION}
+    COMPATIBILITY SameMajorVersion)
 install(FILES
-    "${CMAKE_CURRENT_BINARY_DIR}/fooConfig.cmake"
-    "${CMAKE_CURRENT_BINARY_DIR}/fooConfigVersion.cmake"
-    DESTINATION lib/cmake/foo
-)
-install(FILES "${CMAKE_CURRENT_LIST_DIR}/foo/foo.h" DESTINATION include/foo)
-install(FILES "${generated_dir}/foo/foo_config.h" DESTINATION include/foo)
+	"${foo_gen_dir}/fooConfig.cmake"
+	"${foo_gen_dir}/fooConfigVersion.cmake"
+	DESTINATION ${foo_export_dir})
+
+# pkgconfig
+configure_file(
+	"${CMAKE_CURRENT_LIST_DIR}/cmake/foo.pc.in"
+	"${foo_gen_dir}/foo.pc" @ONLY)
+install(FILES
+	"${foo_gen_dir}/foo.pc"
+	DESTINATION "${CMAKE_INSTALL_LIBDIR}/pkgconfig")
 
 # cpack
 include(InstallRequiredSystemLibraries)
 set(CPACK_RESOURCE_FILE_LICENSE "${CMAKE_CURRENT_LIST_DIR}/License.txt")
-set(CPACK_PACKAGE_VERSION_MAJOR ${FOO_VER_MAJOR})
-set(CPACK_PACKAGE_VERSION_MINOR ${FOO_VER_MINOR})
-set(CPACK_PACKAGE_VERSION_PATCH ${FOO_VER_PATCH})
+set(CPACK_PACKAGE_VERSION_MAJOR ${FOO_VERSION_MAJOR})
+set(CPACK_PACKAGE_VERSION_MINOR ${FOO_VERSION_MINOR})
+set(CPACK_PACKAGE_VERSION_PATCH ${FOO_VERSION_PATCH})
 set(CPACK_SOURCE_GENERATOR "TGZ")
 include(CPack)
-
-# pkg-config
-include(GNUInstallDirs)
-configure_file(
-	"${CMAKE_CURRENT_LIST_DIR}/foo.pc.in"
-	"${generated_dir}/foo.pc" @ONLY)
-install(FILES
-	"${generated_dir}/foo.pc"
-	DESTINATION lib/pkgconfig)

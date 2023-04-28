@@ -8,3 +8,6 @@
 
 ## baz
 [baz](./baz/CMakeLists.txt) 使用 `pkg_check_modules` 来发现 `foo` 并使用
+
+## bob
+[bob](./bob/meson.build) 使用 `meson` 来构建工程, 发现 `foo` 并使用
