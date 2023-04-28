@@ -1,0 +1,8 @@
+#ifndef FOO_CONFIG_H_
+#define FOO_CONFIG_H_
+
+#cmakedefine FOO_VERSION "@FOO_VERSION@"
+
+#cmakedefine01 FOO_USE_DLL
+
+#endif // !FOO_CONFIG_H_
