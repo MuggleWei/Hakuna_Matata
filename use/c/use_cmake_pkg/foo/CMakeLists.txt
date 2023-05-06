@@ -54,7 +54,7 @@ list(GET foo_semver_list 2 FOO_VERSION_PATCH)
 set(FOO_VERSION "${FOO_VERSION_MAJOR}.${FOO_VERSION_MINOR}.${FOO_VERSION_PATCH}")
 
 # configure
-set(foo_src_dir ${CMAKE_CURRENT_LIST_DIR}/foo)
+set(foo_src_dir ${CMAKE_CURRENT_LIST_DIR})
 set(foo_gen_dir ${CMAKE_CURRENT_BINARY_DIR}/generated)
 if (BUILD_SHARED_LIBS)
 	set(FOO_USE_DLL ON)
@@ -65,13 +65,13 @@ else()
 endif()
 
 configure_file(
-	${CMAKE_CURRENT_LIST_DIR}/foo/foo_config.h.in
+	${foo_src_dir}/foo/foo_config.h.in
 	${foo_gen_dir}/foo/foo_config.h)
 
 # add library
-FILE(GLOB_RECURSE foo_src_c "${foo_src_dir}/*.c")
-FILE(GLOB_RECURSE foo_src_h "${foo_src_dir}/*.h")
-FILE(GLOB_RECURSE foo_gen_h "${foo_gen_dir}/*.h")
+FILE(GLOB_RECURSE foo_src_c "${foo_src_dir}/foo/*.c")
+FILE(GLOB_RECURSE foo_src_h "${foo_src_dir}/foo/*.h")
+FILE(GLOB_RECURSE foo_gen_h "${foo_gen_dir}/foo/*.h")
 add_library(foo ${FOO_LIB_TYPE}
 	${foo_src_c}
 	${foo_src_h}
@@ -95,7 +95,7 @@ install(TARGETS foo
 	RUNTIME DESTINATION "${CMAKE_INSTALL_BINDIR}"
 	ARCHIVE DESTINATION "${CMAKE_INSTALL_LIBDIR}"
 	LIBRARY DESTINATION "${CMAKE_INSTALL_LIBDIR}")
-install(DIRECTORY "${foo_src_dir}" "${foo_gen_dir}/foo"
+install(DIRECTORY "${foo_src_dir}/foo" "${foo_gen_dir}/foo"
 	DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}"
 	FILES_MATCHING
 	PATTERN "*.h"
