@@ -1,4 +1,4 @@
-site_name: MkDocs
+site_name: MkDocs例子
 theme:
   name: material
   features:
@@ -6,7 +6,7 @@ theme:
     - content.code.copy
 nav:
   - index.md
-  - c01.md
+  - test.md
 
 extra_javascript:
   - javascripts/mathjax@2.7.5/MathJax.min.js
