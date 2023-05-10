@@ -1,0 +1,7 @@
+<Hello>
+	<items>
+		<item id="1" hide="false">foo</item>
+		<item id="2" hide="false">bar</item>
+		<item id="3" hide="false">baz</item>
+	</items>
+</Hello>
