@@ -12,70 +12,48 @@ fi
 
 echo "Build Type: $BUILD_TYPE"
 
-# functions
-download_src() {
-	local name=$1
-	local git_repo=$2
-	local tag=$3
-	local src_dir=$4
-
-	if [ -d $src_dir ]; then
-		echo "$name source directory already exists"
-	else
-		echo "$name source directory not exists, clone"
-		echo "name=$name"
-		echo "git_repo=$git_repo"
-		echo "tag=$tag"
-		echo "src_dir=$src_dir"
-
-		git clone --branch $tag --depth 1 $git_repo $src_dir
-	fi
-}
+# dependencies
+mugglec_repo="https://github.com/MuggleWei/mugglec.git"
+mugglec_ver="v1.2.2"
 
 # directories
 origin_dir="$(dirname "$(readlink -f "$0")")"
-
 build_dir=$origin_dir/build
-pkg_dir=$build_dir/usr
+pkg_dir=$build_dir/pkg
 dep_dir=$origin_dir/_deps
 
-if [ ! -d $build_dir ]; then
-	echo "create build directory"
-	mkdir -p $build_dir
+if [ -d $dep_dir ]; then
+	rm -rf $dep_dir
 fi
+mkdir -p $dep_dir
 
-if [ ! -d $dep_dir ]; then
-	echo "create dependency directory"
-	mkdir -p $dep_dir
+if [ -d $build_dir ]; then
+	rm -rf $build_dir
 fi
+mkdir -p $build_dir
 
 echo "------------------------"
 echo "build mugglec"
 
 cd $dep_dir
 
-mugglec_git=https://github.com/MuggleWei/mugglec.git
-mugglec_tag=v1.0.0-alpha.7
-mugglec_name=mugglec-$mugglec_tag
-mugglec_src_dir=$dep_dir/$mugglec_name
-mugglec_build_dir=$build_dir/_deps/mugglec
-
-download_src $mugglec_name $mugglec_git $mugglec_tag $mugglec_src_dir
-
-if [ ! -d $mugglec_build_dir ]; then
-	mkdir -p $mugglec_build_dir
+git clone --branch $mugglec_ver --depth 1 $mugglec_repo mugglec
+status=$?
+if [ $status -eq 0 ]; then
+	echo "Success download mugglec"
+else
+	echo "Failed download mugglec"
+	exit 1
 fi
-cd $mugglec_build_dir
+
+mugglec_src_dir=$dep_dir/mugglec
+mugglec_build_dir=$dep_dir/build/mugglec
+
+mkdir -p $mugglec_build_dir
 
 cmake \
 	-S $mugglec_src_dir -B $mugglec_build_dir \
 	-DCMAKE_BUILD_TYPE=$BUILD_TYPE \
-	-DMUGGLE_BUILD_SHARED_LIB=ON \
-	-DMUGGLE_BUILD_STATIC_PIC=ON \
-	-DMUGGLE_BUILD_EXAMPLE=OFF \
-	-DMUGGLE_BUILD_TESTING=OFF \
-	-DMUGGLE_BUILD_BENCHMARK=OFF \
-	-DMUGGLE_BUILD_TRACE=OFF \
 	-DCMAKE_INSTALL_PREFIX=$pkg_dir
 cmake --build $mugglec_build_dir
 cmake --build $mugglec_build_dir --target install

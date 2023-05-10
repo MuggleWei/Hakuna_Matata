@@ -1,5 +1,12 @@
-cmake_minimum_required (VERSION 3.0.2)
+cmake_minimum_required (VERSION 3.18.6)
 project(hello)
+
+################################
+# general config
+################################
+
+message("-- use c compiler ${CMAKE_C_COMPILER}")
+message("-- use c++ compiler ${CMAKE_CXX_COMPILER}")
 
 # set compile parameter
 if (${CMAKE_C_COMPILER_ID} STREQUAL GNU)
@@ -16,22 +23,38 @@ endif()
 set(CMAKE_C_STANDARD 11)
 set(CMAKE_C_STANDARD_REQUIRED ON)
 
-# for vim plugin - YCM
-if (NOT ${CMAKE_CXX_COMPILER_ID} STREQUAL MSVC)
-	set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
-endif()
+message("-- c compiler support features: ")
+foreach(feature ${CMAKE_C_COMPILE_FEATURES})
+	message("support feature: ${feature}")
+endforeach()
 
 # set output directory
 set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 
+# for vim plugin - YCM
+if (NOT ${CMAKE_CXX_COMPILER_ID} STREQUAL MSVC)
+	set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
+endif()
+
+# set use folder in vs
+set_property(GLOBAL PROPERTY USE_FOLDERS ON)
+
+################################
+# deps
+################################
+
 find_package(mugglec)
 if (NOT mugglec_FOUND)
 	message(FATAL_ERROR "Failed find mugglec")
 endif()
+message("-- Found mugglec: ${mugglec_DIR}")
 
-# function
+################################
+# functions
+################################
+
 function(add_example name folder)
 	message("add example ${name} ${folder}")
 	
@@ -68,14 +91,16 @@ function(add_example name folder)
 	target_compile_definitions(${name} PUBLIC MUGGLE_HOLD_LOG_MACRO)
 
 	install(TARGETS ${name} RUNTIME DESTINATION bin)
-
-	# cpack
-	include(InstallRequiredSystemLibraries)
-	set(CPACK_PACKAGE_VERSION_MAJOR ${MUGGLE_C_VER_MAJOR})
-	set(CPACK_PACKAGE_VERSION_MINOR ${MUGGLE_C_VER_MINOR})
-	set(CPACK_PACKAGE_VERSION_PATCH ${MUGGLE_C_VER_PATCH})
-	include(CPack)
 endfunction()
 
+################################
 # examples
-add_example(hello ${CMAKE_CURRENT_LIST_DIR}/example/hello)
+################################
+
+set(example_root_dir ${CMAKE_CURRENT_LIST_DIR}/example)
+FILE(GLOB subdirs RELATIVE ${example_root_dir} ${example_root_dir}/*)
+FOREACH(subdir ${subdirs})
+	IF(IS_DIRECTORY ${example_root_dir}/${subdir})
+		add_example(${subdir} ${example_root_dir}/${subdir})
+	ENDIF()
+ENDFOREACH()

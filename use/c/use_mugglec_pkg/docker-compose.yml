@@ -7,7 +7,7 @@ services:
       args:
         OS: alpine
         OS_VER: 3.17
-        MUGGLEC_VER: 1.0.0-alpha.7
+        MUGGLEC_VER: 1.2.2
     image: registry.mugglewei.com/mugglec-hello:1.0.0
     restart: "no"
     volumes:
