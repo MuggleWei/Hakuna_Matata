@@ -1,0 +1,40 @@
+name: mbedtls
+variables:
+  - build_type: release
+  - mbedtls_tag: v3.4.0
+  - mbedtls_url: https://github.com/Mbed-TLS/mbedtls.git
+source:
+  maintainer: Mbed-TLS
+  name: mbedtls
+  tag: ${mbedtls_tag}
+  repo_kind: git
+  repo_url: ${mbedtls_url}
+  git_depth: 1
+jobs:
+  build:
+    steps:
+      - name: build
+        run: >
+          cd ${HPB_TASK_DIR};
+          cmake \
+            -S ${HPB_SOURCE_PATH} \
+            -B ${HPB_BUILD_DIR} \
+            -DCMAKE_BUILD_TYPE=${build_type} \
+            -DUSE_STATIC_MBEDTLS_LIBRARY=OFF \
+            -DUSE_SHARED_MBEDTLS_LIBRARY=ON \
+            -DENABLE_TESTING=OFF \
+            -DCMAKE_INSTALL_PREFIX=${HPB_OUTPUT_DIR};
+          cmake --build ${HPB_BUILD_DIR} --config ${build_type};
+          cmake --build ${HPB_BUILD_DIR} --target install;
+  package:
+    needs: [build]
+    steps:
+      - name: pack
+        run: >
+          hpb pack;
+  upload:
+    needs: [package]
+    steps:
+      - name: upload
+        run: >
+          hpb push;

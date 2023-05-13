@@ -1,0 +1,30 @@
+name: use_mbedtls
+variables:
+  - build_type: release
+  - mbedtls_tag: v3.4.0
+  - mugglec_tag: v1.2.2
+source:
+  maintainer: mugglewei
+  name: use_mbedtls
+  tag: v1.0.0
+deps:
+  - maintainer: Mbed-TLS
+    name: mbedtls
+    tag: ${mbedtls_tag}
+  - maintainer: mugglewei
+    name: mugglec
+    tag: ${mugglec_tag}
+jobs:
+  build:
+    steps:
+      - name: build
+        run: >
+          cmake \
+            -S ${HPB_SOURCE_PATH} \
+            -B ${HPB_BUILD_DIR} \
+            -DCMAKE_BUILD_TYPE=${build_type} \
+            -DBUILD_SHARED_LIBS=ON \
+            -DCMAKE_PREFIX_PATH=${HPB_DEPS_DIR} \
+            -DCMAKE_INSTALL_PREFIX=${HPB_OUTPUT_DIR};
+          cmake --build ${HPB_BUILD_DIR} --config ${build_type};
+          cmake --build ${HPB_BUILD_DIR} --target install;
