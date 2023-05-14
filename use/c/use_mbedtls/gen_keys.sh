@@ -20,4 +20,6 @@ fi
 
 cd $etc_dir
 export LD_LIBRARY_PATH=$mbedtls_dir/lib
-$gen_key type=rsa rsa_keysize=1024 filename=rsa_private.key format=pem
+#$gen_key type=rsa rsa_keysize=2048 filename=private_rsa_2048.key format=pem
+openssl genrsa -out rsa.private 1024
+openssl rsa -in rsa.private -out rsa.public -pubout -outform PEM

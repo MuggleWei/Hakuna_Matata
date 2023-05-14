@@ -111,6 +111,14 @@ endfunction()
 # examples
 ################################
 
+set(example_root_dir ${CMAKE_CURRENT_LIST_DIR}/example)
+FILE(GLOB subdirs RELATIVE ${example_root_dir} ${example_root_dir}/*)
+FOREACH(subdir ${subdirs})
+	IF(IS_DIRECTORY ${example_root_dir}/${subdir})
+		add_example(${subdir} ${example_root_dir}/${subdir})
+	ENDIF()
+ENDFOREACH()
+
 set(example_root_dir ${CMAKE_CURRENT_LIST_DIR}/psa_example)
 FILE(GLOB subdirs RELATIVE ${example_root_dir} ${example_root_dir}/*)
 FOREACH(subdir ${subdirs})
