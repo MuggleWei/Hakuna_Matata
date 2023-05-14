@@ -158,8 +158,11 @@ int main(int argc, char *argv[])
 			"  Use Public Key to encrypt and private key to decrypt\n"
 			"  Before run example, use gen_keys.sh to generate key pair\n"
 			"e.g.\n"
-			"%s enc ./etc/rsa.public hello\n"
-			"%s dec ./etc/rsa.private ${hex format ciphertext}\n",
+			"  %s enc ./etc/rsa.public hello\n"
+			"  <=> [OpenSSL 3]: echo hello | openssl pkeyutl -encrypt -pubin -inkey ./etc/rsa.public | hexdump -e '256/1 \"%%02x\" \"\\n\"'\n"
+			"  <=> [OpenSSL 1]: echo hello | openssl rsautl -encrypt -pubin -inkey ./etc/rsa.public | hexdump -e '256/1 \"%%02x\" \"\\n\"'\n"
+			"\n"
+			"  %s dec ./etc/rsa.private ${hex format ciphertext}\n",
 			argv[0], argv[0], argv[0]);
 		exit(EXIT_FAILURE);
 	}
