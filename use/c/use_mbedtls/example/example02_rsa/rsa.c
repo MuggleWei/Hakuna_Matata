@@ -162,7 +162,10 @@ int main(int argc, char *argv[])
 			"  <=> [OpenSSL 3]: echo hello | openssl pkeyutl -encrypt -pubin -inkey ./etc/rsa.public | hexdump -e '256/1 \"%%02x\" \"\\n\"'\n"
 			"  <=> [OpenSSL 1]: echo hello | openssl rsautl -encrypt -pubin -inkey ./etc/rsa.public | hexdump -e '256/1 \"%%02x\" \"\\n\"'\n"
 			"\n"
-			"  %s dec ./etc/rsa.private ${hex format ciphertext}\n",
+			"  %s dec ./etc/rsa.private ${hex format ciphertext}\n"
+			"  <=> echo -n ${hex format ciphertext} > ciphertext.txt\n"
+			"      xxd -r -p ciphertext.txt ciphertext.bin\n"
+			"      openssl pkeyutl -decrypt -in ciphertext.bin -inkey ./etc/rsa.private\n",
 			argv[0], argv[0], argv[0]);
 		exit(EXIT_FAILURE);
 	}
