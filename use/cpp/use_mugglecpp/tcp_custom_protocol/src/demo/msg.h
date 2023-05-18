@@ -26,7 +26,7 @@ typedef struct msg_header
 
 #define NEW_STACK_DEMO_MSG(demo_msg_id, msg_type, var) \
 	char msg_placeholder_##var[sizeof(msg_hdr_t) + sizeof(msg_type)]; \
-	memset(&msg_placeholder_##var, 0, sizeof(msg_placeholder_##var)); \
+	memset(msg_placeholder_##var, 0, sizeof(msg_placeholder_##var)); \
 	msg_hdr_t *hdr_##var = (msg_hdr_t*)msg_placeholder_##var; \
 	hdr_##var->msg_id = demo_msg_id; \
 	msg_type *var = (msg_type*)(hdr_##var + 1);
