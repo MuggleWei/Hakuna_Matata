@@ -38,6 +38,9 @@ docker_volume/
 _hpb/
 _artifacts/
 
+# hpkg
+_hpkg/
+
 # Intellij
 .idea/
 **/java/**/.idea/
