@@ -109,7 +109,7 @@ int main(int argc, char *argv[])
 	exec_sql(con, "CREATE TABLE writers("
 				  "id INT PRIMARY KEY AUTO_INCREMENT, "
 				  "name VARCHAR(255)"
-				  ")");
+				  ") CHARACTER SET utf8mb4 COLLATE utf8mb4_bin");
 	exec_sql(con, "INSERT INTO writers(name) VALUES('Leo Tolstoy')");
 	exec_sql(con, "INSERT INTO writers(name) VALUES('Jack London')");
 	exec_sql(con, "INSERT INTO writers(name) VALUES('Honore de Balzac')");

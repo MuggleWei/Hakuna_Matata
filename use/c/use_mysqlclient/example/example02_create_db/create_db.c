@@ -89,7 +89,9 @@ int main(int argc, char *argv[])
 		exit(EXIT_FAILURE);
 	}
 
-	const char *sqlstr = "CREATE DATABASE IF NOT EXISTS testdb";
+	const char *sqlstr =
+		"CREATE DATABASE IF NOT EXISTS testdb "
+		"CHARACTER SET utf8mb4 COLLATE utf8mb4_bin";
 	LOG_DEBUG("exec sql: %s", sqlstr);
 	if (mysql_query(con, sqlstr)) {
 		LOG_ERROR("%s", mysql_error(con));

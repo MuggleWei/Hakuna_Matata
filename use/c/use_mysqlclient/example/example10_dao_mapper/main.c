@@ -112,7 +112,7 @@ int main(int argc, char *argv[])
 				  "name VARCHAR(64),"
 				  "age INT,"
 				  "update_ts DATETIME"
-				  ")");
+				  ") CHARACTER SET utf8mb4 COLLATE utf8mb4_bin");
 
 	// set data and execute
 	struct dao_user users[] = {

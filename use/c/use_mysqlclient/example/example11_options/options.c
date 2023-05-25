@@ -9,11 +9,18 @@ struct sys_args {
 	unsigned int port;
 	char user[32];
 	char passwd[32];
+	int ssl_mode;
+	char charset[16];
 };
+
+#define OPT_SSL_MODE 1001
+#define OPT_CHARSET 1002
 
 bool parse_args(int argc, char **argv, struct sys_args *args)
 {
 	memset(args, 0, sizeof(*args));
+	args->ssl_mode = SSL_MODE_PREFERRED;
+	strncpy(args->charset, "utf8mb4", sizeof(args->charset) - 1);
 
 	int c;
 	while (1) {
@@ -23,6 +30,8 @@ bool parse_args(int argc, char **argv, struct sys_args *args)
 			{ "user", required_argument, NULL, 'u' },
 			{ "password", required_argument, NULL, 'p' },
 			{ "port", required_argument, NULL, 'P' },
+			{ "ssl-mode", required_argument, NULL, OPT_SSL_MODE },
+			{ "charset", required_argument, NULL, OPT_CHARSET },
 		};
 
 		c = getopt_long(argc, argv, "h:u:p:P:", long_options, &option_index);
@@ -41,6 +50,18 @@ bool parse_args(int argc, char **argv, struct sys_args *args)
 		} break;
 		case 'P': {
 			muggle_str_tou(optarg, &args->port, 10);
+		} break;
+		case OPT_SSL_MODE: {
+			if (strcmp(optarg, "REQUIRED")) {
+				args->ssl_mode = SSL_MODE_REQUIRED;
+			} else if (strcmp(optarg, "PREFERRED")) {
+				args->ssl_mode = SSL_MODE_PREFERRED;
+			} else if (strcmp(optarg, "DISABLED")) {
+				args->ssl_mode = SSL_MODE_DISABLED;
+			}
+		} break;
+		case OPT_CHARSET: {
+			strncpy(args->charset, optarg, sizeof(args->charset) - 1);
 		} break;
 		}
 	}
@@ -89,6 +110,14 @@ int main(int argc, char *argv[])
 		exit(EXIT_FAILURE);
 	}
 
+	if (mysql_options(con, MYSQL_OPT_SSL_MODE, &args.ssl_mode)) {
+		LOG_ERROR("failed set ssl-mode: %d", args.ssl_mode);
+	}
+
+	if (mysql_options(con, MYSQL_SET_CHARSET_NAME, args.charset)) {
+		LOG_ERROR("failed set charset: %s", args.charset);
+	}
+
 	if (mysql_real_connect(con, args.host, args.user, args.passwd, "testdb",
 						   args.port, NULL, 0) == NULL) {
 		LOG_ERROR("%s", mysql_error(con));
@@ -100,25 +129,23 @@ int main(int argc, char *argv[])
 				"\t-u, --user      user for login\n"
 				"\t-p, --password  password to use when connecting to server\n"
 				"\t-P, --port      port number to use for connection\n"
+				"\t  , --ssl-mode  set ssl mode\n"
+				"\t  , --charset   charset\n"
 				"",
 				argv[0]);
 		exit(EXIT_FAILURE);
 	}
 
-	exec_sql(con, "DROP TABLE IF EXISTS cars");
-	exec_sql(con, "CREATE TABLE cars ("
+	exec_sql(con, "DROP TABLE IF EXISTS language");
+	exec_sql(con, "CREATE TABLE language ("
 				  "id INT PRIMARY KEY AUTO_INCREMENT,"
-				  "name VARCHAR(255),"
-				  "price INT"
+				  "word VARCHAR(16)"
 				  ") CHARACTER SET utf8mb4 COLLATE utf8mb4_bin");
-	exec_sql(con, "INSERT INTO cars VALUES(1,'Audi',52642)");
-	exec_sql(con, "INSERT INTO cars VALUES(2,'Mercedes',57127)");
-	exec_sql(con, "INSERT INTO cars VALUES(3,'Skoda',9000)");
-	exec_sql(con, "INSERT INTO cars VALUES(4,'Volvo',29000)");
-	exec_sql(con, "INSERT INTO cars VALUES(5,'Bentley',350000)");
-	exec_sql(con, "INSERT INTO cars VALUES(6,'Citroen',21000)");
-	exec_sql(con, "INSERT INTO cars VALUES(7,'Hummer',41400)");
-	exec_sql(con, "INSERT INTO cars VALUES(8,'Volkswagen',21600)");
+	exec_sql(con, "INSERT INTO language VALUES(1, '你好')");
+	exec_sql(con, "INSERT INTO language VALUES(2, 'hello')");
+	exec_sql(con, "INSERT INTO language VALUES(3, 'bonjour')");
+	exec_sql(con, "INSERT INTO language VALUES(4, 'Buen día')");
+	exec_sql(con, "INSERT INTO language VALUES(5, 'こんにちは')");
 
 	mysql_close(con);
 
