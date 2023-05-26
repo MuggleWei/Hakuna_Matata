@@ -3,7 +3,7 @@
 #include "wolfssl/wolfcrypt/settings.h"
 #include "wolfssl/ssl.h"
 
-#define KEY_SIZE WC_SHA256_DIGEST_SIZE
+#define KEY_SIZE 32
 #define HASH_SIZE WC_SHA256_DIGEST_SIZE
 
 typedef struct msg {
@@ -38,7 +38,7 @@ int gen_key(byte *buf, uint32_t bufsize)
 }
 
 byte *hmac_sign(const msg_t *p_msg, const byte *secure_key,
-				const byte *access_key, const struct timespec *ts, byte *hash)
+				const struct timespec *ts, byte *hash)
 {
 	memset(hash, 0, HASH_SIZE);
 
@@ -60,11 +60,6 @@ byte *hmac_sign(const msg_t *p_msg, const byte *secure_key,
 
 	if (wc_HmacUpdate(&hmac, (const byte *)ts, sizeof(*ts)) != 0) {
 		LOG_ERROR("failed HMAC update timestamp");
-		return NULL;
-	}
-
-	if (wc_HmacUpdate(&hmac, access_key, KEY_SIZE) != 0) {
-		LOG_ERROR("failed HMAC update access key");
 		return NULL;
 	}
 
@@ -119,7 +114,7 @@ int main(int argc, char *argv[])
 
 	// hmac
 	byte sign[HASH_SIZE];
-	if (hmac_sign(&msg, secure_key, access_key, &ts, sign) == NULL) {
+	if (hmac_sign(&msg, secure_key, &ts, sign) == NULL) {
 		LOG_ERROR("failed HMAC");
 		exit(EXIT_FAILURE);
 	}
@@ -131,11 +126,11 @@ int main(int argc, char *argv[])
 	LOG_INFO("message\n{\n"
 			 "\tAK: %s\n"
 			 "\ttimestamp: %llu.%09u\n"
-			 "\tHMAC sign: %s\n"
 			 "\tpayload: %s\n"
+			 "\tHMAC sign: %s\n"
 			 "}",
 			 ak_hex, (unsigned long long)ts.tv_sec, (unsigned long)ts.tv_nsec,
-			 sign_hex, msg.data);
+			 msg.data, sign_hex);
 
 	return 0;
 }

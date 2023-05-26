@@ -121,9 +121,6 @@ int main(int argc, char *argv[])
 	// check passwd
 	const char *passwd = argv[1];
 
-	// init wolfssl
-	wolfSSL_Init();
-
 	// password hash
 	char salt_hex[SALT_SIZE * 2 + 1];
 	char hash_hex[WC_SHA256_DIGEST_SIZE * 2 + 1];
@@ -155,9 +152,6 @@ int main(int argc, char *argv[])
 				  "----------------------");
 		exit(EXIT_FAILURE);
 	}
-
-	// cleanup wolfssl
-	wolfSSL_Cleanup();
 
 	return 0;
 }
