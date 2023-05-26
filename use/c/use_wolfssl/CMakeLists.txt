@@ -83,8 +83,6 @@ include(GNUInstallDirs)
 function(add_example name folder)
 	message("add example ${name} ${folder}")
 	
-	set(name example_${name})
-
 	file(GLOB tmp_h ${folder}/*.h)
 	file(GLOB tmp_c ${folder}/*.c)
 	file(GLOB tmp_cpp ${folder}/*.cpp)

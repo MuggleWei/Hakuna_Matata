@@ -15,10 +15,17 @@ origin_dir="$(dirname "$(readlink -f "$0")")"
 # gen certs
 cd $origin_dir
 if [ -d build/certs ]; then
-	echo "$origin_dir/build/certs is already exists"
+	echo "$origin_dir/build/certs already exists"
 else
 	echo "$origin_dir/build/certs not exists, gen certs"
 	./gen_cert.sh
+fi
+
+if [ -d build/keys ]; then
+	echo "$origin_dir/build/keys already exists"
+else
+	echo "$origin_dir/build/keys not exists, gen keys"
+	./gen_keys.sh
 fi
 
 # build project
