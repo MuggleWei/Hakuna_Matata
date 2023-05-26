@@ -1,0 +1,45 @@
+name: use_mariadb
+variables:
+  - build_type: release
+  - mugglec_tag: v1.2.4
+  - mariadb_connector_c_tag: v3.3.5
+source:
+  maintainer: mugglewei
+  name: use_mysqlclient
+  tag: v1.0.0
+deps:
+  - maintainer: mugglewei
+    name: mugglec
+    tag: ${mugglec_tag}
+  - maintainer: mariadb
+    name: mariadb_connector_c
+    tag: ${mariadb_connector_c_tag}
+jobs:
+  build:
+    steps:
+      - name: build
+        run: >
+          cmake \
+            -S ${HPB_SOURCE_PATH} \
+            -B ${HPB_BUILD_DIR} \
+            -DCMAKE_BUILD_TYPE=${build_type} \
+            -DCMAKE_PREFIX_PATH="${HPB_DEPS_DIR}" \
+            -DCMAKE_INSTALL_PREFIX=${HPB_OUTPUT_DIR} \
+            -DZLIB_ROOT="${HPB_DEPS_DIR}" \
+            -DOPENSSL_ROOT_DIR="${HPB_DEPS_DIR}";
+          cmake --build ${HPB_BUILD_DIR} --config ${build_type};
+          cmake --build ${HPB_BUILD_DIR} --target install;
+  package:
+    needs: [build]
+    steps:
+      - name: pack
+        run: >
+          cd ${HPB_TASK_DIR};
+          #hpb pack --copy-to=${HPB_ROOT_DIR}/dist;
+          rm -rf ${HPB_ROOT_DIR}/dist;
+          mkdir -p ${HPB_ROOT_DIR}/dist;
+          mkdir -p ${HPB_ROOT_DIR}/dist/lib;
+          cp -r ${HPB_OUTPUT_DIR}/bin ${HPB_ROOT_DIR}/dist/;
+          cp -r ${HPB_DEPS_DIR}/lib/*.so* ${HPB_ROOT_DIR}/dist/lib/;
+          cp -r ${HPB_DEPS_DIR}/lib/mariadb/*.so* ${HPB_ROOT_DIR}/dist/lib/;
+          cp -r ${HPB_DEPS_DIR}/lib/mariadb/plugin ${HPB_ROOT_DIR}/dist/lib/;

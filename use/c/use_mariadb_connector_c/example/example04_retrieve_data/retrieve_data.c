@@ -57,6 +57,64 @@ bool parse_args(int argc, char **argv, struct sys_args *args)
 	return true;
 }
 
+void exit_with_error(MYSQL *con)
+{
+	LOG_ERROR("%s", mysql_error(con));
+	mysql_close(con);
+	exit(EXIT_FAILURE);
+}
+
+void exec_sql(MYSQL *con, const char *sqlstr)
+{
+	LOG_DEBUG("begin exec sql: %s", sqlstr);
+	if (mysql_query(con, sqlstr)) {
+		exit_with_error(con);
+	}
+	LOG_DEBUG("end exec sql: %s", sqlstr);
+}
+
+void process_use_result(MYSQL *con)
+{
+	MYSQL_RES *result = mysql_use_result(con);
+	if (result == NULL) {
+		exit_with_error(con);
+	}
+
+	int num_fields = mysql_num_fields(result);
+	MYSQL_ROW row;
+	while ((row = mysql_fetch_row(result))) {
+		for (int i = 0; i < num_fields; i++) {
+			fprintf(stdout, "%s ", row[i] ? row[i] : "NULL");
+		}
+		fprintf(stdout, "\n");
+	}
+
+	if (mysql_errno(con) != 0) {
+		LOG_ERROR("%s", mysql_error(con));
+	}
+
+	mysql_free_result(result);
+}
+
+void process_store_result(MYSQL *con)
+{
+	MYSQL_RES *result = mysql_store_result(con);
+	if (result == NULL) {
+		exit_with_error(con);
+	}
+
+	int num_fields = mysql_num_fields(result);
+	MYSQL_ROW row;
+	while ((row = mysql_fetch_row(result))) {
+		for (int i = 0; i < num_fields; i++) {
+			fprintf(stdout, "%s ", row[i] ? row[i] : "NULL");
+		}
+		fprintf(stdout, "\n");
+	}
+
+	mysql_free_result(result);
+}
+
 int main(int argc, char *argv[])
 {
 	muggle_log_complicated_init(LOG_LEVEL_DEBUG, -1, NULL);
@@ -73,15 +131,7 @@ int main(int argc, char *argv[])
 		exit(EXIT_FAILURE);
 	}
 
-	// close ssl
-	LOG_DEBUG("set ssl mode: SSL_MODE_DISABLED");
-	unsigned int ssl_mode = SSL_MODE_DISABLED;
-	if (mysql_options(con, MYSQL_OPT_SSL_MODE, &ssl_mode)) {
-		LOG_ERROR("%s", mysql_error(con));
-		exit(EXIT_FAILURE);
-	}
-
-	if (mysql_real_connect(con, args.host, args.user, args.passwd, NULL,
+	if (mysql_real_connect(con, args.host, args.user, args.passwd, "testdb",
 						   args.port, NULL, 0) == NULL) {
 		LOG_ERROR("%s", mysql_error(con));
 		mysql_close(con);
@@ -96,6 +146,14 @@ int main(int argc, char *argv[])
 				argv[0]);
 		exit(EXIT_FAILURE);
 	}
+
+	exec_sql(con, "SELECT * FROM cars");
+	LOG_INFO("do store result");
+	process_store_result(con);
+
+	exec_sql(con, "SELECT * FROM cars");
+	LOG_INFO("do use result");
+	process_use_result(con);
 
 	mysql_close(con);
 

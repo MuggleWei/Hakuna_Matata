@@ -1,0 +1,12 @@
+version: "0.0.1"
+services:
+  mysql:
+    image: "mariadb:10.6.13"
+    restart: always
+    ports:
+      - "127.0.0.1:3306:3306"
+    volumes:
+      - ./docker_volume/mariadb/data:/var/lib/mysql
+      - ./init:/docker-entrypoint-initdb.d/:ro
+    environment:
+      - MYSQL_ALLOW_EMPTY_PASSWORD=true

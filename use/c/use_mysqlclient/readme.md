@@ -2,9 +2,7 @@
 
 ## 构建
 ```
-./bootstrap.sh
-cd build
-cmake --build .
+hpb build -c build.yml
 ```
 
 ## 例子
@@ -15,7 +13,7 @@ cmake --build .
 * example04_retrieve_data: 查询 example03 中插入的数据
 * example05_inserted_row_id: 插入数据，并获取返回的自增 id 值
 * example06_col_headers: 查询 example03 中插入的数据，并且获取列名
-* example07_set_option: 设置 option，以 ssl 为例
+* example07_options: 以 ssl 和 charset 为例, 设置 option
 * example08_mul_thread: 多线程同时查询 example03 中插入的数据
 * example09_stmt_prepare: 使用 prepared statement 插入数据
 * example10_dao_mapper: 使用 prepared statement 插入并查询数据
