@@ -1,12 +1,13 @@
 # 使用wolfssl
-本项目展示了wolfssl的tls用法
+本项目展示了wolfssl的用法
 
 ## 构建项目
-先运行gen_cert.sh生成根证书、私钥和服务器的私钥、证书，再运行build脚本生成项目构建文件，接着去编译项目即可
+1. 先运行 gen_cert.sh 生成根证书、私钥和服务器的私钥、证书
+2. 运行 boostrap 脚本生成项目构建文件
+3. 进入 build 目录编译项目
 
 ## 例子简介
 详见[example](./example/readme.md)
-此项目中包含一个echo服务和一个发送时间的客户端，都使用wolfssl TLS对通信进行加密
 
 ## set_fd的问题
 wolfSSL_set_fd函数并不区分平台，第二个参数是int型，也就是POSIX socket的类型，而在windows下，socket的类型为SOCKET，其定义为

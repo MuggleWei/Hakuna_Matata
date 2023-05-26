@@ -1,5 +1,15 @@
 #!/bin/bash
 
+# handle argv
+if [ "$#" -lt 1 ]; then
+	echo "[ERROR] build.sh without build type"
+	echo "[ERROR] Usage: build.sh <Debug|Release>"
+	exit 1
+else
+	# to lowercase
+	BUILD_TYPE=$(echo $1 | tr '[:upper:]' '[:lower:]')
+fi
+
 origin_dir="$(dirname "$(readlink -f "$0")")"
 
 # gen certs
@@ -16,7 +26,7 @@ mkdir -p $origin_dir/build
 cd $origin_dir/build
 
 cmake .. \
-	-DCMAKE_BUILD_TYPE=Debug \
+	-DCMAKE_BUILD_TYPE=$BUILD_TYPE \
 	-DWOLFSSL_DEBUG=ON \
 	-DWOLFSSL_TLS13=ON \
 	-DWOLFSSL_DTLS=ON \
@@ -24,4 +34,4 @@ cmake .. \
 	-DWOLFSSL_EXAMPLES=OFF \
 	-DWOLFSSL_CRYPT_TESTS=OFF \
 	-DWOLFSSL_CRYPT_TESTS_LIBS=OFF \
-	-DCMAKE_INSTALL_PREFIX=$origin_dir/build/pkg
+	-DCMAKE_INSTALL_PREFIX=$origin_dir/dist
