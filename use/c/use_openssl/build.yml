@@ -2,7 +2,7 @@ name: use_openssl
 variables:
   - build_type: debug
   - openssl_tag: openssl-3.1.0
-  - mugglec_tag: v1.0.2
+  - mugglec_tag: v1.2.4
 source:
   maintainer: mugglewei
   name: use_openssl
@@ -28,10 +28,10 @@ jobs:
             -DCMAKE_INSTALL_PREFIX=${HPB_OUTPUT_DIR} \
             -DCMAKE_PREFIX_PATH=${HPB_DEPS_DIR};
           cmake --build ${HPB_BUILD_DIR};
+          cmake --build ${HPB_BUILD_DIR} --target install;
   package:
     steps:
       - name: package
         run: >
           cd ${HPB_TASK_DIR};
-          cmake --build ${HPB_BUILD_DIR} --target install;
-          hpb pack -o ${HPB_ROOT_DIR}/_artifacts;
+          hpb pack --copy-to ${HPB_ROOT_DIR}/dist;
