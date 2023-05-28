@@ -13,7 +13,7 @@ hpb build -c build.yml
 [crypt01_digest](./example/crypt01_digest/digest.c) 消息摘要操作
 
 ### crypt02_cipher
-[crypt02_cipher](./example/crypt02_cipher/cipher.c) 以 AES-128-CBC 和 AES-256-CBC 为例进行加解密
+[crypt02_cipher](./example/crypt02_cipher/cipher.c) 以 DES-EDE3-CBC，AES-128-CBC 和 AES-256-CBC 为例进行加解密
 
 ### crypt03_rsa
 [crypt03_rsa](./example/crypt03_rsa/rsa.c)  

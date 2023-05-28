@@ -170,6 +170,24 @@ int main(int argc, char *argv[])
 
 	LOG_INFO("input message: %s", plaintext);
 
+	LOG_INFO("-------- DES-EDE3-CBC --------");
+
+	ciphertext_len = 0;
+	const int DES_EDE3_KEY_SIZE = 24;
+	const int DES_EDE3_IV_SIZE = 8;
+	const int DES_EDE3_BLOCK_SIZE = 8;
+	unsigned char des_ede3_key[] = "0123456789abcdefghijklmn";
+	unsigned char des_ede3_iv[] = "12345678";
+	LOG_INFO("DES-EDE3-CBC key: %.*s", DES_EDE3_KEY_SIZE, des_ede3_key);
+	LOG_INFO("DES-EDE3-CBC iv: %.*s", DES_EDE3_IV_SIZE, des_ede3_iv);
+	cipher_encrypt("DES-EDE3-CBC", plaintext, strlen(plaintext), des_ede3_key,
+				   des_ede3_iv, DES_EDE3_KEY_SIZE, DES_EDE3_IV_SIZE,
+				   DES_EDE3_BLOCK_SIZE, ciphertext, &ciphertext_len);
+	cipher_decrypt("DES-EDE3-CBC", ciphertext, ciphertext_len, des_ede3_key,
+				   des_ede3_iv, DES_EDE3_KEY_SIZE, DES_EDE3_IV_SIZE,
+				   DES_EDE3_BLOCK_SIZE, ret_plaintext);
+
+
 	LOG_INFO("-------- AES-128-CBC --------");
 
 	ciphertext_len = 0;
