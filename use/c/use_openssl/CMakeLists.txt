@@ -43,10 +43,9 @@ endif()
 
 ###############################
 # mugglec
-find_package(mugglec 1 REQUIRED)
+find_package(mugglec)
 if (mugglec_FOUND)
-    message("find mugglec include dir: ${MUGGLEC_INCLUDE_DIR}")
-    message("find mugglec libraries: ${MUGGLEC_LIBRARIES}")
+	message("find mugglec dir: ${mugglec_DIR}")
 else()
     message(FATAL_ERROR "failed found mugglec")
 endif()
