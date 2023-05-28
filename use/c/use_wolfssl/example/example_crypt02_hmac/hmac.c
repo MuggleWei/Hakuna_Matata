@@ -10,7 +10,7 @@ typedef struct msg {
 	char data[32]; //!< data
 } msg_t;
 
-int gen_key(byte *buf, uint32_t bufsize)
+int random_block(byte *buf, uint32_t bufsize)
 {
 	int ret = 0;
 
@@ -80,7 +80,7 @@ int main(int argc, char *argv[])
 
 	// generate ak/sk
 	byte access_key[KEY_SIZE];
-	if (gen_key(access_key, sizeof(access_key)) != 0) {
+	if (random_block(access_key, sizeof(access_key)) != 0) {
 		LOG_ERROR("failed generate AK");
 		exit(EXIT_FAILURE);
 	}
@@ -91,7 +91,7 @@ int main(int argc, char *argv[])
 	LOG_INFO("generate AK: %s", ak_hex);
 
 	byte secure_key[KEY_SIZE];
-	if (gen_key(secure_key, sizeof(secure_key)) != 0) {
+	if (random_block(secure_key, sizeof(secure_key)) != 0) {
 		LOG_ERROR("failed generate SK");
 		exit(EXIT_FAILURE);
 	}

@@ -13,7 +13,7 @@ wolfSSL 库的头文件被分为以下几个部分
 ## crypt
 
 ### example_crypt01_hash
-生成消息摘要，如 MD5, SHA256, SHA512 [crypt01_hash.c](./example_crypt01_md5/use_md5.c)
+生成消息摘要，如 MD5, SHA256, SHA512 [crypt01_hash.c](./example_crypt01_hash_digest/hash_digest.c)
 
 ## example_crypt02_hmac
 HMAC 的例子 [hmac.c](./example_crypt02_hmac/hmac.c)
@@ -23,6 +23,9 @@ HMAC 的例子 [hmac.c](./example_crypt02_hmac/hmac.c)
 
 ## example_crypt03_passwd_hash
 密码 hash + 盐 的例子 [passwd_hash.c](./example_crypt03_passwd_hash/passwd_hash.c)
+
+## example_crypt04_aes
+使用 AES 加密
 
 ## ssl
 
