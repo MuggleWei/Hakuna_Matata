@@ -87,15 +87,15 @@ int main(int argc, char *argv[])
 {
 	muggle_log_complicated_init(LOG_LEVEL_DEBUG, -1, NULL);
 
-	LOG_INFO("OpenSSL version: %s", OpenSSL_version(OPENSSL_VERSION));
-	LOG_INFO("mugglec version: %s", mugglec_version());
-	LOG_INFO("mugglec compile time: %s", mugglec_compile_time());
-
 	if (argc < 2) {
 		LOG_ERROR("Usage: %s <message>", argv[0]);
 		exit(EXIT_FAILURE);
 	}
 	const char *data = argv[1];
+
+	LOG_INFO("OpenSSL version: %s", OpenSSL_version(OPENSSL_VERSION));
+	LOG_INFO("mugglec version: %s", mugglec_version());
+	LOG_INFO("mugglec compile time: %s", mugglec_compile_time());
 
 	LOG_INFO("input message: %s", data);
 
