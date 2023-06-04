@@ -235,6 +235,7 @@ unsigned char *pri_decrypt(const char *pem_filepath, const char *passphrase,
 	}
 
 	plaintext = (unsigned char *)malloc(outlen);
+	memset(plaintext, 0, outlen);
 	ret = EVP_PKEY_decrypt(dec_ctx, plaintext, &outlen,
 						   (const unsigned char *)ciphertext, ciphertext_len);
 	if (ret <= 0) {
@@ -319,6 +320,8 @@ int main(int argc, char *argv[])
 		"output: %s",
 		alice_pri, alice_pri, alice_pri_passphrase, dec_ret_plaintext);
 
+	// cleanup
+	free(dec_ret_plaintext);
 	free(ciphertext_hex);
 
 	return 0;

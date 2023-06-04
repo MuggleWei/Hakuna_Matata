@@ -18,9 +18,7 @@ hpb build -c build.yml
 ### crypt03_rsa
 [crypt03_rsa](./example/crypt03_rsa/rsa.c)  
 此例子模拟 alice 和 bob 通讯，确保 gen_keys.sh 已经成功生成 alice 和 bob 的密钥  
-由 bob 发送消息，使用 bob 的私钥签名并用 alice 的公钥加密，接着使用 alice 的私钥解密并用 bob 的公钥验证签名
+由 bob 发送消息，使用 alice 的公钥加密，接着使用 alice 的私钥解密
 
 ## 使用示例
 * [bignum](./example/bignum/bignum.c): 展示了使用 OpenSSL 中的大整型运算
-* [digest](./example/digest/msg_digest.c): 生成消息摘要
-* [crypt](./example/crypt/msg_crypt.c): 消息加密/解密
