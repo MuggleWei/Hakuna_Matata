@@ -28,3 +28,6 @@ hpb build -c build.yml
 [crypt04_rsa_sign](./example/crypt04_rsa_sign/rsa_sign.c)  
 运行此例子, 需要先使用 gen_keys.sh 已经成功生成 alice 和 bob 的密钥  
 此例子模拟 alice 和 bob 通讯中的签名和验证步骤，由 bob 发送消息，使用 bob 的私钥加密，接着使用 bob 的公钥验证签名
+
+### crypt05_hmac
+[crypt05_hmac](./example/crypt05_hmac/hmac.c) 使用 HMAC SHA256 生成消息认证码
