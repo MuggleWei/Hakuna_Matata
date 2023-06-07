@@ -3,7 +3,8 @@ variables:
   - build_type: release
   - mariadb_connector_c_tag: v3.3.5
   - mariadb_connector_c_url: https://github.com/mariadb-corporation/mariadb-connector-c.git
-  - openssl_tag: openssl-3.1.0
+  - openssl_tag: openssl-3.1.1
+  - zlib_tag: v1.2.13
 source:
   maintainer: mariadb
   name: mariadb_connector_c
@@ -15,6 +16,9 @@ deps:
   - name: openssl
     maintainer: openssl
     tag: ${openssl_tag}
+  - name: zlib
+    maintainer: madler
+    tag: ${zlib_tag}
 jobs:
   build:
     steps:
@@ -32,7 +36,7 @@ jobs:
             -DWITH_EXTERNAL_ZLIB=ON \
             -DWITH_CURL=OFF;
           cmake --build ${HPB_BUILD_DIR} --config ${build_type};
-          cmake --build ${HPB_BUILD_DIR} --target install;
+          cmake --build ${HPB_BUILD_DIR} --config ${build_type} --target install;
   package:
     needs: [build]
     steps:

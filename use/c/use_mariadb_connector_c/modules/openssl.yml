@@ -1,7 +1,7 @@
 name: openssl
 variables:
   - build_type: release
-  - openssl_tag: openssl-3.1.0
+  - openssl_tag: openssl-3.1.1
   - openssl_url: https://github.com/openssl/openssl.git
   - zlib_tag: v1.2.13
 source:
@@ -25,9 +25,7 @@ jobs:
             --prefix=${HPB_OUTPUT_DIR} \
             --openssldir=${HPB_OUTPUT_DIR} \
             threads \
-            zlib \
-            --with-zlib-include=${HPB_DEPS_DIR}/include \
-            --with-zlib-lib=${HPB_DEPS_DIR}/lib \
+            no-comp \
             -Wl,-rpath,\\\$\$ORIGIN/../lib \
             no-tests \
             --${build_type};
