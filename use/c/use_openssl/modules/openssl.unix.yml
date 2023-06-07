@@ -25,15 +25,28 @@ jobs:
             --prefix=${HPB_OUTPUT_DIR} \
             --openssldir=${HPB_OUTPUT_DIR} \
             threads \
-            zlib \
-            --with-zlib-include=${HPB_DEPS_DIR}/include \
-            --with-zlib-lib=${HPB_DEPS_DIR}/lib \
+            no-comp \
             -Wl,-rpath,\\\$\$ORIGIN/../lib \
             no-tests \
             --${build_type};
           make;
           make install_sw;
           mv ${HPB_OUTPUT_DIR}/lib64 ${HPB_OUTPUT_DIR}/lib;
+        #run: >
+        #  cd ${HPB_BUILD_DIR};
+        #  ${HPB_SOURCE_PATH}/Configure \
+        #    --prefix=${HPB_OUTPUT_DIR} \
+        #    --openssldir=${HPB_OUTPUT_DIR} \
+        #    threads \
+        #    zlib \
+        #    --with-zlib-include=${HPB_DEPS_DIR}/include \
+        #    --with-zlib-lib=${HPB_DEPS_DIR}/lib \
+        #    -Wl,-rpath,\\\$\$ORIGIN/../lib \
+        #    no-tests \
+        #    --${build_type};
+        #  make;
+        #  make install_sw;
+        #  mv ${HPB_OUTPUT_DIR}/lib64 ${HPB_OUTPUT_DIR}/lib;
   package:
     needs: [build]
     steps:
