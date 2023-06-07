@@ -3,7 +3,7 @@ variables:
   - build_type: release
   - openssl_tag: openssl-3.1.1
   - openssl_url: https://github.com/openssl/openssl.git
-  - zlib_tag: v1.2.13
+  #- zlib_tag: v1.2.13
 source:
   maintainer: openssl
   name: openssl
@@ -11,10 +11,10 @@ source:
   repo_kind: git
   repo_url: ${openssl_url}
   git_depth: 1
-deps:
-  - name: zlib
-    maintainer: madler
-    tag: ${zlib_tag}
+#deps:
+#  - name: zlib
+#    maintainer: madler
+#    tag: ${zlib_tag}
 jobs:
   build:
     steps:
