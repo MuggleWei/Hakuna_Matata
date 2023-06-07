@@ -5,7 +5,7 @@ variables:
   - mariadb_connector_c_tag: v3.3.5
 source:
   maintainer: mugglewei
-  name: use_mysqlclient
+  name: use_mariadb_connector_c
   tag: v1.0.0
 deps:
   - maintainer: mugglewei
