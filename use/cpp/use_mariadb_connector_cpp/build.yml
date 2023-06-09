@@ -27,3 +27,16 @@ jobs:
             -DCMAKE_INSTALL_PREFIX=${HPB_OUTPUT_DIR};
           cmake --build ${HPB_BUILD_DIR} --config ${build_type};
           cmake --build ${HPB_BUILD_DIR} --target install;
+  package:
+    needs: [build]
+    steps:
+      - name: pack
+        run: >
+          cd ${HPB_TASK_DIR};
+          rm -rf ${HPB_ROOT_DIR}/dist;
+          mkdir -p ${HPB_ROOT_DIR}/dist;
+          mkdir -p ${HPB_ROOT_DIR}/dist/lib;
+          cp -r ${HPB_OUTPUT_DIR}/bin ${HPB_ROOT_DIR}/dist/;
+          cp -r ${HPB_DEPS_DIR}/lib/*.so* ${HPB_ROOT_DIR}/dist/lib/;
+          cp -r ${HPB_DEPS_DIR}/lib/mariadb/*.so* ${HPB_ROOT_DIR}/dist/lib/;
+          cp -r ${HPB_DEPS_DIR}/lib/mariadb/plugin ${HPB_ROOT_DIR}/dist/lib/;

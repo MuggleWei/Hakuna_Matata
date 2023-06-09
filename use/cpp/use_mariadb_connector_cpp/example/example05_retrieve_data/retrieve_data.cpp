@@ -114,8 +114,12 @@ void run(struct sys_args &args)
 	Query(conn, 0);
 
 	LOG_INFO("----------------");
-	LOG_INFO("Query with ResultSet streaming");
+	LOG_INFO("Query with ResultSet streaming, fetch size row: 512");
 	Query(conn, 512);
+
+	LOG_INFO("----------------");
+	LOG_INFO("Query with ResultSet streaming, fetch size row: 1");
+	Query(conn, 1);
 
 	conn->close();
 }
