@@ -1,0 +1,47 @@
+name: mariadb_connector_cpp
+variables:
+  - build_type: release
+  - mariadb_connector_cpp_tag: private-1.1.2-patch.1
+  - mariadb_connector_cpp_url: https://github.com/MuggleWei/mariadb-connector-cpp.git
+  - mariadb_connector_c: v3.3.5
+source:
+  maintainer: mugglewei
+  name: mariadb_connector_cpp
+  tag: ${mariadb_connector_cpp_tag}
+  repo_kind: git
+  repo_url: ${mariadb_connector_cpp_url}
+  git_depth: 1
+deps:
+  - name: mariadb_connector_c
+    maintainer: mariadb
+    tag: ${mariadb_connector_c}
+jobs:
+  build:
+    steps:
+      - name: build
+        run: >
+          cmake \
+            -S ${HPB_SOURCE_PATH} \
+            -B ${HPB_BUILD_DIR} \
+            -DCMAKE_BUILD_TYPE=${build_type} \
+            -DCMAKE_PREFIX_PATH=${HPB_DEPS_DIR} \
+            -DCMAKE_INSTALL_PREFIX=${HPB_OUTPUT_DIR} \
+            -DUSE_SYSTEM_INSTALLED_LIB=ON \
+            -DMARIADB_LINK_DYNAMIC=ON \
+            -DWITH_UNIT_TESTS=OFF;
+          cmake --build ${HPB_BUILD_DIR} --config ${build_type};
+          cmake --build ${HPB_BUILD_DIR} --config ${build_type} --target install;
+  package:
+    needs: [build]
+    steps:
+      - name: pack
+        run: >
+          cd ${HPB_TASK_DIR};
+          hpb pack;
+  upload:
+    needs: [package]
+    steps:
+      - name: upload
+        run: >
+          hpb push;
+
