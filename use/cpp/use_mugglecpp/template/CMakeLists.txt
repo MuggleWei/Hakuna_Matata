@@ -36,6 +36,7 @@ FetchContent_Declare(
 	mugglecpp
 	GIT_REPOSITORY https://github.com/MuggleWei/mugglecpp.git
 	GIT_TAG v1.0.6
+	GIT_SHALLOW TRUE
 )
 FetchContent_MakeAvailable(mugglecpp)
 
@@ -71,14 +72,13 @@ function(add_example name folder)
 	target_include_directories(${name} PUBLIC
 		${folder}
 		${FETCHCONTENT_BASE_DIR}/mugglecpp-src
+		${FETCHCONTENT_BASE_DIR}/mugglecpp-build/generated
 	)
 	target_link_libraries(${name} mugglecpp)
 
 	target_compile_definitions(${name} PUBLIC MUGGLE_HOLD_LOG_MACRO)
 
-	if (MUGGLE_INSTALL_BIN)
-		install(TARGETS ${name} RUNTIME DESTINATION bin)
-	endif()
+	install(TARGETS ${name} RUNTIME DESTINATION bin)
 endfunction()
 
 SUBDIRLIST(example_root_dir ${CMAKE_CURRENT_LIST_DIR}/example)
