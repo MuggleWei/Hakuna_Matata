@@ -32,21 +32,10 @@ set(FETCHCONTENT_BASE_DIR ${CMAKE_BINARY_DIR}/_deps)
 
 ###################################
 # mugglec & mugglecpp
-set(MUGGLE_BUILD_TRACE OFF CACHE BOOL "")
-set(MUGGLE_BUILD_SHARED_LIB ON CACHE BOOL "")
-set(MUGGLE_BUILD_STATIC_PIC ON CACHE BOOL "")
-set(MUGGLE_BUILD_BENCHMARK OFF CACHE BOOL "")
-set(MUGGLE_BUILD_TESTING OFF CACHE BOOL "")
-set(MUGGLE_BUILD_EXAMPLE OFF CACHE BOOL "")
-
-set(MUGGLE_CPP_BUILD_SHARED_LIB ON CACHE BOOL "")
-set(MUGGLE_CPP_BUILD_STATIC_PIC ON CACHE BOOL "")
-set(MUGGLE_CPP_BUILD_EXAMPLE OFF CACHE BOOL "")
-
 FetchContent_Declare(
-		mugglecpp
-		GIT_REPOSITORY https://github.com/MuggleWei/mugglecpp.git
-		GIT_TAG v1.0.0
+	mugglecpp
+	GIT_REPOSITORY https://github.com/MuggleWei/mugglecpp.git
+	GIT_TAG v1.0.6
 )
 FetchContent_MakeAvailable(mugglecpp)
 
