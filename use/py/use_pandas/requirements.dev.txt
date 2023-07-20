@@ -1,0 +1,5 @@
+pyright
+pynvim
+pyinstaller==5.13.0
+
+pandas==2.0.3
