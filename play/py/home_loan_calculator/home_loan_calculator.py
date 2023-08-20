@@ -353,11 +353,11 @@ if __name__ == "__main__":
     loan.social_debt = 1000000
     loan.commercial_debt = loan.total_debt - loan.social_debt
     loan.social_fund_bal = 500000
-    loan.social_fund_monthly = 90000
+    loan.social_fund_monthly = 9000
     loan.social_interest_rate = 0.031
     loan.commercial_interest_rate = 0.0455
     loan.social_months = 20 * 12
-    loan.commercial_months = 25 * 12
+    loan.commercial_months = 20 * 12
 
     loan.once_repay = 0.0
     loan.once_repay_idx = -1
