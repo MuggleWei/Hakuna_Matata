@@ -59,3 +59,6 @@ hpb build -c build.yml
 
 ### crypt05_hmac
 [crypt05_hmac](./example/crypt05_hmac/hmac.c) 使用 HMAC SHA256 生成消息认证码
+
+### crypt06_totp
+[crypt06_totp](./example/crypt06_totp/totp.c) 一个简单的 TOTP(Time-based One-time Password) 生成器

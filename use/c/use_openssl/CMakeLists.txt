@@ -1,4 +1,4 @@
-cmake_minimum_required (VERSION 3.0.2)
+cmake_minimum_required (VERSION 3.18.6)
 project(openssl_c_example)
 
 # set compile parameter
@@ -58,10 +58,10 @@ function(add_example name folder)
 	
 	set(name example_${name})
 
-	file(GLOB tmp_h ${folder}/*.h)
-	file(GLOB tmp_c ${folder}/*.c)
-	file(GLOB tmp_cpp ${folder}/*.cpp)
-	file(GLOB tmp_cc ${folder}/*.cc)
+	file(GLOB_RECURSE tmp_h ${folder}/*.h)
+	file(GLOB_RECURSE tmp_c ${folder}/*.c)
+	file(GLOB_RECURSE tmp_cpp ${folder}/*.cpp)
+	file(GLOB_RECURSE tmp_cc ${folder}/*.cc)
 
 	if (WIN32)
 		add_executable(${name} ${tmp_h} ${tmp_c} ${tmp_cpp} ${tmp_cc})
@@ -81,6 +81,7 @@ function(add_example name folder)
 	target_include_directories(${name} PUBLIC
 		${PROJECT_BINARY_DIR}
 		${OPENSSL_INCLUDE_DIR}
+		${folder}
 	)
 	target_link_libraries(${name}
 		mugglec
