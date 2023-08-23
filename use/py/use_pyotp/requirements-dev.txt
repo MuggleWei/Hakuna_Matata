@@ -1,0 +1,4 @@
+pynvim
+pyright
+
+pyotp==2.9.0
