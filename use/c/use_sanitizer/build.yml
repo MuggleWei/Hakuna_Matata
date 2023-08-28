@@ -1,12 +1,13 @@
-name: mugglecpp
+name: use_openssl
 variables:
-  - build_type: release
-  - hello_tag: v1.0.0
+  - build_type: debug
   - mugglec_tag: v1.3.0
 source:
   maintainer: mugglewei
-  name: hello
-  tag: ${hello_tag}
+  name: use_sanitizer
+  tag: 1.0.0
+build:
+  fat_pkg: true
 deps:
   - maintainer: mugglewei
     name: mugglec
@@ -20,14 +21,13 @@ jobs:
             -S ${HPB_SOURCE_PATH} \
             -B ${HPB_BUILD_DIR} \
             -DCMAKE_BUILD_TYPE=${build_type} \
-            -DBUILD_SHARED_LIBS=ON \
             -DCMAKE_INSTALL_PREFIX=${HPB_OUTPUT_DIR} \
             -DCMAKE_PREFIX_PATH=${HPB_DEPS_DIR};
-          cmake --build ${HPB_BUILD_DIR} --config ${build_type} --target install;
+          cmake --build ${HPB_BUILD_DIR};
+          cmake --build ${HPB_BUILD_DIR} --target install;
   package:
-    needs: [build]
     steps:
-      - name: pack
+      - name: package
         run: >
           cd ${HPB_TASK_DIR};
-          hpb pack;
+          hpb pack --copy-to ${HPB_ROOT_DIR}/dist;

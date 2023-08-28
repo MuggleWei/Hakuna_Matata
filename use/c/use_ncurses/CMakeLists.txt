@@ -52,7 +52,7 @@ endif()
 #------------------------------
 
 # include cmake
-include(${CMAKE_CURRENT_LIST_DIR}/_deps/mugglec-v1.0.0-alpha.3/cmake/muggle_utils.cmake)
+include(${CMAKE_CURRENT_LIST_DIR}/_deps/mugglec-v1.3.0/cmake/muggle_utils.cmake)
 
 # threads
 find_package(Threads)
