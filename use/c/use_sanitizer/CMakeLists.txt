@@ -78,8 +78,14 @@ FOREACH(san_dir ${san_dirs})
 				target_compile_options(example_${subdir} PRIVATE -fsanitize=undefined)
 				target_link_options(example_${subdir} PRIVATE -fsanitize=undefined)
 			elseif (${san_dir} STREQUAL "leak")
-				target_compile_options(example_${subdir} PRIVATE -fsanitize=leak)
-				target_link_options(example_${subdir} PRIVATE -fsanitize=leak)
+				target_compile_options(example_${subdir} PRIVATE
+					-fsanitize=undefined
+					#-fsanitize=address
+					-fsanitize=leak)
+				target_link_options(example_${subdir} PRIVATE
+					-fsanitize=undefined
+					#-fsanitize=address
+					-fsanitize=leak)
 			elseif (${san_dir} STREQUAL "address")
 				target_compile_options(example_${subdir} PRIVATE -fsanitize=address)
 				target_link_options(example_${subdir} PRIVATE -fsanitize=address)
