@@ -26,14 +26,6 @@ set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 
-# dependencies
-find_package(mugglec)
-if (mugglec_FOUND)
-	message("find mugglec dir: ${mugglec_DIR}")
-else()
-    message(FATAL_ERROR "failed found mugglec")
-endif()
-
 # function
 function(add_example name folder)
 	message("add example ${name} ${folder}")
@@ -66,27 +58,39 @@ function(add_example name folder)
 			)
 		endif()
 	endif(WIN32)
-	add_dependencies(${name} mugglec)
 	target_include_directories(${name} PUBLIC ${folder})
-	target_link_libraries(${name} mugglec)
 
-	# sanitizer
-	target_compile_options(${name} PRIVATE
-		-fsanitize=undefined
-		-fsanitize=address
-		-fsanitize=leak)
-	target_link_options(${name} PRIVATE
-		-fsanitize=undefined
-		-fsanitize=address
-		-fsanitize=leak)
-
-	target_compile_definitions(${name} PUBLIC MUGGLE_HOLD_LOG_MACRO)
 	install(TARGETS ${name} RUNTIME DESTINATION bin)
 endfunction()
 
-# examples
+# examples - Undefined Behavior
 set(example_root_dir ${CMAKE_CURRENT_LIST_DIR}/example)
-FILE(GLOB subdirs RELATIVE ${example_root_dir} ${example_root_dir}/*)
-FOREACH(subdir ${subdirs})
-	add_example(${subdir} ${CMAKE_CURRENT_LIST_DIR}/example/${subdir})
+FILE(GLOB san_dirs RELATIVE ${example_root_dir} ${example_root_dir}/*)
+FOREACH(san_dir ${san_dirs})
+	set(san_root_dir ${example_root_dir}/${san_dir})
+	FILE(GLOB subdirs RELATIVE ${san_root_dir} ${san_root_dir}/*)
+
+	FOREACH(subdir ${subdirs})
+		add_example(${subdir} ${san_root_dir}/${subdir})
+		if ((CMAKE_CXX_COMPILER_ID STREQUAL "GNU") OR
+			(CMAKE_CXX_COMPILER_ID STREQUAL "Clang"))
+			if (${san_dir} STREQUAL "ubsan")
+				target_compile_options(example_${subdir} PRIVATE -fsanitize=undefined)
+				target_link_options(example_${subdir} PRIVATE -fsanitize=undefined)
+			elseif (${san_dir} STREQUAL "leak")
+				target_compile_options(example_${subdir} PRIVATE -fsanitize=leak)
+				target_link_options(example_${subdir} PRIVATE -fsanitize=leak)
+			elseif (${san_dir} STREQUAL "address")
+				target_compile_options(example_${subdir} PRIVATE -fsanitize=address)
+				target_link_options(example_${subdir} PRIVATE -fsanitize=address)
+			elseif (${san_dir} STREQUAL "memory")
+				if (CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
+					target_compile_options(example_${subdir} PRIVATE -fsanitize=memory)
+					target_link_options(example_${subdir} PRIVATE -fsanitize=memory)
+				else()
+					message(WARNING "only Clang support -fsantitize=memory")
+				endif()
+			endif()
+		endif()
+	ENDFOREACH()
 ENDFOREACH()
