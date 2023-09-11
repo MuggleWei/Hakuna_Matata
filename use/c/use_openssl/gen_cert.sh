@@ -36,6 +36,7 @@ echo "----------------------------------"
 openssl x509 -req \
 	-days 3650 \
 	-in ca.csr \
+	-extensions v3_ca \
 	-signkey ca.key \
 	-outform pem -out ca.crt -extfile $cfg_dir/ca_csr.conf
 echo ""
@@ -68,3 +69,12 @@ openssl x509 -req \
 	-CAkey ca.key \
 	-CAcreateserial \
 	-outform pem -out server.crt -extfile $cfg_dir/server_csr.conf
+echo ""
+
+echo "----------------------------------"
+echo "verify"
+echo "----------------------------------"
+echo "search CA:TRUE in ca.crt"
+openssl x509 -text -noout -in ca.crt | grep "CA:TRUE"
+echo "verify server.crt"
+openssl verify -CAfile ca.crt server.crt
