@@ -42,7 +42,7 @@ static SSL_CTX *new_client_ssl_ctx()
 
 	SSL_CTX_set_verify(ctx, SSL_VERIFY_PEER, NULL);
 
-	const char *crt_filepath = "certs/server.crt";
+	const char *crt_filepath = "certs/ca.crt";
 	if (!SSL_CTX_load_verify_locations(ctx, crt_filepath, NULL)) {
 		LOG_ERROR("failed load verify file: "
 				  "crt_filepath=%s, err=%s",
