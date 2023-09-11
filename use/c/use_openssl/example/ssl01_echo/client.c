@@ -207,10 +207,11 @@ void ssl_client_on_add_ctx(muggle_event_loop_t *evloop,
 {
 	client_evloop_data_t *data =
 		(client_evloop_data_t *)muggle_evloop_get_data(evloop);
+	data->ctx = ctx;
+
 	ssl_session_t *session = ssl_session_new(ctx, data->ssl_ctx);
 	if (session) {
 		muggle_socket_ctx_set_data(ctx, session);
-		data->ctx = ctx;
 
 		LOG_DEBUG("on add context");
 
@@ -225,7 +226,7 @@ void ssl_client_on_add_ctx(muggle_event_loop_t *evloop,
 		if (!ssl_session_connect(session)) {
 			LOG_ERROR("failed ssl session connect: remote_addr=%s",
 					  session->remote_addr);
-			muggle_socket_ctx_close(ctx);
+			muggle_socket_ctx_shutdown(ctx);
 			return;
 		}
 	} else {
@@ -275,6 +276,12 @@ void ssl_client_on_message(muggle_event_loop_t *evloop,
 void ssl_client_on_close(muggle_event_loop_t *evloop,
 						 muggle_socket_context_t *ctx)
 {
+	client_evloop_data_t *data =
+		(client_evloop_data_t *)muggle_evloop_get_data(evloop);
+	if (data->ctx == ctx) {
+		data->ctx = NULL;
+	}
+
 	ssl_session_t *session = muggle_socket_ctx_get_data(ctx);
 	if (session == NULL) {
 		LOG_FATAL("failed get ssl session");
@@ -282,12 +289,6 @@ void ssl_client_on_close(muggle_event_loop_t *evloop,
 	}
 
 	LOG_DEBUG("on close: remote_addr=%s", session->remote_addr);
-
-	client_evloop_data_t *data =
-		(client_evloop_data_t *)muggle_evloop_get_data(evloop);
-	if (data->ctx == ctx) {
-		data->ctx = NULL;
-	}
 }
 
 void ssl_client_on_release(muggle_event_loop_t *evloop,
@@ -313,7 +314,11 @@ void ssl_client_on_timer(muggle_event_loop_t *evloop)
 	if (data->ctx == NULL) {
 		return;
 	}
+
 	ssl_session_t *session = muggle_socket_ctx_get_data(data->ctx);
+	if (session == NULL) {
+		return;
+	}
 
 	if (session->status == 0) {
 		if (!ssl_session_connect(session)) {
