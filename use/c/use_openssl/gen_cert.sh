@@ -68,7 +68,7 @@ openssl x509 -req \
 	-CA ca.crt \
 	-CAkey ca.key \
 	-CAcreateserial \
-	-outform pem -out server.crt -extfile $cfg_dir/server_csr.conf
+	-outform pem -out server.crt -extfile $cfg_dir/server_crt.conf
 echo ""
 
 echo "----------------------------------"
