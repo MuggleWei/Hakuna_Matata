@@ -34,6 +34,9 @@ hpb build -c build.yml
 
 # generate rsa key for example
 ./gen_keys.sh
+
+# generate crt and key for ssl example
+./gen_cert.sh
 ```
 
 ## 使用示例 - libcrypto
@@ -62,3 +65,7 @@ hpb build -c build.yml
 
 ### crypt06_totp
 [crypt06_totp](./example/crypt06_totp/totp.c) 一个简单的 TOTP(Time-based One-time Password) 生成器
+
+## 使用示例 - libssl
+### ssl01_echo
+[ssl01_echo](./example/ssl01_echo/main.c) 展示了一个 ssl echo 服务/客户端的例子
