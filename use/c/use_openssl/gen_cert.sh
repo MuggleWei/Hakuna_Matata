@@ -25,7 +25,7 @@ echo "gen CA CSR"
 echo "----------------------------------"
 openssl req \
 	-key ca.key \
-	-config $cfg_dir/ca_csr.conf \
+	-config $cfg_dir/ca.conf \
 	-new -out ca.csr
 echo ""
 
@@ -38,7 +38,7 @@ openssl x509 -req \
 	-in ca.csr \
 	-extensions v3_ca \
 	-signkey ca.key \
-	-outform pem -out ca.crt -extfile $cfg_dir/ca_csr.conf
+	-outform pem -out ca.crt -extfile $cfg_dir/ca.conf
 echo ""
 
 # -------- 生成用户证书 --------
@@ -55,7 +55,7 @@ echo ""
 echo "----------------------------------"
 echo "Gen Server CSR"
 echo "----------------------------------"
-openssl req -key server.key -config $cfg_dir/server_csr.conf -new -out server.csr
+openssl req -key server.key -config $cfg_dir/server.conf -new -out server.csr
 echo ""
 
 # Generate Server certificate
@@ -68,13 +68,17 @@ openssl x509 -req \
 	-CA ca.crt \
 	-CAkey ca.key \
 	-CAcreateserial \
-	-outform pem -out server.crt -extfile $cfg_dir/server_crt.conf
+	-extfile $cfg_dir/server.conf \
+	-extensions v3_req \
+	-outform pem -out server.crt
 echo ""
 
 echo "----------------------------------"
 echo "verify"
 echo "----------------------------------"
-echo "search CA:TRUE in ca.crt"
-openssl x509 -text -noout -in ca.crt | grep "CA:TRUE"
 echo "verify server.crt"
 openssl verify -CAfile ca.crt server.crt
+echo "search 'CA:TRUE' in ca.crt"
+openssl x509 -text -noout -in ca.crt | grep "CA:TRUE"
+echo "search 'DNS' in server.crt"
+openssl x509 -text -noout -in server.crt | grep "DNS"
