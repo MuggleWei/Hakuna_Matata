@@ -67,7 +67,6 @@ static bool ssl_session_accept(ssl_session_t *session)
 	}
 
 	int ret = SSL_accept(session->ssl);
-	LOG_DEBUG("ssl session accept, return: %d", ret);
 	if (ret == 0) {
 		// FATAL ERROR
 		int err_code = SSL_get_error(session->ssl, ret);
@@ -81,6 +80,7 @@ static bool ssl_session_accept(ssl_session_t *session)
 		int err_code = SSL_get_error(session->ssl, ret);
 		if (err_code == SSL_ERROR_WANT_READ) {
 			// wait for data to be read
+			LOG_DEBUG("ssl session establishing");
 			return true;
 		} else {
 			OUTPUT_SSL_SESSION_ERROR(session, err_code);

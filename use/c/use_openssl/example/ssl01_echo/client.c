@@ -7,13 +7,21 @@
 typedef struct client_evloop_data {
 	SSL_CTX *ssl_ctx;
 	muggle_socket_context_t *ctx;
+	char host[MUGGLE_SOCKET_ADDR_STRLEN];
+	char port[16];
 } client_evloop_data_t;
+
+typedef struct client_connect_cfg {
+	char host[MUGGLE_SOCKET_ADDR_STRLEN];
+	char port[16];
+	muggle_event_loop_t *evloop;
+} client_connect_cfg_t;
 
 static muggle_socket_context_t *tcp_connect(const char *host, const char *port)
 {
 	muggle_socket_t fd = muggle_tcp_connect(host, port, 3);
 	if (fd == MUGGLE_INVALID_SOCKET) {
-		LOG_SYS_ERR(LOG_LEVEL_ERROR, "failed listen");
+		LOG_ERROR("failed connect to %s:%s", host, port);
 		return NULL;
 	}
 	LOG_DEBUG("success connect to %s:%s", host, port);
@@ -29,6 +37,26 @@ static muggle_socket_context_t *tcp_connect(const char *host, const char *port)
 	muggle_socket_ctx_init(ctx, fd, NULL, MUGGLE_SOCKET_CTX_TYPE_TCP_CLIENT);
 
 	return ctx;
+}
+
+static muggle_thread_ret_t conn_thread_routine(void *p_args)
+{
+	client_connect_cfg_t *con_cfg = (client_connect_cfg_t *)p_args;
+	do {
+		muggle_msleep(3000);
+		LOG_DEBUG("try reconnect to %s:%s", con_cfg->host, con_cfg->port);
+
+		muggle_socket_context_t *conn_ctx =
+			tcp_connect(con_cfg->host, con_cfg->port);
+		if (conn_ctx) {
+			muggle_socket_evloop_add_ctx(con_cfg->evloop, conn_ctx);
+			break;
+		}
+	} while (1);
+
+	free(p_args);
+
+	return NULL;
 }
 
 static SSL_CTX *new_client_ssl_ctx()
@@ -63,7 +91,6 @@ static bool ssl_session_connect(ssl_session_t *session)
 	}
 
 	int ret = SSL_connect(session->ssl);
-	LOG_DEBUG("ssl session connect, return: %d", ret);
 	if (ret == 0) {
 		// FATAL ERROR
 		int err_code = SSL_get_error(session->ssl, ret);
@@ -77,6 +104,7 @@ static bool ssl_session_connect(ssl_session_t *session)
 		int err_code = SSL_get_error(session->ssl, ret);
 		if (err_code == SSL_ERROR_WANT_READ) {
 			// wait for data to be read
+			LOG_DEBUG("ssl session establishing");
 			return true;
 		} else {
 			OUTPUT_SSL_SESSION_ERROR(session, err_code);
@@ -96,7 +124,6 @@ bool run_ssl_client(const char *host, const char *port)
 	muggle_event_loop_t *evloop = NULL;
 	muggle_socket_evloop_handle_t *handle = NULL;
 	SSL_CTX *ssl_ctx = NULL;
-	muggle_socket_context_t *conn_ctx = NULL;
 	client_evloop_data_t *user_data = NULL;
 	bool ret = true;
 
@@ -148,14 +175,16 @@ bool run_ssl_client(const char *host, const char *port)
 		goto cleanup;
 	}
 
-	// tcp connect
-	conn_ctx = tcp_connect(host, port);
-	if (conn_ctx == NULL) {
-		LOG_ERROR("failed connect to %s:%s", host, port);
-		ret = false;
-		goto cleanup;
-	}
-	muggle_socket_evloop_add_ctx(evloop, conn_ctx);
+	// tcp connect thread
+	do {
+		LOG_DEBUG("try connect to %s:%s", host, port);
+		muggle_socket_context_t *conn_ctx = tcp_connect(host, port);
+		if (conn_ctx) {
+			muggle_socket_evloop_add_ctx(evloop, conn_ctx);
+			break;
+		}
+		muggle_msleep(3000);
+	} while (1);
 
 	// set evloop user data
 	user_data = (client_evloop_data_t *)malloc(sizeof(client_evloop_data_t));
@@ -166,6 +195,8 @@ bool run_ssl_client(const char *host, const char *port)
 	}
 	memset(user_data, 0, sizeof(*user_data));
 	user_data->ssl_ctx = ssl_ctx;
+	strncpy(user_data->host, host, sizeof(user_data->host) - 1);
+	strncpy(user_data->port, port, sizeof(user_data->port) - 1);
 
 	muggle_evloop_set_data(evloop, user_data);
 
@@ -176,11 +207,6 @@ cleanup:
 	if (user_data) {
 		free(user_data);
 		user_data = NULL;
-	}
-
-	if (conn_ctx) {
-		free(conn_ctx);
-		conn_ctx = NULL;
 	}
 
 	if (ssl_ctx) {
@@ -289,6 +315,23 @@ void ssl_client_on_close(muggle_event_loop_t *evloop,
 	}
 
 	LOG_DEBUG("on close: remote_addr=%s", session->remote_addr);
+
+	// reconnect
+	client_connect_cfg_t *con_cfg =
+		(client_connect_cfg_t *)malloc(sizeof(client_connect_cfg_t));
+	if (con_cfg == NULL) {
+		LOG_ERROR("failed allocate space for reconnect config");
+		muggle_evloop_exit(evloop);
+	} else {
+		memset(con_cfg, 0, sizeof(*con_cfg));
+		strncpy(con_cfg->host, data->host, sizeof(con_cfg->host) - 1);
+		strncpy(con_cfg->port, data->port, sizeof(con_cfg->port) - 1);
+		con_cfg->evloop = evloop;
+
+		muggle_thread_t th;
+		muggle_thread_create(&th, conn_thread_routine, con_cfg);
+		muggle_thread_detach(&th);
+	}
 }
 
 void ssl_client_on_release(muggle_event_loop_t *evloop,
