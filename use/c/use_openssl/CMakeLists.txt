@@ -23,6 +23,9 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 # set use folder in vs
 set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 
+# build with sanitizer
+option(BUILD_SANITIZER "Compile with sanitizer" OFF)
+
 #------------------------------
 # dependencies
 message("------------------------------")
@@ -89,6 +92,20 @@ function(add_example name folder)
 
 	target_compile_definitions(${name}
 		PUBLIC MUGGLE_HOLD_LOG_MACRO)
+
+	if (BUILD_SANITIZER)
+		if ((CMAKE_CXX_COMPILER_ID STREQUAL "GNU") OR
+			(CMAKE_CXX_COMPILER_ID STREQUAL "Clang"))
+			target_compile_options(${name} PUBLIC
+				-fsanitize=undefined
+				-fsanitize=address
+				-fsanitize=leak)
+			target_link_options(${name} PUBLIC
+				-fsanitize=undefined
+				-fsanitize=address
+				-fsanitize=leak)
+		endif()
+	endif()
 
 	# install
 	install(TARGETS ${name}

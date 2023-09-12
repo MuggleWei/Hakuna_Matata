@@ -181,10 +181,12 @@ cleanup:
 		user_data = NULL;
 	}
 
-	if (listen_ctx) {
-		free(listen_ctx);
-		listen_ctx = NULL;
-	}
+	// NOTE:
+	//   listen context already add into eventloop, don't need free it manaual
+	// if (listen_ctx) {
+	//     free(listen_ctx);
+	//     listen_ctx = NULL;
+	// }
 
 	if (ssl_ctx) {
 		SSL_CTX_free(ssl_ctx);
