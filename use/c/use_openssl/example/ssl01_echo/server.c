@@ -29,6 +29,48 @@ static muggle_socket_context_t *tcp_listen(const char *host, const char *port)
 	return ctx;
 }
 
+static EVP_PKEY *load_enc_key(const char *pem_filepath, const char *passphrase)
+{
+	BIO *bp = NULL;
+	EVP_PKEY *key = NULL;
+	int ret = 0;
+
+	bp = BIO_new(BIO_s_file());
+	if (bp == NULL) {
+		LOG_ERROR("BIO_new(BIO_s_file()) failed: %s",
+				  ERR_reason_error_string(ERR_get_error()));
+		goto load_enc_key_exit;
+	}
+
+	ret = BIO_read_filename(bp, pem_filepath);
+	if (ret <= 0) {
+		LOG_ERROR("BIO_read_filename failed: %s",
+				  ERR_reason_error_string(ERR_get_error()));
+		goto load_enc_key_exit;
+	}
+
+	key = EVP_PKEY_new();
+	if (key == NULL) {
+		LOG_ERROR("failed allocate key structure");
+		goto load_enc_key_exit;
+	}
+
+	if (PEM_read_bio_PrivateKey(bp, &key, NULL, (void *)passphrase) == NULL) {
+		LOG_ERROR("PEM_read_bio_PrivateKey failed: %s",
+				  ERR_reason_error_string(ERR_get_error()));
+		EVP_PKEY_free(key);
+		key = NULL;
+		goto load_enc_key_exit;
+	}
+
+load_enc_key_exit:
+	if (bp) {
+		BIO_free(bp);
+	}
+
+	return key;
+}
+
 static SSL_CTX *new_server_ssl_ctx()
 {
 	SSL_CTX *ctx = SSL_CTX_new(TLS_server_method());
@@ -39,7 +81,6 @@ static SSL_CTX *new_server_ssl_ctx()
 	}
 
 	const char *crt_filepath = "certs/server.crt";
-	const char *key_filepath = "certs/server.key";
 	if (SSL_CTX_use_certificate_chain_file(ctx, crt_filepath) <= 0) {
 		LOG_ERROR("failed set certificate chain file: "
 				  "crt_filepath=%s, err=%s",
@@ -47,13 +88,37 @@ static SSL_CTX *new_server_ssl_ctx()
 		SSL_CTX_free(ctx);
 		return NULL;
 	}
-	if (SSL_CTX_use_PrivateKey_file(ctx, key_filepath, SSL_FILETYPE_PEM) <= 0) {
-		LOG_ERROR("failed set private key file: "
-				  "key_filepath=%s, err=%s",
-				  key_filepath, ERR_reason_error_string(ERR_get_error()));
+
+	// load key
+	// const char *key_filepath = "certs/server.key";
+	// if (SSL_CTX_use_PrivateKey_file(ctx, key_filepath, SSL_FILETYPE_PEM) <= 0) {
+	//     LOG_ERROR("failed set private key file: "
+	//               "key_filepath=%s, err=%s",
+	//               key_filepath, ERR_reason_error_string(ERR_get_error()));
+	//     SSL_CTX_free(ctx);
+	//     return NULL;
+	// }
+
+	// load encrypted key
+	const char *enc_key_filepath = "certs/server.enc.key";
+	const char *passphrase = "hello123";
+	EVP_PKEY *pkey = load_enc_key(enc_key_filepath, passphrase);
+	if (pkey == NULL) {
+		LOG_ERROR("failed load enc private key: key_filepath=%s",
+				  enc_key_filepath);
 		SSL_CTX_free(ctx);
 		return NULL;
 	}
+	LOG_DEBUG("success load encrypted private key");
+
+	if (SSL_CTX_use_PrivateKey(ctx, pkey) != 1) {
+		LOG_ERROR("failed use private key: key_filepath=%s, err=%s",
+				  enc_key_filepath, ERR_reason_error_string(ERR_get_error()));
+		SSL_CTX_free(ctx);
+		return NULL;
+	}
+
+	EVP_PKEY_free(pkey);
 
 	LOG_DEBUG("success new ssl context");
 
