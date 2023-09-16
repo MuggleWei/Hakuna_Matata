@@ -114,6 +114,7 @@ static SSL_CTX *new_server_ssl_ctx()
 	if (SSL_CTX_use_PrivateKey(ctx, pkey) != 1) {
 		LOG_ERROR("failed use private key: key_filepath=%s, err=%s",
 				  enc_key_filepath, ERR_reason_error_string(ERR_get_error()));
+		EVP_PKEY_free(pkey);
 		SSL_CTX_free(ctx);
 		return NULL;
 	}
