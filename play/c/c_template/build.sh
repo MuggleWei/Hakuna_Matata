@@ -81,11 +81,6 @@ if [ $build_mugglec -eq 1 ]; then
 	fi
 	cd $mugglec_build_dir
 
-	# patch for mac
-	if [[ "$OSTYPE" == "darwin"* ]]; then
-		cp $origin_dir/patch_scripts/mugglec_cmakelist.txt $mugglec_src_dir/CMakeLists.txt
-	fi
-
 	cmake \
 		-S $mugglec_src_dir -B $mugglec_build_dir \
 		-DCMAKE_BUILD_TYPE=$BUILD_TYPE \
