@@ -1,9 +1,20 @@
 SOURCE_DIR = .
 BUILD_DIR = build
 
+BUILD_FLAGS = 
+LD_FLAGS = 
+
 BUILD_TYPE_LOWER = $(shell echo $(BUILD_TYPE) | tr '[:upper:]' '[:lower:]')
 ifeq ($(BUILD_TYPE_LOWER), debug)
-	BUILD_FLAGS = --gstabs
+	BUILD_FLAGS += --gstabs
+endif
+
+ifeq ($(target), x64)
+	BUILD_FLAGS += --64
+	LD_FLAGS = -m elf_x86_64
+else ifeq ($(target), x86)
+	BUILD_FLAGS += --32
+	LD_FLAGS = -m elf_i386
 endif
 
 EXECUTABLE = hello
@@ -16,7 +27,7 @@ $(BUILD_DIR):
 	mkdir -p $(BUILD_DIR)
 
 $(BUILD_DIR)/$(EXECUTABLE): $(OBJECTS)
-	ld $^ -o $@
+	ld $(LD_FLAGS) $^ -o $@
 
 $(OBJECTS): $(BUILD_DIR)/%.o: $(SOURCE_DIR)/%.s
 	as $(BUILD_FLAGS) $< -o $@ -alh=$(basename $@).lst
