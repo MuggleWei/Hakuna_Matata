@@ -1,0 +1,41 @@
+name: cpp_template
+variables:
+  - build_type: release
+  - mugglecpp_tag: v1.2.3
+  - googletest_tag: v1.13.0
+source:
+  maintainer: mugglewei
+  name: cpp_template
+  tag: 1.0.0
+build:
+  fat_pkg: true
+deps:
+  - maintainer: mugglewei
+    name: mugglecpp
+    tag: ${mugglecpp_tag}
+test_deps:
+  - maintainer: google
+    name: googletest
+    tag: ${googletest_tag}
+jobs:
+  build:
+    steps:
+      - name: build
+        run: >
+          cd ${HPB_TASK_DIR};
+          cmake \
+            -S ${HPB_SOURCE_PATH} \
+            -B ${HPB_BUILD_DIR} \
+            -DCMAKE_BUILD_TYPE=${build_type} \
+            -DBUILD_TESTING=ON \
+            -DBUILD_SHARED_LIBS=ON \
+            -DCMAKE_INSTALL_PREFIX=${HPB_OUTPUT_DIR} \
+            -DCMAKE_PREFIX_PATH="${HPB_DEPS_DIR};${HPB_TEST_DEPS_DIR}";
+          cmake --build ${HPB_BUILD_DIR} --target install;
+  package:
+    needs: [build]
+    steps:
+      - name: pack
+        run: >
+          cd ${HPB_TASK_DIR};
+          hpb pack --copy-to ${HPB_ROOT_DIR}/dist;
