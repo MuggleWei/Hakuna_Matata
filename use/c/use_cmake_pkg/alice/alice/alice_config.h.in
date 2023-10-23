@@ -1,0 +1,8 @@
+#ifndef ALICE_CONFIG_H_
+#define ALICE_CONFIG_H_
+
+#cmakedefine ALICE_VERSION "@ALICE_VERSION@"
+
+#cmakedefine01 ALICE_USE_DLL
+
+#endif // !ALICE_CONFIG_H_

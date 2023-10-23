@@ -1,0 +1,10 @@
+@PACKAGE_INIT@
+
+include("${CMAKE_CURRENT_LIST_DIR}/daveTargets.cmake")
+
+find_package(foo 1 REQUIRED)
+if (foo_FOUND)
+	message("found foo: ${foo_DIR}")
+else()
+	message(FATAL_ERROR "Failed found foo")
+endif()

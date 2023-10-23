@@ -1,0 +1,8 @@
+#ifndef DAVE_CONFIG_H_
+#define DAVE_CONFIG_H_
+
+#cmakedefine DAVE_VERSION "@DAVE_VERSION@"
+
+#cmakedefine01 DAVE_USE_DLL
+
+#endif // !DAVE_CONFIG_H_
