@@ -43,6 +43,36 @@ endif()
 set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 
 ################################
+# options
+################################
+set(CMAKE_BUILD_TYPE "Release" CACHE STRING
+	"Build type (Debug, RelWithDebInfo, Release, MinSizeRel or Coverage)")
+option(BUILD_SHARED_LIBS "Build shared or static library" ON)
+if (BUILD_SHARED_LIBS)
+	set(BOB_LIB_TYPE SHARED)
+	set(BOB_USE_DLL ON)
+else()
+	set(BOB_LIB_TYPE STATIC)
+	set(BOB_USE_DLL OFF)
+endif()
+
+################################
+# version
+################################
+
+file(STRINGS "version.txt" bob_version)
+string(REPLACE "-" ";" bob_semver_ext ${bob_version})
+list(GET bob_semver_ext 0 bob_semver)
+string(REPLACE "." ";" bob_semver_list ${bob_semver})
+
+list(GET bob_semver_list 0 BOB_VERSION_MAJOR)
+list(GET bob_semver_list 1 BOB_VERSION_MINOR)
+list(GET bob_semver_list 2 BOB_VERSION_PATCH)
+
+set(BOB_VERSION "${bob_version}")
+set(BOB_SOVERSION "${BOB_VERSION_MAJOR}")
+
+################################
 # deps
 ################################
 find_package(foo REQUIRED)
@@ -56,16 +86,28 @@ endif()
 # project
 ################################
 
-set(BOB_VERSION "1.0.0")
-set(BOB_SOVERSION "1")
+message("--------------------------------")
+message("# bob version: ${BOB_VERSION}")
+message("# CMAKE_BUILD_TYPE: ${CMAKE_BUILD_TYPE}")
+message("# BUILD_SHARED_LIBS: ${BUILD_SHARED_LIBS}")
+message("--------------------------------")
 
-FILE(GLOB_RECURSE bob_src_c "${CMAKE_CURRENT_LIST_DIR}/bob/*.c")
-FILE(GLOB_RECURSE bob_src_h "${CMAKE_CURRENT_LIST_DIR}/bob/*.h")
-add_library(bob SHARED
+set(bob_src_dir ${CMAKE_CURRENT_LIST_DIR})
+set(bob_gen_dir ${CMAKE_BINARY_DIR}/gen)
+configure_file(
+	"${bob_src_dir}/bob/bob_config.h.in"
+	"${bob_gen_dir}/bob/bob_config.h")
+
+FILE(GLOB_RECURSE bob_src_c "${bob_src_dir}/bob/*.c")
+FILE(GLOB_RECURSE bob_src_h "${bob_src_dir}/bob/*.h")
+FILE(GLOB_RECURSE bob_gen_h "${bob_gen_dir}/bob/*.h")
+add_library(bob ${BOB_LIB_TYPE}
 	${bob_src_c}
-	${bob_src_h})
+	${bob_src_h}
+	${bob_gen_h})
 target_include_directories(bob PUBLIC 
-	$<BUILD_INTERFACE:${CMAKE_CURRENT_LIST_DIR}>
+	$<BUILD_INTERFACE:${bob_src_dir}>
+	$<BUILD_INTERFACE:${bob_gen_dir}>
 	$<INSTALL_INTERFACE:include>)
 target_link_libraries(bob PRIVATE foo)
 set_target_properties(bob PROPERTIES
@@ -73,6 +115,7 @@ set_target_properties(bob PROPERTIES
 	DEBUG_POSTFIX d
 	VERSION ${BOB_VERSION}
 	SOVERSION ${BOB_SOVERSION})
+target_compile_definitions(bob PRIVATE BAR_EXPORTS)
 
 if (${CMAKE_C_COMPILER_ID} STREQUAL GNU)
 	target_link_options(bob PRIVATE "-Wl,--exclude-libs,ALL")
@@ -87,7 +130,7 @@ install(TARGETS bob
 	RUNTIME DESTINATION "${CMAKE_INSTALL_BINDIR}"
 	ARCHIVE DESTINATION "${CMAKE_INSTALL_LIBDIR}"
 	LIBRARY DESTINATION "${CMAKE_INSTALL_LIBDIR}")
-install(DIRECTORY "${CMAKE_CURRENT_LIST_DIR}/bob"
+install(DIRECTORY "${bob_src_dir}/bob" "${bob_gen_dir}/bob"
 	DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}"
 	FILES_MATCHING
 	PATTERN "*.h"
@@ -95,7 +138,6 @@ install(DIRECTORY "${CMAKE_CURRENT_LIST_DIR}/bob"
 
 # cmake package config
 set(bob_export_dir "${CMAKE_INSTALL_LIBDIR}/cmake/bob")
-set(bob_gen_dir "${CMAKE_CURRENT_BINARY_DIR}/generated")
 
 install(EXPORT bobTargets
 	FILE bobTargets.cmake

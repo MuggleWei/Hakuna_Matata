@@ -2,8 +2,7 @@
 #include "foo/foo.h"
 #include "bar/bar.h"
 #include "bob/bob.h"
-
-#define BAZ_VERSION "1.0.0"
+#include "baz/baz_config.h"
 
 int main()
 {

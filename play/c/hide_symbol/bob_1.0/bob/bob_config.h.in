@@ -1,0 +1,22 @@
+#ifndef BOB_CONFIG_IN_H_
+#define BOB_CONFIG_IN_H_
+
+#cmakedefine BOB_VERSION "@BOB_VERSION@"
+
+#cmakedefine BOB_USE_DLL
+
+#if defined(BOB_USE_DLL)
+	#if defined(_WIN32)
+		#ifdef BOB_EXPORTS
+			#define BOB_EXPORT __declspec(dllexport)
+		#else
+			#define BOB_EXPORT __declspec(dllimport)
+		#endif
+	#else
+		#define BOB_EXPORT __attribute__ ((visibility ("default")))
+	#endif
+#else
+	#define BOB_EXPORT
+#endif
+
+#endif // !BOB_CONFIG_IN_H_

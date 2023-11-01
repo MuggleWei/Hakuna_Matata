@@ -43,6 +43,36 @@ endif()
 set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 
 ################################
+# options
+################################
+set(CMAKE_BUILD_TYPE "Release" CACHE STRING
+	"Build type (Debug, RelWithDebInfo, Release, MinSizeRel or Coverage)")
+option(BUILD_SHARED_LIBS "Build shared or static library" ON)
+if (BUILD_SHARED_LIBS)
+	set(BAR_LIB_TYPE SHARED)
+	set(BAR_USE_DLL ON)
+else()
+	set(BAR_LIB_TYPE STATIC)
+	set(BAR_USE_DLL OFF)
+endif()
+
+################################
+# version
+################################
+
+file(STRINGS "version.txt" bar_version)
+string(REPLACE "-" ";" bar_semver_ext ${bar_version})
+list(GET bar_semver_ext 0 bar_semver)
+string(REPLACE "." ";" bar_semver_list ${bar_semver})
+
+list(GET bar_semver_list 0 BAR_VERSION_MAJOR)
+list(GET bar_semver_list 1 BAR_VERSION_MINOR)
+list(GET bar_semver_list 2 BAR_VERSION_PATCH)
+
+set(BAR_VERSION "${bar_version}")
+set(BAR_SOVERSION "${BAR_VERSION_MAJOR}")
+
+################################
 # deps
 ################################
 find_package(foo REQUIRED)
@@ -56,26 +86,36 @@ endif()
 # project
 ################################
 
-set(BAR_VERSION "1.0.0")
-set(BAR_SOVERSION "1")
+message("--------------------------------")
+message("# bar version: ${BAR_VERSION}")
+message("# CMAKE_BUILD_TYPE: ${CMAKE_BUILD_TYPE}")
+message("# BUILD_SHARED_LIBS: ${BUILD_SHARED_LIBS}")
+message("--------------------------------")
 
-FILE(GLOB_RECURSE bar_src_c "${CMAKE_CURRENT_LIST_DIR}/bar/*.c")
-FILE(GLOB_RECURSE bar_src_h "${CMAKE_CURRENT_LIST_DIR}/bar/*.h")
-add_library(bar SHARED
+set(bar_src_dir ${CMAKE_CURRENT_LIST_DIR})
+set(bar_gen_dir ${CMAKE_BINARY_DIR}/gen)
+configure_file(
+	"${bar_src_dir}/bar/bar_config.h.in"
+	"${bar_gen_dir}/bar/bar_config.h")
+
+FILE(GLOB_RECURSE bar_src_c "${bar_src_dir}/bar/*.c")
+FILE(GLOB_RECURSE bar_src_h "${bar_src_dir}/bar/*.h")
+FILE(GLOB_RECURSE bar_gen_h "${bar_gen_dir}/bar/*.h")
+add_library(bar ${BAR_LIB_TYPE}
 	${bar_src_c}
-	${bar_src_h})
+	${bar_src_h}
+	${bar_gen_h})
 target_include_directories(bar PUBLIC 
-	$<BUILD_INTERFACE:${CMAKE_CURRENT_LIST_DIR}>
+	$<BUILD_INTERFACE:${bar_src_dir}>
+	$<BUILD_INTERFACE:${bar_gen_dir}>
 	$<INSTALL_INTERFACE:include>)
 target_link_libraries(bar PRIVATE foo)
 set_target_properties(bar PROPERTIES
 	LINKER_LANGUAGE C
 	DEBUG_POSTFIX d
-	#C_VISIBILITY_PRESET hidden
-	#CXX_VISIBILITY_PRESET hidden
-	#VISIBILITY_INLINES_HIDDEN YES
 	VERSION ${BAR_VERSION}
 	SOVERSION ${BAR_SOVERSION})
+target_compile_definitions(bar PRIVATE BAR_EXPORTS)
 
 # install
 include(GNUInstallDirs)
@@ -84,7 +124,7 @@ install(TARGETS bar
 	RUNTIME DESTINATION "${CMAKE_INSTALL_BINDIR}"
 	ARCHIVE DESTINATION "${CMAKE_INSTALL_LIBDIR}"
 	LIBRARY DESTINATION "${CMAKE_INSTALL_LIBDIR}")
-install(DIRECTORY "${CMAKE_CURRENT_LIST_DIR}/bar"
+install(DIRECTORY "${bar_src_dir}/bar" "${bar_gen_dir}/bar"
 	DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}"
 	FILES_MATCHING
 	PATTERN "*.h"
@@ -92,7 +132,6 @@ install(DIRECTORY "${CMAKE_CURRENT_LIST_DIR}/bar"
 
 # cmake package config
 set(bar_export_dir "${CMAKE_INSTALL_LIBDIR}/cmake/bar")
-set(bar_gen_dir "${CMAKE_CURRENT_BINARY_DIR}/generated")
 
 install(EXPORT barTargets
 	FILE barTargets.cmake

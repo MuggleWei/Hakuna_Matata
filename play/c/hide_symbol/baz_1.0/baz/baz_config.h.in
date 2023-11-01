@@ -1,0 +1,6 @@
+#ifndef BAZ_CONFIG_IN_H_
+#define BAZ_CONFIG_IN_H_
+
+#cmakedefine BAZ_VERSION "@BAZ_VERSION@"
+
+#endif // !BAZ_CONFIG_IN_H_

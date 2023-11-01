@@ -43,19 +43,62 @@ endif()
 set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 
 ################################
+# options
+################################
+set(CMAKE_BUILD_TYPE "Release" CACHE STRING
+	"Build type (Debug, RelWithDebInfo, Release, MinSizeRel or Coverage)")
+option(BUILD_SHARED_LIBS "Build shared or static library" ON)
+if (BUILD_SHARED_LIBS)
+	set(FOO_LIB_TYPE SHARED)
+	set(FOO_USE_DLL ON)
+else()
+	set(FOO_LIB_TYPE STATIC)
+	set(FOO_USE_DLL OFF)
+endif()
+option(FOO_VISIBILITY_HIDDEN "set foo default visibility=hidden" OFF)
+
+################################
+# version
+################################
+
+file(STRINGS "version.txt" foo_version)
+string(REPLACE "-" ";" foo_semver_ext ${foo_version})
+list(GET foo_semver_ext 0 foo_semver)
+string(REPLACE "." ";" foo_semver_list ${foo_semver})
+
+list(GET foo_semver_list 0 FOO_VERSION_MAJOR)
+list(GET foo_semver_list 1 FOO_VERSION_MINOR)
+list(GET foo_semver_list 2 FOO_VERSION_PATCH)
+
+set(FOO_VERSION "${foo_version}")
+set(FOO_SOVERSION "${FOO_VERSION_MAJOR}")
+
+################################
 # project
 ################################
 
-set(FOO_VERSION "1.1.0")
-set(FOO_SOVERSION "1")
+message("--------------------------------")
+message("# foo version: ${FOO_VERSION}")
+message("# CMAKE_BUILD_TYPE: ${CMAKE_BUILD_TYPE}")
+message("# BUILD_SHARED_LIBS: ${BUILD_SHARED_LIBS}")
+message("--------------------------------")
 
-FILE(GLOB_RECURSE foo_src_c "${CMAKE_CURRENT_LIST_DIR}/foo/*.c")
-FILE(GLOB_RECURSE foo_src_h "${CMAKE_CURRENT_LIST_DIR}/foo/*.h")
-add_library(foo SHARED
+set(foo_src_dir ${CMAKE_CURRENT_LIST_DIR})
+set(foo_gen_dir ${CMAKE_BINARY_DIR}/gen)
+configure_file(
+	"${foo_src_dir}/foo/foo_config.h.in"
+	"${foo_gen_dir}/foo/foo_config.h")
+
+FILE(GLOB_RECURSE foo_src_c "${foo_src_dir}/foo/*.c")
+FILE(GLOB_RECURSE foo_src_h "${foo_src_dir}/foo/*.h")
+FILE(GLOB_RECURSE foo_gen_h "${foo_gen_dir}/foo/*.h")
+add_library(foo ${FOO_LIB_TYPE}
 	${foo_src_c}
-	${foo_src_h})
+	${foo_src_h}
+	${foo_gen_h})
 target_include_directories(foo PUBLIC 
-	$<BUILD_INTERFACE:${CMAKE_CURRENT_LIST_DIR}>
+	$<BUILD_INTERFACE:${foo_src_dir}>
+	$<BUILD_INTERFACE:${foo_gen_dir}>
 	$<INSTALL_INTERFACE:include>)
 set_target_properties(foo PROPERTIES
 	LINKER_LANGUAGE C
@@ -63,6 +106,13 @@ set_target_properties(foo PROPERTIES
 	POSITION_INDEPENDENT_CODE ON
 	VERSION ${FOO_VERSION}
 	SOVERSION ${FOO_SOVERSION})
+if (FOO_VISIBILITY_HIDDEN)
+	set_target_properties(foo PROPERTIES
+		C_VISIBILITY_PRESET hidden
+		CXX_VISIBILITY_PRESET hidden
+		VISIBILITY_INLINES_HIDDEN YES)
+endif()
+target_compile_definitions(foo PRIVATE FOO_EXPORTS)
 
 # install
 include(GNUInstallDirs)
@@ -71,7 +121,7 @@ install(TARGETS foo
 	RUNTIME DESTINATION "${CMAKE_INSTALL_BINDIR}"
 	ARCHIVE DESTINATION "${CMAKE_INSTALL_LIBDIR}"
 	LIBRARY DESTINATION "${CMAKE_INSTALL_LIBDIR}")
-install(DIRECTORY "${CMAKE_CURRENT_LIST_DIR}/foo"
+install(DIRECTORY "${foo_src_dir}/foo" "${foo_gen_dir}/foo"
 	DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}"
 	FILES_MATCHING
 	PATTERN "*.h"
@@ -79,7 +129,6 @@ install(DIRECTORY "${CMAKE_CURRENT_LIST_DIR}/foo"
 
 # cmake package config
 set(foo_export_dir "${CMAKE_INSTALL_LIBDIR}/cmake/foo")
-set(foo_gen_dir "${CMAKE_CURRENT_BINARY_DIR}/generated")
 
 install(EXPORT fooTargets
 	FILE fooTargets.cmake

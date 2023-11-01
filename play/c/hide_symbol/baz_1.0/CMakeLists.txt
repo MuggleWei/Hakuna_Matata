@@ -67,16 +67,42 @@ else()
 endif()
 
 ################################
+# version
+################################
+
+file(STRINGS "version.txt" baz_version)
+string(REPLACE "-" ";" baz_semver_ext ${baz_version})
+list(GET baz_semver_ext 0 baz_semver)
+string(REPLACE "." ";" baz_semver_list ${baz_semver})
+
+list(GET baz_semver_list 0 BAZ_VERSION_MAJOR)
+list(GET baz_semver_list 1 BAZ_VERSION_MINOR)
+list(GET baz_semver_list 2 BAZ_VERSION_PATCH)
+
+set(BAZ_VERSION "${baz_version}")
+set(BAZ_SOVERSION "${BAZ_VERSION_MAJOR}")
+
+################################
 # project
 ################################
 
-set(BAZ_VERSION "1.0.0")
-set(BAZ_SOVERSION "1")
+message("--------------------------------")
+message("# baz version: ${BAZ_VERSION}")
+message("# CMAKE_BUILD_TYPE: ${CMAKE_BUILD_TYPE}")
+message("--------------------------------")
 
-FILE(GLOB_RECURSE baz_src_c "${CMAKE_CURRENT_LIST_DIR}/baz/*.c")
-add_executable(baz ${baz_src_c})
+set(baz_src_dir ${CMAKE_CURRENT_LIST_DIR})
+set(baz_gen_dir ${CMAKE_BINARY_DIR}/gen)
+configure_file(
+	"${baz_src_dir}/baz/baz_config.h.in"
+	"${baz_gen_dir}/baz/baz_config.h")
+
+FILE(GLOB_RECURSE baz_src_c "${baz_src_dir}/baz/*.c")
+FILE(GLOB_RECURSE baz_gen_h "${baz_gen_dir}/baz/*.h")
+add_executable(baz ${baz_src_c} ${baz_gen_h})
 target_include_directories(baz PUBLIC 
-	$<BUILD_INTERFACE:${CMAKE_CURRENT_LIST_DIR}>
+	$<BUILD_INTERFACE:${baz_src_dir}>
+	$<BUILD_INTERFACE:${baz_gen_dir}>
 	$<INSTALL_INTERFACE:include>)
 target_link_libraries(baz PRIVATE foo bar bob)
 set_target_properties(baz PROPERTIES
@@ -86,8 +112,7 @@ set_target_properties(baz PROPERTIES
 	SOVERSION ${BAZ_SOVERSION})
 set_target_properties(baz
 	PROPERTIES
-	INSTALL_RPATH "\$ORIGIN/../lib"
-	)
+	INSTALL_RPATH "\$ORIGIN/../lib")
 
 # install
 include(GNUInstallDirs)

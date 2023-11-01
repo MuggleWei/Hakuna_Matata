@@ -28,7 +28,7 @@ fi
 mkdir build
 cmake \
 	-S $foo_1_1_dir -B $foo_1_1_dir/build \
-	-DBUILD_SHARED_LIBS=static \
+	-DBUILD_SHARED_LIBS=ON \
 	-DCMAKE_BUILD_TYPE=$BUILD_TYPE \
 	-DCMAKE_INSTALL_PREFIX=$foo_1_1_dir/dist
 cmake --build $foo_1_1_dir/build --target install
@@ -47,9 +47,10 @@ fi
 mkdir build
 cmake \
 	-S $foo_1_0_dir -B $foo_1_0_dir/build \
-	-DBUILD_SHARED_LIBS=static \
+	-DBUILD_SHARED_LIBS=OFF \
 	-DCMAKE_BUILD_TYPE=$BUILD_TYPE \
-	-DCMAKE_INSTALL_PREFIX=$foo_1_0_dir/dist
+	-DCMAKE_INSTALL_PREFIX=$foo_1_0_dir/dist \
+	-DFOO_VISIBILITY_HIDDEN=ON
 cmake --build $foo_1_0_dir/build --target install
 
 # build bar 1.0
@@ -66,7 +67,7 @@ fi
 mkdir build
 cmake \
 	-S $bar_1_0_dir -B $bar_1_0_dir/build \
-	-DBUILD_SHARED_LIBS=static \
+	-DBUILD_SHARED_LIBS=ON \
 	-DCMAKE_BUILD_TYPE=$BUILD_TYPE \
 	-DCMAKE_PREFIX_PATH=$foo_1_0_dir/dist \
 	-DCMAKE_INSTALL_PREFIX=$bar_1_0_dir/dist
@@ -86,7 +87,7 @@ fi
 mkdir build
 cmake \
 	-S $foo_1_2_dir -B $foo_1_2_dir/build \
-	-DBUILD_SHARED_LIBS=static \
+	-DBUILD_SHARED_LIBS=OFF \
 	-DCMAKE_BUILD_TYPE=$BUILD_TYPE \
 	-DCMAKE_INSTALL_PREFIX=$foo_1_2_dir/dist
 cmake --build $foo_1_2_dir/build --target install
@@ -105,7 +106,7 @@ fi
 mkdir build
 cmake \
 	-S $bob_1_0_dir -B $bob_1_0_dir/build \
-	-DBUILD_SHARED_LIBS=static \
+	-DBUILD_SHARED_LIBS=ON \
 	-DCMAKE_BUILD_TYPE=$BUILD_TYPE \
 	-DCMAKE_PREFIX_PATH=$foo_1_2_dir/dist \
 	-DCMAKE_INSTALL_PREFIX=$bob_1_0_dir/dist
@@ -125,9 +126,8 @@ fi
 mkdir build
 cmake \
 	-S $baz_1_0_dir -B $baz_1_0_dir/build \
-	-DBUILD_SHARED_LIBS=static \
 	-DCMAKE_BUILD_TYPE=$BUILD_TYPE \
-	-DCMAKE_PREFIX_PATH="$bar_1_0_dir/dist;$foo_1_1_dir/dist;$bob_1_0_dir/dist" \
+	-DCMAKE_PREFIX_PATH="$foo_1_1_dir/dist;$bar_1_0_dir/dist;$bob_1_0_dir/dist" \
 	-DCMAKE_INSTALL_PREFIX=$baz_1_0_dir/dist
 cmake --build $baz_1_0_dir/build --target install
 
