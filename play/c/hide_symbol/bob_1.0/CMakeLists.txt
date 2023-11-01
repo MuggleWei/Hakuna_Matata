@@ -115,7 +115,7 @@ set_target_properties(bob PROPERTIES
 	DEBUG_POSTFIX d
 	VERSION ${BOB_VERSION}
 	SOVERSION ${BOB_SOVERSION})
-target_compile_definitions(bob PRIVATE BAR_EXPORTS)
+target_compile_definitions(bob PRIVATE BOB_EXPORTS)
 
 if (${CMAKE_C_COMPILER_ID} STREQUAL GNU)
 	target_link_options(bob PRIVATE "-Wl,--exclude-libs,ALL")
