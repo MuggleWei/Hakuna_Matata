@@ -43,73 +43,60 @@ endif()
 set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 
 ################################
-# deps
-################################
-find_package(foo REQUIRED)
-if (foo_FOUND)
-	message("Found foo: ${foo_DIR}")
-else()
-	message(FATAL_ERROR "failed found foo")
-endif()
-
-################################
 # project
 ################################
 
-set(BAR_VERSION "1.0.0")
-set(BAR_SOVERSION "1")
+set(FOO_VERSION "1.2.0")
+set(FOO_SOVERSION "1")
 
-FILE(GLOB_RECURSE bar_src_c "${CMAKE_CURRENT_LIST_DIR}/bar/*.c")
-FILE(GLOB_RECURSE bar_src_h "${CMAKE_CURRENT_LIST_DIR}/bar/*.h")
-add_library(bar SHARED
-	${bar_src_c}
-	${bar_src_h})
-target_include_directories(bar PUBLIC 
+FILE(GLOB_RECURSE foo_src_c "${CMAKE_CURRENT_LIST_DIR}/foo/*.c")
+FILE(GLOB_RECURSE foo_src_h "${CMAKE_CURRENT_LIST_DIR}/foo/*.h")
+add_library(foo STATIC
+	${foo_src_c}
+	${foo_src_h})
+target_include_directories(foo PUBLIC 
 	$<BUILD_INTERFACE:${CMAKE_CURRENT_LIST_DIR}>
 	$<INSTALL_INTERFACE:include>)
-target_link_libraries(bar PRIVATE foo)
-set_target_properties(bar PROPERTIES
+set_target_properties(foo PROPERTIES
 	LINKER_LANGUAGE C
 	DEBUG_POSTFIX d
-	#C_VISIBILITY_PRESET hidden
-	#CXX_VISIBILITY_PRESET hidden
-	#VISIBILITY_INLINES_HIDDEN YES
-	VERSION ${BAR_VERSION}
-	SOVERSION ${BAR_SOVERSION})
+	POSITION_INDEPENDENT_CODE ON
+	VERSION ${FOO_VERSION}
+	SOVERSION ${FOO_SOVERSION})
 
 # install
 include(GNUInstallDirs)
-install(TARGETS bar
-	EXPORT barTargets
+install(TARGETS foo
+	EXPORT fooTargets
 	RUNTIME DESTINATION "${CMAKE_INSTALL_BINDIR}"
 	ARCHIVE DESTINATION "${CMAKE_INSTALL_LIBDIR}"
 	LIBRARY DESTINATION "${CMAKE_INSTALL_LIBDIR}")
-install(DIRECTORY "${CMAKE_CURRENT_LIST_DIR}/bar"
+install(DIRECTORY "${CMAKE_CURRENT_LIST_DIR}/foo"
 	DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}"
 	FILES_MATCHING
 	PATTERN "*.h"
 	PATTERN "*.hpp")
 
 # cmake package config
-set(bar_export_dir "${CMAKE_INSTALL_LIBDIR}/cmake/bar")
-set(bar_gen_dir "${CMAKE_CURRENT_BINARY_DIR}/generated")
+set(foo_export_dir "${CMAKE_INSTALL_LIBDIR}/cmake/foo")
+set(foo_gen_dir "${CMAKE_CURRENT_BINARY_DIR}/generated")
 
-install(EXPORT barTargets
-	FILE barTargets.cmake
-	DESTINATION "${bar_export_dir}")
+install(EXPORT fooTargets
+	FILE fooTargets.cmake
+	DESTINATION "${foo_export_dir}")
 
 include(CMakePackageConfigHelpers)
 configure_package_config_file(
-	"${CMAKE_CURRENT_LIST_DIR}/cmake/barConfig.cmake.in"
-    "${bar_gen_dir}/barConfig.cmake"
-	INSTALL_DESTINATION "${bar_export_dir}"
+	"${CMAKE_CURRENT_LIST_DIR}/cmake/fooConfig.cmake.in"
+    "${foo_gen_dir}/fooConfig.cmake"
+	INSTALL_DESTINATION "${foo_export_dir}"
     NO_SET_AND_CHECK_MACRO
     NO_CHECK_REQUIRED_COMPONENTS_MACRO)
 write_basic_package_version_file(
-    "${bar_gen_dir}/barConfigVersion.cmake"
-	VERSION ${BAR_VERSION}
+    "${foo_gen_dir}/fooConfigVersion.cmake"
+	VERSION ${FOO_VERSION}
     COMPATIBILITY SameMajorVersion)
 install(FILES
-	"${bar_gen_dir}/barConfig.cmake"
-	"${bar_gen_dir}/barConfigVersion.cmake"
-	DESTINATION ${bar_export_dir})
+	"${foo_gen_dir}/fooConfig.cmake"
+	"${foo_gen_dir}/fooConfigVersion.cmake"
+	DESTINATION ${foo_export_dir})

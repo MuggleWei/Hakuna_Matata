@@ -56,60 +56,63 @@ endif()
 # project
 ################################
 
-set(BAR_VERSION "1.0.0")
-set(BAR_SOVERSION "1")
+set(BOB_VERSION "1.0.0")
+set(BOB_SOVERSION "1")
 
-FILE(GLOB_RECURSE bar_src_c "${CMAKE_CURRENT_LIST_DIR}/bar/*.c")
-FILE(GLOB_RECURSE bar_src_h "${CMAKE_CURRENT_LIST_DIR}/bar/*.h")
-add_library(bar SHARED
-	${bar_src_c}
-	${bar_src_h})
-target_include_directories(bar PUBLIC 
+FILE(GLOB_RECURSE bob_src_c "${CMAKE_CURRENT_LIST_DIR}/bob/*.c")
+FILE(GLOB_RECURSE bob_src_h "${CMAKE_CURRENT_LIST_DIR}/bob/*.h")
+add_library(bob SHARED
+	${bob_src_c}
+	${bob_src_h})
+target_include_directories(bob PUBLIC 
 	$<BUILD_INTERFACE:${CMAKE_CURRENT_LIST_DIR}>
 	$<INSTALL_INTERFACE:include>)
-target_link_libraries(bar PRIVATE foo)
-set_target_properties(bar PROPERTIES
+target_link_libraries(bob PRIVATE foo)
+set_target_properties(bob PROPERTIES
 	LINKER_LANGUAGE C
 	DEBUG_POSTFIX d
-	#C_VISIBILITY_PRESET hidden
-	#CXX_VISIBILITY_PRESET hidden
-	#VISIBILITY_INLINES_HIDDEN YES
-	VERSION ${BAR_VERSION}
-	SOVERSION ${BAR_SOVERSION})
+	VERSION ${BOB_VERSION}
+	SOVERSION ${BOB_SOVERSION})
+
+if (${CMAKE_C_COMPILER_ID} STREQUAL GNU)
+	target_link_options(bob PRIVATE "-Wl,--exclude-libs,ALL")
+elseif (${CMAKE_C_COMPILER_ID} STREQUAL Clang)
+	target_link_options(bob PRIVATE "-Wl,--exclude-libs,ALL")
+endif()
 
 # install
 include(GNUInstallDirs)
-install(TARGETS bar
-	EXPORT barTargets
+install(TARGETS bob
+	EXPORT bobTargets
 	RUNTIME DESTINATION "${CMAKE_INSTALL_BINDIR}"
 	ARCHIVE DESTINATION "${CMAKE_INSTALL_LIBDIR}"
 	LIBRARY DESTINATION "${CMAKE_INSTALL_LIBDIR}")
-install(DIRECTORY "${CMAKE_CURRENT_LIST_DIR}/bar"
+install(DIRECTORY "${CMAKE_CURRENT_LIST_DIR}/bob"
 	DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}"
 	FILES_MATCHING
 	PATTERN "*.h"
 	PATTERN "*.hpp")
 
 # cmake package config
-set(bar_export_dir "${CMAKE_INSTALL_LIBDIR}/cmake/bar")
-set(bar_gen_dir "${CMAKE_CURRENT_BINARY_DIR}/generated")
+set(bob_export_dir "${CMAKE_INSTALL_LIBDIR}/cmake/bob")
+set(bob_gen_dir "${CMAKE_CURRENT_BINARY_DIR}/generated")
 
-install(EXPORT barTargets
-	FILE barTargets.cmake
-	DESTINATION "${bar_export_dir}")
+install(EXPORT bobTargets
+	FILE bobTargets.cmake
+	DESTINATION "${bob_export_dir}")
 
 include(CMakePackageConfigHelpers)
 configure_package_config_file(
-	"${CMAKE_CURRENT_LIST_DIR}/cmake/barConfig.cmake.in"
-    "${bar_gen_dir}/barConfig.cmake"
-	INSTALL_DESTINATION "${bar_export_dir}"
+	"${CMAKE_CURRENT_LIST_DIR}/cmake/bobConfig.cmake.in"
+    "${bob_gen_dir}/bobConfig.cmake"
+	INSTALL_DESTINATION "${bob_export_dir}"
     NO_SET_AND_CHECK_MACRO
     NO_CHECK_REQUIRED_COMPONENTS_MACRO)
 write_basic_package_version_file(
-    "${bar_gen_dir}/barConfigVersion.cmake"
-	VERSION ${BAR_VERSION}
+    "${bob_gen_dir}/bobConfigVersion.cmake"
+	VERSION ${BOB_VERSION}
     COMPATIBILITY SameMajorVersion)
 install(FILES
-	"${bar_gen_dir}/barConfig.cmake"
-	"${bar_gen_dir}/barConfigVersion.cmake"
-	DESTINATION ${bar_export_dir})
+	"${bob_gen_dir}/bobConfig.cmake"
+	"${bob_gen_dir}/bobConfigVersion.cmake"
+	DESTINATION ${bob_export_dir})

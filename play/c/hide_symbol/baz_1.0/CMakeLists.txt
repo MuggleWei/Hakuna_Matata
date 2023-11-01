@@ -45,6 +45,13 @@ set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 ################################
 # deps
 ################################
+find_package(foo REQUIRED)
+if (foo_FOUND)
+	message("Found foo: ${foo_DIR}")
+else()
+	message(FATAL_ERROR "failed found foo")
+endif()
+
 find_package(bar REQUIRED)
 if (bar_FOUND)
 	message("Found bar: ${bar_DIR}")
@@ -52,11 +59,11 @@ else()
 	message(FATAL_ERROR "failed found bar")
 endif()
 
-find_package(foo REQUIRED)
-if (foo_FOUND)
-	message("Found foo: ${foo_DIR}")
+find_package(bob REQUIRED)
+if (bob_FOUND)
+	message("Found bob: ${bob_DIR}")
 else()
-	message(FATAL_ERROR "failed found foo")
+	message(FATAL_ERROR "failed found bob")
 endif()
 
 ################################
@@ -71,7 +78,7 @@ add_executable(baz ${baz_src_c})
 target_include_directories(baz PUBLIC 
 	$<BUILD_INTERFACE:${CMAKE_CURRENT_LIST_DIR}>
 	$<INSTALL_INTERFACE:include>)
-target_link_libraries(baz PRIVATE bar foo)
+target_link_libraries(baz PRIVATE foo bar bob)
 set_target_properties(baz PROPERTIES
 	LINKER_LANGUAGE C
 	DEBUG_POSTFIX d
@@ -89,5 +96,6 @@ install(TARGETS baz
 	RUNTIME DESTINATION "${CMAKE_INSTALL_BINDIR}"
 	ARCHIVE DESTINATION "${CMAKE_INSTALL_LIBDIR}"
 	LIBRARY DESTINATION "${CMAKE_INSTALL_LIBDIR}")
-install(IMPORTED_RUNTIME_ARTIFACTS bar)
 install(IMPORTED_RUNTIME_ARTIFACTS foo)
+install(IMPORTED_RUNTIME_ARTIFACTS bar)
+install(IMPORTED_RUNTIME_ARTIFACTS bob)

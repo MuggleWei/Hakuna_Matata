@@ -6,6 +6,6 @@
 
 void bar_say_hello(const char *name)
 {
-	fprintf(stdout, "bar call foo, it's bar %s\n", BAR_VERSION);
+	fprintf(stdout, "bar[%s] call | ", BAR_VERSION);
 	foo_say_hello(name);
 }
