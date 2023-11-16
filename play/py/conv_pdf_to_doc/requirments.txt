@@ -1,0 +1,2 @@
+pdf2docx==0.5.6
+docxcompose==1.4.0
