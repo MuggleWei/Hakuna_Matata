@@ -76,56 +76,10 @@ message("# find openssl include dir: ${OPENSSL_INCLUDE_DIR}")
 message("# find openssl libraries: ${OPENSSL_LIBRARIES}")
 
 # mariadb
-include(FindPackageHandleStandardArgs)
-
-find_path(MARIADB_CONN_C_INCLUDE_DIR
-	NAMES mysql.h mariadb_version.h
-	PATH_SUFFIXES mariadb
-	NO_SYSTEM_ENVIRONMENT_PATH
-	NO_CMAKE_SYSTEM_PATH)
-find_library(MARIADB_CONN_C_LIBRARIES
-	NAMES mariadb
-	PATH_SUFFIXES lib/mariadb
-	NO_SYSTEM_ENVIRONMENT_PATH
-	NO_CMAKE_SYSTEM_PATH)
-
-find_package_handle_standard_args(MARIADB_CONN_C
-	REQUIRED_VARS MARIADB_CONN_C_INCLUDE_DIR MARIADB_CONN_C_LIBRARIES)
-
-if (MARIADB_CONN_C_FOUND)
-	message("# find mariadb_conn_c include dir: ${MARIADB_CONN_C_INCLUDE_DIR}")
-	message("# find mariadb_conn_c libraries: ${MARIADB_CONN_C_LIBRARIES}")
-else()
-	message("${MARIADB_CONN_C_INCLUDE_DIR}")
-	message("${MARIADB_CONN_C_LIBRARIES}")
-	message(FATAL_ERROR "Failed found mariadb")
-endif()
+include(${CMAKE_CURRENT_LIST_DIR}/cmake/Findmariadb_connector_c.cmake)
 
 # mariadb
-include(FindPackageHandleStandardArgs)
-
-find_path(MARIADB_CONN_CPP_INCLUDE_DIR
-	NAMES conncpp.hpp
-	PATH_SUFFIXES mariadb
-	NO_SYSTEM_ENVIRONMENT_PATH
-	NO_CMAKE_SYSTEM_PATH)
-find_library(MARIADB_CONN_CPP_LIBRARIES
-	NAMES mariadbcpp
-	PATH_SUFFIXES lib/mariadb
-	NO_SYSTEM_ENVIRONMENT_PATH
-	NO_CMAKE_SYSTEM_PATH)
-
-find_package_handle_standard_args(MARIADB_CONN_CPP
-	REQUIRED_VARS MARIADB_CONN_CPP_INCLUDE_DIR MARIADB_CONN_CPP_LIBRARIES)
-
-if (MARIADB_CONN_CPP_FOUND)
-	message("# find mariadb_conn_cpp include dir: ${MARIADB_CONN_CPP_INCLUDE_DIR}")
-	message("# find mariadb_conn_cpp libraries: ${MARIADB_CONN_CPP_LIBRARIES}")
-else()
-	message("${MARIADB_CONN_CPP_INCLUDE_DIR}")
-	message("${MARIADB_CONN_CPP_LIBRARIES}")
-	message(FATAL_ERROR "Failed found mariadb_conn_cpp")
-endif()
+include(${CMAKE_CURRENT_LIST_DIR}/cmake/Findmariadb_connector_cpp.cmake)
 
 ################################
 # examples
@@ -172,8 +126,8 @@ function(add_example name folder)
 		mugglec
 		${ZLIB_LIBRARIES}
 		${OPENSSL_LIBRARIES}
-		${MARIADB_CONN_C_LIBRARIES}
-		${MARIADB_CONN_CPP_LIBRARIES})
+		${MARIADB_CONNECTOR_C_TARGET_NAME}
+		${MARIADB_CONNECTOR_CPP_TARGET_NAME})
 	target_compile_definitions(${name} PRIVATE MUGGLE_HOLD_LOG_MACRO)
 
 	install(TARGETS ${name} 

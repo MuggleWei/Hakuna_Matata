@@ -1,4 +1,3 @@
-#include <bits/chrono.h>
 #include <chrono>
 #include "mariadb/conncpp.hpp"
 #include "muggle/c/muggle_c.h"
