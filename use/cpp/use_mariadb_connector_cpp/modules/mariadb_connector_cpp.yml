@@ -28,6 +28,7 @@ jobs:
             -DCMAKE_INSTALL_PREFIX=${HPB_OUTPUT_DIR} \
             -DUSE_SYSTEM_INSTALLED_LIB=ON \
             -DMARIADB_LINK_DYNAMIC=ON \
+            -DWITH_MSI=OFF \
             -DWITH_UNIT_TESTS=OFF;
           cmake --build ${HPB_BUILD_DIR} --config ${build_type};
           cmake --build ${HPB_BUILD_DIR} --config ${build_type} --target install;
