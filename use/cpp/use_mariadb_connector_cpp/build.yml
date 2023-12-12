@@ -1,8 +1,8 @@
 name: use_mariadb_connector_cpp
 variables:
   - build_type: release
-  - mugglec_tag: v1.2.4
-  - mariadb_connector_cpp_tag: private-1.1.2-patch.1
+  - mugglec_tag: v1.4.4
+  - mariadb_connector_cpp_tag: private-1.1.2-patch.2
 source:
   maintainer: mugglewei
   name: use_mariadb_connector_cpp

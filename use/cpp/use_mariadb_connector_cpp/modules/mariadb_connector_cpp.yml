@@ -1,9 +1,9 @@
 name: mariadb_connector_cpp
 variables:
   - build_type: release
-  - mariadb_connector_cpp_tag: private-1.1.2-patch.1
+  - mariadb_connector_cpp_tag: private-1.1.2-patch.2
   - mariadb_connector_cpp_url: https://github.com/MuggleWei/mariadb-connector-cpp.git
-  - mariadb_connector_c: v3.3.5
+  - mariadb_connector_c: v3.3.8
 source:
   maintainer: mugglewei
   name: mariadb_connector_cpp

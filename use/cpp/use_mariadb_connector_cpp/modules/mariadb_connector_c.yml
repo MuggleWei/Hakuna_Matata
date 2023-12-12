@@ -1,9 +1,9 @@
 name: mariadb_connector_c
 variables:
   - build_type: release
-  - mariadb_connector_c_tag: v3.3.5
+  - mariadb_connector_c_tag: v3.3.8
   - mariadb_connector_c_url: https://github.com/mariadb-corporation/mariadb-connector-c.git
-  - openssl_tag: openssl-3.1.1
+  - openssl_tag: openssl-3.1.4
   - zlib_tag: v1.2.13
 source:
   maintainer: mariadb
