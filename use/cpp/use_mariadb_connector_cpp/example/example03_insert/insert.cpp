@@ -1,11 +1,17 @@
 #include "mariadb/conncpp.hpp"
 #include "muggle/c/muggle_c.h"
+#include <stdlib.h>
 
 struct sys_args {
 	char host[64];
 	unsigned int port;
 	char user[32];
 	char passwd[32];
+	char plugin_dir[128];
+};
+
+enum {
+	OPT_VAL_PLUGIN_DIR = 1001,
 };
 
 bool parse_args(int argc, char **argv, struct sys_args *args)
@@ -20,6 +26,7 @@ bool parse_args(int argc, char **argv, struct sys_args *args)
 			{ "user", required_argument, NULL, 'u' },
 			{ "password", required_argument, NULL, 'p' },
 			{ "port", required_argument, NULL, 'P' },
+			{ "plugin_dir", required_argument, NULL, OPT_VAL_PLUGIN_DIR },
 		};
 
 		c = getopt_long(argc, argv, "h:u:p:P:", long_options, &option_index);
@@ -38,6 +45,9 @@ bool parse_args(int argc, char **argv, struct sys_args *args)
 		} break;
 		case 'P': {
 			muggle_str_tou(optarg, &args->port, 10);
+		} break;
+		case OPT_VAL_PLUGIN_DIR: {
+			strncpy(args->plugin_dir, optarg, sizeof(args->plugin_dir) - 1);
 		} break;
 		}
 	}
@@ -146,6 +156,12 @@ void run(struct sys_args &args)
 		{ "useTls", "false" },
 		{ "useCharacterEncoding", "utf8mb4" },
 	});
+#if MUGGLE_PLATFORM_WINDOWS
+#else
+	if (args.plugin_dir[0] != '\0') {
+		setenv("MARIADB_PLUGIN_DIR", args.plugin_dir, 1);
+	}
+#endif
 
 	sql::Driver *driver = sql::mariadb::get_driver_instance();
 
@@ -171,11 +187,12 @@ int main(int argc, char *argv[])
 		LOG_ERROR("Error SQLException: %s", e.what());
 		LOG_ERROR(
 			"\n"
-			"Usage: %s -h <host> -u <user> -p <password> -P <port>\n"
-			"\t-h, --host      connect to host\n"
-			"\t-u, --user      user for login\n"
-			"\t-p, --password  password to use when connecting to server\n"
-			"\t-P, --port      port number to use for connection\n"
+			"Usage: %s <options>\n"
+			"\t-h, --host        connect to host\n"
+			"\t-u, --user        user for login\n"
+			"\t-p, --password    password to use when connecting to server\n"
+			"\t-P, --port        port number to use for connection\n"
+			"\t  , --plugin_dir  plugin directory\n"
 			"",
 			argv[0]);
 		exit(EXIT_FAILURE);
