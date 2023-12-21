@@ -14,90 +14,25 @@ typedef struct {
 static uint32_t iter_cnt = 10000;
 static int ready = 0;
 
-muggle_thread_ret_t increase_foo_a(void *args)
+muggle_thread_ret_t increase(void *args)
 {
+	int *p = (int*)args;
+
 	while (muggle_atomic_load(&ready, muggle_memory_order_relaxed) == 0) {
 	}
 
 	struct timespec ts1, ts2;
 	muggle_realtime_get(ts1);
 
-	foo_t *foo = (foo_t *)args;
 	for (uint32_t i = 0; i < iter_cnt; ++i) {
-		muggle_atomic_fetch_add(&foo->a, 1, muggle_memory_order_relaxed);
+		muggle_atomic_fetch_add(p, 1, muggle_memory_order_relaxed);
 	}
 
 	muggle_realtime_get(ts2);
 
 	unsigned long long elapsed =
 		(ts2.tv_sec - ts1.tv_sec) * 1000000000 + ts2.tv_nsec - ts1.tv_nsec;
-	LOG_INFO("increase_foo_a use time: %.3f us", elapsed / 1000.0);
-
-	return NULL;
-}
-
-muggle_thread_ret_t increase_foo_b(void *args)
-{
-	while (muggle_atomic_load(&ready, muggle_memory_order_relaxed) == 0) {
-	}
-
-	struct timespec ts1, ts2;
-	muggle_realtime_get(ts1);
-
-	foo_t *foo = (foo_t *)args;
-	for (uint32_t i = 0; i < iter_cnt; ++i) {
-		muggle_atomic_fetch_add(&foo->b, 1, muggle_memory_order_relaxed);
-	}
-
-	muggle_realtime_get(ts2);
-
-	unsigned long long elapsed =
-		(ts2.tv_sec - ts1.tv_sec) * 1000000000 + ts2.tv_nsec - ts1.tv_nsec;
-	LOG_INFO("increase_foo_a use time: %.3f us", elapsed / 1000.0);
-
-	return NULL;
-}
-
-muggle_thread_ret_t increase_bar_a(void *args)
-{
-	while (muggle_atomic_load(&ready, muggle_memory_order_relaxed) == 0) {
-	}
-
-	struct timespec ts1, ts2;
-	muggle_realtime_get(ts1);
-
-	bar_t *bar = (bar_t *)args;
-	for (uint32_t i = 0; i < iter_cnt; ++i) {
-		muggle_atomic_fetch_add(&bar->a, 1, muggle_memory_order_relaxed);
-	}
-
-	muggle_realtime_get(ts2);
-
-	unsigned long long elapsed =
-		(ts2.tv_sec - ts1.tv_sec) * 1000000000 + ts2.tv_nsec - ts1.tv_nsec;
-	LOG_INFO("increase_bar_a use time: %.3f us", elapsed / 1000.0);
-
-	return NULL;
-}
-
-muggle_thread_ret_t increase_bar_b(void *args)
-{
-	while (muggle_atomic_load(&ready, muggle_memory_order_relaxed) == 0) {
-	}
-
-	struct timespec ts1, ts2;
-	muggle_realtime_get(ts1);
-
-	bar_t *bar = (bar_t *)args;
-	for (uint32_t i = 0; i < iter_cnt; ++i) {
-		muggle_atomic_fetch_add(&bar->b, 1, muggle_memory_order_relaxed);
-	}
-
-	muggle_realtime_get(ts2);
-
-	unsigned long long elapsed =
-		(ts2.tv_sec - ts1.tv_sec) * 1000000000 + ts2.tv_nsec - ts1.tv_nsec;
-	LOG_INFO("increase_bar_a use time: %.3f us", elapsed / 1000.0);
+	LOG_INFO("increase use time: %.3f us", elapsed / 1000.0);
 
 	return NULL;
 }
@@ -121,8 +56,8 @@ int main(int argc, char *argv[])
 		LOG_INFO("--------------------------------");
 
 		muggle_thread_t th1, th2;
-		muggle_thread_create(&th1, increase_foo_a, &data);
-		muggle_thread_create(&th2, increase_foo_b, &data);
+		muggle_thread_create(&th1, increase, &data.a);
+		muggle_thread_create(&th2, increase, &data.b);
 
 		muggle_msleep(100);
 		muggle_atomic_store(&ready, 1, muggle_memory_order_relaxed);
@@ -145,8 +80,8 @@ int main(int argc, char *argv[])
 		LOG_INFO("--------------------------------");
 
 		muggle_thread_t th1, th2;
-		muggle_thread_create(&th1, increase_bar_a, &data);
-		muggle_thread_create(&th2, increase_bar_b, &data);
+		muggle_thread_create(&th1, increase, &data.a);
+		muggle_thread_create(&th2, increase, &data.b);
 
 		muggle_msleep(100);
 		muggle_atomic_store(&ready, 1, muggle_memory_order_relaxed);
