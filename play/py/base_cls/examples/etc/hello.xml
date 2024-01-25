@@ -1,0 +1,7 @@
+<Hello>
+    <List>
+        <Item k="foo" v="5" />
+        <Item k="bar" v="6" />
+        <Item k="baz" v="8" />
+    </List>
+</Hello>
