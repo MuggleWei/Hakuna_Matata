@@ -14,6 +14,7 @@ import (
 	"example.com/hello/db"
 	"github.com/go-sql-driver/mysql"
 	"github.com/gorilla/mux"
+	"github.com/rs/cors"
 	log "github.com/sirupsen/logrus"
 	"gopkg.in/natefinch/lumberjack.v2"
 )
@@ -130,8 +131,28 @@ func main() {
 	router.Use(controller.MiddlewareTimeElapsed)
 	router.Use(controller.MiddlewareGZip)
 
+	var handler http.Handler
+	handler = router
+
+	allowCORS := false
+	if allowCORS {
+		c := cors.New(cors.Options{
+			AllowedOrigins: []string{"*"},
+			AllowedMethods: []string{
+				http.MethodGet,
+				http.MethodPost,
+				http.MethodDelete,
+				http.MethodOptions,
+			},
+			AllowedHeaders:   []string{"*"},
+			AllowCredentials: true,
+		})
+		handler = c.Handler(handler)
+		log.Warning("allow CORS")
+	}
+
 	srv := &http.Server{
-		Handler:      router,
+		Handler:      handler,
 		Addr:         cfg.Config.Http.Addr,
 		WriteTimeout: 15 * time.Second,
 		ReadTimeout:  15 * time.Second,
