@@ -128,6 +128,7 @@ func main() {
 	albumRouter.HandleFunc("/query_by_price", albumController.QueryByPrice).Methods("POST")
 
 	router.Use(controller.MiddlewareTimeElapsed)
+	router.Use(controller.MiddlewareGZip)
 
 	srv := &http.Server{
 		Handler:      router,
