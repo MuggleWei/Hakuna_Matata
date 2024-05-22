@@ -1,0 +1,7 @@
+#ifndef PFPA_CONFIG_H_IN_
+#define PFPA_CONFIG_H_IN_
+
+#cmakedefine PFPA_VERSION "@PFPA_VERSION@"
+#cmakedefine PFPA_USE_DLL
+
+#endif // !PFPA_CONFIG_H_IN_
