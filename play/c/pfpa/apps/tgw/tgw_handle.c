@@ -19,20 +19,40 @@ typedef struct {
 
 #pragma pack(pop)
 
-void on_tcp_packet(void *ctx, pfpa_packet_context_t *packet_ctx,
-				   pfpa_tcp_session_t *session)
+void handle_tgw_immediate(pfpa_context_t *ctx,
+						  pfpa_packet_context_t *packet_ctx,
+						  pfpa_tcp_session_t *session)
 {
-	MUGGLE_UNUSED(packet_ctx);
+	MUGGLE_UNUSED(session);
 
-	pfpa_context_t *p_ctx = (pfpa_context_t *)ctx;
-	pfpa_addr_t *match_addr = (pfpa_addr_t *)p_ctx->user_data;
-
-	if (memcmp(&session->key.src, match_addr, sizeof(pfpa_addr_t)) != 0 &&
-		memcmp(&session->key.dst, match_addr, sizeof(pfpa_addr_t)) != 0) {
+	if (packet_ctx->datalen < sizeof(tgw_hdr_t)) {
+		LOG_WARNING("[%u] datalen < sizeof(tgw_hdr_t)", ctx->total_pack);
 		return;
 	}
 
+	tgw_hdr_t *hdr = (tgw_hdr_t *)packet_ctx->data;
+	hdr->MsgType = MUGGLE_ENDIAN_SWAP_32(hdr->MsgType);
+	hdr->BodyLength = MUGGLE_ENDIAN_SWAP_32(hdr->BodyLength);
+
+	if (packet_ctx->datalen ==
+		sizeof(tgw_hdr_t) + hdr->BodyLength + sizeof(tgw_tail_t)) {
+		fprintf(ctx->fp, "  - TGW|MsgType=%u;BodyLength=%u\n", hdr->MsgType,
+				hdr->BodyLength);
+		fflush(ctx->fp);
+	} else {
+		LOG_WARNING("[%u] datalen is incorrect", ctx->total_pack);
+	}
+}
+
+void handle_tgw(pfpa_context_t *ctx, pfpa_packet_context_t *packet_ctx,
+				pfpa_tcp_session_t *session)
+{
 	muggle_bytes_buffer_t *bytes_buf = &session->bytes_buf;
+
+	if (muggle_bytes_buffer_writable(bytes_buf) >= (int)packet_ctx->datalen) {
+		muggle_bytes_buffer_write(bytes_buf, (int)packet_ctx->datalen,
+								  packet_ctx->data);
+	}
 
 	while (1) {
 		if (muggle_bytes_buffer_readable(bytes_buf) < (int)sizeof(tgw_hdr_t)) {
@@ -62,14 +82,40 @@ void on_tcp_packet(void *ctx, pfpa_packet_context_t *packet_ctx,
 		hdr->MsgType = MUGGLE_ENDIAN_SWAP_32(hdr->MsgType);
 		hdr->BodyLength = MUGGLE_ENDIAN_SWAP_32(hdr->BodyLength);
 
-		fprintf(p_ctx->fp, "  - TGW|MsgType=%u;BodyLength=%u\n", hdr->MsgType,
+		fprintf(ctx->fp, "  - TGW|MsgType=%u;BodyLength=%u\n", hdr->MsgType,
 				hdr->BodyLength);
-		fflush(p_ctx->fp);
+		fflush(ctx->fp);
 
 		if (buf) {
 			free(buf);
 		} else {
 			muggle_bytes_buffer_reader_move(bytes_buf, total_len);
 		}
+	}
+}
+
+void on_tcp_packet(pfpa_context_t *ctx, pfpa_packet_context_t *packet_ctx,
+				   pfpa_tcp_session_t *session)
+{
+	MUGGLE_UNUSED(packet_ctx);
+
+	if (packet_ctx->datalen == 0) {
+		return;
+	}
+
+	pfpa_addr_t *match_addr = (pfpa_addr_t *)ctx->user_data;
+
+	if (memcmp(&session->key.src, match_addr, sizeof(pfpa_addr_t)) != 0 &&
+		memcmp(&session->key.dst, match_addr, sizeof(pfpa_addr_t)) != 0) {
+		return;
+	}
+
+	if (1) {
+		// NOTE:
+		// assume network environment is good and half-packets/sticky-packets
+		// will not occur
+		handle_tgw_immediate(ctx, packet_ctx, session);
+	} else {
+		handle_tgw(ctx, packet_ctx, session);
 	}
 }

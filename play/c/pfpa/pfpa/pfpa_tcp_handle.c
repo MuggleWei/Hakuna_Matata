@@ -20,25 +20,6 @@ static void pfpa_tcp_output(pfpa_context_t *ctx,
 	fflush(ctx->fp);
 }
 
-static void pfpa_tcp_data_handle(pfpa_context_t *ctx,
-								 pfpa_packet_context_t *packet_ctx,
-								 struct tcphdr *tcp_hdr,
-								 pfpa_tcp_session_t *session)
-{
-	MUGGLE_UNUSED(tcp_hdr);
-
-	muggle_bytes_buffer_t *bytes_buf = &session->bytes_buf;
-	if (muggle_bytes_buffer_writable(bytes_buf) < (int)packet_ctx->datalen) {
-		return;
-	}
-	muggle_bytes_buffer_write(bytes_buf, (int)packet_ctx->datalen,
-							  packet_ctx->data);
-
-	if (ctx->tcp_callback) {
-		ctx->tcp_callback(ctx, packet_ctx, session);
-	}
-}
-
 void pfpa_tcp_packet_handle(pfpa_context_t *ctx,
 							pfpa_packet_context_t *packet_ctx,
 							struct tcphdr *tcp_hdr)
@@ -77,7 +58,9 @@ void pfpa_tcp_packet_handle(pfpa_context_t *ctx,
 	}
 
 	// handle tcp data
-	pfpa_tcp_data_handle(ctx, packet_ctx, tcp_hdr, session);
+	if (ctx->tcp_callback) {
+		ctx->tcp_callback(ctx, packet_ctx, session);
+	}
 
 	// handle seq
 	if (tcp_hdr->syn || tcp_hdr->fin) {

@@ -1,10 +1,10 @@
 #ifndef PFPA_STRUCT_H_
 #define PFPA_STRUCT_H_
 
-#include "pfpa/pfpa_macro.h"
-#include "muggle/c/net/socket.h"
 #include "muggle/c/dsaa/hash_table.h"
 #include "muggle/c/memory/bytes_buffer.h"
+#include "muggle/c/net/socket.h"
+#include "pfpa/pfpa_macro.h"
 #include <stdio.h>
 #include <time.h>
 
@@ -61,18 +61,20 @@ typedef struct {
 	uint32_t datalen;
 } pfpa_packet_context_t;
 
-typedef void (*pfpa_fn_tcp_callback)(void *ctx,
+struct pfpa_context;
+
+typedef void (*pfpa_fn_tcp_callback)(struct pfpa_context *ctx,
 									 pfpa_packet_context_t *packet_ctx,
 									 pfpa_tcp_session_t *session);
 
-typedef void (*pfpa_fn_udp_callback)(void *ctx,
+typedef void (*pfpa_fn_udp_callback)(struct pfpa_context *ctx,
 									 pfpa_packet_context_t *packet_ctx,
 									 void *data, uint32_t datalen);
 
 /**
  * @brief PFPA context
  */
-typedef struct {
+typedef struct pfpa_context {
 	FILE *fp; //!< output file
 	uint32_t total_pack; //!< total number of packet
 
