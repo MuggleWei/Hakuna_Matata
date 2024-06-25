@@ -1,0 +1,4 @@
+streamlit
+
+pyright
+pynvim
