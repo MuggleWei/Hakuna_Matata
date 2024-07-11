@@ -80,7 +80,7 @@ set(CMAKE_INSTALL_LIBDIR "lib")
 # set fetch context
 include(FetchContent)
 set(FETCHCONTENT_BASE_DIR ${CMAKE_BINARY_DIR}/_deps)
-cmake_policy(SET CMP0169 OLD)
+# cmake_policy(SET CMP0169 OLD)
 
 # set external project
 include(ExternalProject)
