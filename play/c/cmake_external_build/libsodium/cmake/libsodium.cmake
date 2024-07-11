@@ -21,18 +21,14 @@ if (MSVC)
 		else()
 			set(sodium_configure "StaticDebug")
 		endif()
+		set(sodium_type_dir_name Debug)
 	else()
 		if (BUILD_SHARED_LIBS)
 			set(sodium_configure "DynRelease")
 		else()
 			set(sodium_configure "StaticRelease")
 		endif()
-	endif()
-
-	if (BUILD_SHARED_LIBS)
-		set(sodium_dir_name dynamic)
-	else()
-		set(sodium_dir_name static)
+		set(sodium_type_dir_name Release)
 	endif()
 
 	if ((MSVC_VERSION GREATER_EQUAL 1920) AND (MSVC_VERSION LESS_EQUAL 1929))
@@ -48,16 +44,48 @@ if (MSVC)
 		message(FATAL_ERROR "unsupport visual studio version")
 	endif()
 
+	if (BUILD_SHARED_LIBS)
+		set(sodium_dir_name dynamic)
+	else()
+		set(sodium_dir_name static)
+	endif()
+
 	string(REPLACE "/" "\\" WIN_FETCHCONTENT_BASE_DIR ${FETCHCONTENT_BASE_DIR})
 
-	ExternalProject_Add(libsodium
-		SOURCE_DIR        "${FETCHCONTENT_BASE_DIR}/libsodium-src"
-		BINARY_DIR        "${FETCHCONTENT_BASE_DIR}/libsodium-build"
-		CONFIGURE_COMMAND ""
-		BUILD_COMMAND     msbuild /m /v:n /p:Configuration=${sodium_configure} /p:Platform=x64 ${WIN_FETCHCONTENT_BASE_DIR}\\libsodium-src\\builds\\msvc\\${sodium_vs}\\libsodium.sln
-		COMMAND           ${CMAKE_COMMAND} -E copy_directory ${WIN_FETCHCONTENT_BASE_DIR}\\libsodium-src\\bin\\x64\\Debug\\${sodium_vc}\\${sodium_dir_name}\\ ${CMAKE_INSTALL_PREFIX}
-		INSTALL_COMMAND   ""
-	)
+	if (BUILD_SHARED_LIBS)
+		ExternalProject_Add(libsodium
+			SOURCE_DIR        "${FETCHCONTENT_BASE_DIR}/libsodium-src"
+			BINARY_DIR        "${FETCHCONTENT_BASE_DIR}/libsodium-build"
+			CONFIGURE_COMMAND ""
+			BUILD_COMMAND     msbuild /m /v:n /p:Configuration=${sodium_configure} /p:Platform=x64 ${WIN_FETCHCONTENT_BASE_DIR}\\libsodium-src\\builds\\msvc\\${sodium_vs}\\libsodium.sln
+			COMMAND ${CMAKE_COMMAND} -E copy ${WIN_FETCHCONTENT_BASE_DIR}\\libsodium-src\\bin\\x64\\${sodium_type_dir_name}\\${sodium_vc}\\${sodium_dir_name}\\libsodium.dll ${CMAKE_INSTALL_PREFIX}\\bin\\libsodium.dll
+			COMMAND ${CMAKE_COMMAND} -E copy ${WIN_FETCHCONTENT_BASE_DIR}\\libsodium-src\\bin\\x64\\${sodium_type_dir_name}\\${sodium_vc}\\${sodium_dir_name}\\libsodium.lib ${CMAKE_INSTALL_PREFIX}\\lib\\libsodium.lib
+			# install headers
+			COMMAND ${CMAKE_COMMAND} -E copy_directory ${WIN_FETCHCONTENT_BASE_DIR}\\libsodium-src\\src\\libsodium\\include ${CMAKE_INSTALL_PREFIX}\\include
+			# remove private & make files
+			COMMAND ${CMAKE_COMMAND} -E remove_directory ${CMAKE_INSTALL_PREFIX}\\include\\sodium\\private
+			COMMAND ${CMAKE_COMMAND} -E remove  ${CMAKE_INSTALL_PREFIX}\\include\\sodium\\version.h.in
+			COMMAND ${CMAKE_COMMAND} -E remove  ${CMAKE_INSTALL_PREFIX}\\include\\Makefile.in
+			COMMAND ${CMAKE_COMMAND} -E remove  ${CMAKE_INSTALL_PREFIX}\\include\\Makefile.am
+			INSTALL_COMMAND   ""
+		)
+	else()
+		ExternalProject_Add(libsodium
+			SOURCE_DIR        "${FETCHCONTENT_BASE_DIR}/libsodium-src"
+			BINARY_DIR        "${FETCHCONTENT_BASE_DIR}/libsodium-build"
+			CONFIGURE_COMMAND ""
+			BUILD_COMMAND     msbuild /m /v:n /p:Configuration=${sodium_configure} /p:Platform=x64 ${WIN_FETCHCONTENT_BASE_DIR}\\libsodium-src\\builds\\msvc\\${sodium_vs}\\libsodium.sln
+			COMMAND ${CMAKE_COMMAND} -E copy ${WIN_FETCHCONTENT_BASE_DIR}\\libsodium-src\\bin\\x64\\${sodium_type_dir_name}\\${sodium_vc}\\${sodium_dir_name}\\libsodium.lib ${CMAKE_INSTALL_PREFIX}\\lib\\libsodium.lib
+			# install headers
+			COMMAND ${CMAKE_COMMAND} -E copy_directory ${WIN_FETCHCONTENT_BASE_DIR}\\libsodium-src\\src\\libsodium\\include ${CMAKE_INSTALL_PREFIX}\\include
+			# remove private & make files
+			COMMAND ${CMAKE_COMMAND} -E remove_directory ${CMAKE_INSTALL_PREFIX}\\include\\sodium\\private
+			COMMAND ${CMAKE_COMMAND} -E remove  ${CMAKE_INSTALL_PREFIX}\\include\\sodium\\version.h.in
+			COMMAND ${CMAKE_COMMAND} -E remove  ${CMAKE_INSTALL_PREFIX}\\include\\Makefile.in
+			COMMAND ${CMAKE_COMMAND} -E remove  ${CMAKE_INSTALL_PREFIX}\\include\\Makefile.am
+			INSTALL_COMMAND   ""
+		)
+	endif()
 else()
 	if (${sodium_build_type} STREQUAL "debug")
 		set(sodium_configure_debug "--enable-debug")
