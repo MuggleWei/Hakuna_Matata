@@ -29,7 +29,7 @@ echo "CMAKE_SHARED_LIB: $CMAKE_SHARED_LIBS"
 # variables
 origin_dir="$(dirname "$(readlink -f "$0")")"
 build_dir=$origin_dir/build
-deps_dir=$origin_dir/dist/deps
+deps_dir=$origin_dir/dist
 
 if [ -d $build_dir ]; then
 	rm -rf $build_dir

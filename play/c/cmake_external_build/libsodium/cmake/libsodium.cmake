@@ -76,7 +76,7 @@ else()
 	ExternalProject_Add(libsodium
 		SOURCE_DIR        "${FETCHCONTENT_BASE_DIR}/libsodium-src"
 		BINARY_DIR        "${FETCHCONTENT_BASE_DIR}/libsodium-build"
-		CONFIGURE_COMMAND ${FETCHCONTENT_BASE_DIR}/libsodium-src/configure --prefix=${CMAKE_INSTALL_PREFIX}/deps ${sodium_configure_debug} ${sodium_configure_shared} ${sodium_configure_static}
+		CONFIGURE_COMMAND ${FETCHCONTENT_BASE_DIR}/libsodium-src/configure --prefix=${CMAKE_INSTALL_PREFIX} ${sodium_configure_debug} ${sodium_configure_shared} ${sodium_configure_static}
 		BUILD_COMMAND     ${MAKE}
 		INSTALL_COMMAND   make install
 	)
