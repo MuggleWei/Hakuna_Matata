@@ -72,3 +72,19 @@ message("--------------------------------")
 ################################
 set(sodium_search_path ${CMAKE_PREFIX_PATH})
 include("${CMAKE_CURRENT_LIST_DIR}/cmake/FindSodium.cmake")
+
+################################
+# examples
+################################
+
+file(GLOB lib_h ${CMAKE_CURRENT_LIST_DIR}/src/foo_module/*.h)
+file(GLOB lib_c ${CMAKE_CURRENT_LIST_DIR}/src/foo_module/*.c)
+add_library(foo_module
+	${lib_h}
+	${lib_c})
+target_include_directories(foo_module PUBLIC ${CMAKE_CURRENT_LIST_DIR}/src/foo_module)
+target_link_libraries(foo_module PUBLIC sodium)
+
+add_executable(foo ${CMAKE_CURRENT_LIST_DIR}/src/foo/main.c)
+target_link_libraries(foo PUBLIC foo_module)
+add_dependencies(foo foo_module)

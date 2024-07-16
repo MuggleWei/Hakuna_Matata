@@ -96,15 +96,19 @@ else()
 	if (BUILD_SHARED_LIBS)
 		set(sodium_configure_shared "--enable-shared=yes")
 		set(sodium_configure_static "--enable-static=no")
+		set(sodium_configure_pic "")
+		set(sodium_configure_pie "")
 	else()
 		set(sodium_configure_shared "--enable-shared=no")
 		set(sodium_configure_static "--enable-static=yes")
+		set(sodium_configure_pic "--with-pic")
+		set(sodium_configure_pie "--disable-pie")
 	endif()
 
 	ExternalProject_Add(libsodium
 		SOURCE_DIR        "${FETCHCONTENT_BASE_DIR}/libsodium-src"
 		BINARY_DIR        "${FETCHCONTENT_BASE_DIR}/libsodium-build"
-		CONFIGURE_COMMAND ${FETCHCONTENT_BASE_DIR}/libsodium-src/configure --prefix=${CMAKE_INSTALL_PREFIX} ${sodium_configure_debug} ${sodium_configure_shared} ${sodium_configure_static}
+		CONFIGURE_COMMAND ${FETCHCONTENT_BASE_DIR}/libsodium-src/configure --prefix=${CMAKE_INSTALL_PREFIX} ${sodium_configure_debug} ${sodium_configure_shared} ${sodium_configure_static} ${sodium_configure_pic} ${sodium_configure_pie}
 		BUILD_COMMAND     ${MAKE}
 		INSTALL_COMMAND   make install
 	)
