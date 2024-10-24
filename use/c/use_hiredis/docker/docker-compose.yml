@@ -1,0 +1,10 @@
+version: "0.0.1"
+services:
+  redis:
+    image: "redis:7.0.4-alpine"
+    ports:
+      - "127.0.0.1:6379:6379"
+    volumes:
+      - ./docker_volume/redis/data:/data
+      - ./docker_volume/redis/logs:/logs
+    command: redis-server --requirepass wsz123
