@@ -12,7 +12,7 @@
     <artifactId>mix-javaxml-jdbc</artifactId>
 
     <properties>
-        <mysql.version>8.0.20</mysql.version>
+        <mysql.version>8.0.28</mysql.version>
         <druid.version>1.1.22</druid.version>
     </properties>
 
