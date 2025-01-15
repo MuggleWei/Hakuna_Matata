@@ -58,7 +58,7 @@ int main()
 	fprintf(stdout, "write data: %s\n", data->buf);
 
 	// write dummy data and watch size change in /dev/shm/${name}
-	int remain_size = SIZE - sizeof(uint32_t) - len;
+	int remain_size = SIZE - sizeof(data_t);
 	int n = remain_size / sizeof(data_t);
 	data_t *p = data + 1;
 	for (int i = 0; i < n; ++i) {
