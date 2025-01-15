@@ -15,7 +15,6 @@ typedef struct {
 
 int main()
 {
-	const int SIZE = 1024;
 	const char *name = "muggle_test_shm";
 
 	int shm_fd = shm_open(name, O_RDWR | O_EXCL, S_IRUSR | S_IWUSR);
@@ -25,7 +24,15 @@ int main()
 	}
 	fprintf(stdout, "success open shm, name=%s, fd=%d\n", name, shm_fd);
 
-	void *ptr = mmap(0, SIZE, PROT_READ | PROT_WRITE, MAP_SHARED, shm_fd, 0);
+	struct stat shm_fd_stat;
+	if (fstat(shm_fd, &shm_fd_stat) != 0) {
+		fprintf(stderr, "failed fstat(shm_fd)");
+		exit(EXIT_FAILURE);
+	}
+	fprintf(stdout, "get shm size: %lld\n", (long long)shm_fd_stat.st_size);
+
+	void *ptr = mmap(0, shm_fd_stat.st_size, PROT_READ | PROT_WRITE, MAP_SHARED,
+					 shm_fd, 0);
 	if (ptr == MAP_FAILED) {
 		fprintf(stderr, "failed mmap\n");
 		exit(EXIT_FAILURE);
@@ -35,7 +42,7 @@ int main()
 	data_t *data = (data_t *)ptr;
 	fprintf(stdout, "read data: [%d] %s\n", data->len, data->buf);
 
-	if (munmap(ptr, SIZE) == -1) {
+	if (munmap(ptr, shm_fd_stat.st_size) == -1) {
 		fprintf(stdout, "failed mnump\n");
 		exit(EXIT_FAILURE);
 	}

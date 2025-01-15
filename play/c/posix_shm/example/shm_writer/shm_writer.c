@@ -15,7 +15,7 @@ typedef struct {
 
 int main()
 {
-	const int SIZE = 1024;
+	const int SIZE = 32 * 1024 * 1024;
 	const char *name = "muggle_test_shm";
 
 	int shm_fd = shm_open(name, O_CREAT | O_RDWR | O_EXCL, S_IRUSR | S_IWUSR);
@@ -41,6 +41,7 @@ int main()
 	}
 	fprintf(stdout, "success mmap\n");
 
+	// write data
 	char buf[64];
 	time_t ts = time(NULL);
 	struct tm t;
@@ -49,12 +50,21 @@ int main()
 			 t.tm_mon + 1, t.tm_mday, t.tm_hour, t.tm_min, t.tm_sec);
 	uint32_t len = strlen(buf);
 
-	data_t *data = (data_t*)ptr;
+	data_t *data = (data_t *)ptr;
 	memset(data, 0, sizeof(*data));
 	data->len = len;
 	memcpy(data->buf, buf, len);
 
 	fprintf(stdout, "write data: %s\n", data->buf);
+
+	// write dummy data and watch size change in /dev/shm/${name}
+	int remain_size = SIZE - sizeof(uint32_t) - len;
+	int n = remain_size / sizeof(data_t);
+	data_t *p = data + 1;
+	for (int i = 0; i < n; ++i) {
+		memcpy(p, data, sizeof(data_t));
+		++p;
+	}
 
 	if (munmap(ptr, SIZE) == -1) {
 		fprintf(stdout, "failed mnump\n");
