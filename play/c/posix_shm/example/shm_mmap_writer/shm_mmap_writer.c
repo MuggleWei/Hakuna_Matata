@@ -1,11 +1,11 @@
-#include <stdio.h>
+#include <fcntl.h>
 #include <stdint.h>
+#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <time.h>
 #include <sys/mman.h>
 #include <sys/stat.h>
-#include <fcntl.h>
+#include <time.h>
 #include <unistd.h>
 
 typedef struct {
@@ -15,26 +15,37 @@ typedef struct {
 
 int main()
 {
-	const int SIZE = 32 * 1024 * 1024;
+	int shm_size = 32 * 1024 * 1024;
 	const char *name = "muggle_test_shm";
 
 	int shm_fd = shm_open(name, O_CREAT | O_RDWR | O_EXCL, S_IRUSR | S_IWUSR);
-	if (shm_fd == -1) {
-		fprintf(stderr, "failed shm_open: %s\n", name);
+	if (shm_fd != -1) {
+		if (ftruncate(shm_fd, shm_size) == -1) {
+			fprintf(stderr, "failed truncate shm\n");
+			exit(EXIT_FAILURE);
+		}
+		fprintf(stdout, "success create shm, name=%s, size=%d\n", name,
+				shm_size);
+	} else {
+		fprintf(stderr, "failed create shm: %s\n", name);
 		shm_fd = shm_open(name, O_RDWR | O_EXCL, S_IRUSR | S_IWUSR);
 		if (shm_fd == -1) {
 			fprintf(stdout, "failed shm_open: %s\n", name);
 			exit(EXIT_FAILURE);
 		}
-	} else {
-		if (ftruncate(shm_fd, SIZE) == -1) {
-			fprintf(stderr, "failed truncate shm\n");
+		fprintf(stdout, "success open shm, name=%s\n", name);
+
+		struct stat shm_fd_stat;
+		if (fstat(shm_fd, &shm_fd_stat) != 0) {
+			fprintf(stderr, "failed fstat(shm_fd)");
 			exit(EXIT_FAILURE);
 		}
+		shm_size = shm_fd_stat.st_size;
+		fprintf(stdout, "get shm size: %d\n", shm_size);
 	}
-	fprintf(stdout, "success open shm, name=%s, fd=%d\n", name, shm_fd);
 
-	void *ptr = mmap(0, SIZE, PROT_READ | PROT_WRITE, MAP_SHARED, shm_fd, 0);
+	void *ptr =
+		mmap(0, shm_size, PROT_READ | PROT_WRITE, MAP_SHARED, shm_fd, 0);
 	if (ptr == MAP_FAILED) {
 		fprintf(stderr, "failed mmap\n");
 		exit(EXIT_FAILURE);
@@ -58,7 +69,7 @@ int main()
 	fprintf(stdout, "write data: %s\n", data->buf);
 
 	// write dummy data and watch size change in /dev/shm/${name}
-	int remain_size = SIZE - sizeof(data_t);
+	int remain_size = shm_size - sizeof(data_t);
 	int n = remain_size / sizeof(data_t);
 	data_t *p = data + 1;
 	for (int i = 0; i < n; ++i) {
@@ -66,7 +77,7 @@ int main()
 		++p;
 	}
 
-	if (munmap(ptr, SIZE) == -1) {
+	if (munmap(ptr, shm_size) == -1) {
 		fprintf(stdout, "failed mnump\n");
 		exit(EXIT_FAILURE);
 	}
