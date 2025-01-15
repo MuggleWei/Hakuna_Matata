@@ -30,7 +30,7 @@ int main()
 		fprintf(stderr, "failed shmctl(IPC_RMID)");
 		exit(EXIT_FAILURE);
 	}
-	fprintf(stdout, "success rm shm, shm_id=%d", shm_id);
+	fprintf(stdout, "success rm shm, shm_id=%d\n", shm_id);
 
 	return 0;
 }

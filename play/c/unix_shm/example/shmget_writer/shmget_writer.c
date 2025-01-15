@@ -3,6 +3,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <time.h>
+#include <sys/errno.h>
 #include <sys/ipc.h>
 #include <sys/shm.h>
 #include <unistd.h>
@@ -11,6 +12,13 @@ typedef struct {
 	uint32_t len;
 	char buf[64];
 } data_t;
+
+void output_errmsg()
+{
+	char errmsg[512];
+	strerror_r(errno, errmsg, sizeof(errmsg));
+	fprintf(stderr, "errno: %d, errmsg: %s\n", errno, errmsg);
+}
 
 int main()
 {
@@ -24,7 +32,7 @@ int main()
 		exit(EXIT_FAILURE);
 	}
 
-	// create or open shm
+	// create or get shm
 	int shm_size = 32 * 1024 * 1024;
 	// int flag_privilege = SHM_R | SHM_W;
 	int flag_privilege = 0666;
@@ -33,9 +41,14 @@ int main()
 	if (shm_id != -1) {
 		fprintf(stdout, "success create shm, key=%d\n", shm_key);
 	} else {
+		fprintf(stderr, "failed create shm, key=%d, filepath=%s\n", shm_key,
+				filepath);
+		output_errmsg();
+
 		shm_id = shmget(shm_key, 0, 0);
 		if (shm_id == -1) {
 			fprintf(stderr, "failed get shm, key=%d\n", shm_key);
+			output_errmsg();
 			exit(EXIT_FAILURE);
 		}
 		fprintf(stdout, "success get shm id: %d\n", shm_id);
@@ -73,15 +86,6 @@ int main()
 	memcpy(data->buf, buf, len);
 
 	fprintf(stdout, "write data: %s\n", data->buf);
-
-	// write dummy data and watch size change in /dev/shm/${name}
-	int remain_size = shm_size - sizeof(data_t);
-	int n = remain_size / sizeof(data_t);
-	data_t *p = data + 1;
-	for (int i = 0; i < n; ++i) {
-		memcpy(p, data, sizeof(data_t));
-		++p;
-	}
 
 	// shm detach
 	if (shmdt(ptr) != 0) {

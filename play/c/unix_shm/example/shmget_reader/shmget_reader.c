@@ -1,6 +1,8 @@
-#include <stdio.h>
 #include <stdint.h>
+#include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
+#include <sys/errno.h>
 #include <sys/ipc.h>
 #include <sys/shm.h>
 #include <unistd.h>
@@ -9,6 +11,13 @@ typedef struct {
 	uint32_t len;
 	char buf[64];
 } data_t;
+
+void output_errmsg()
+{
+	char errmsg[512];
+	strerror_r(errno, errmsg, sizeof(errmsg));
+	fprintf(stderr, "errno: %d, errmsg: %s\n", errno, errmsg);
+}
 
 int main()
 {
@@ -22,11 +31,15 @@ int main()
 		exit(EXIT_FAILURE);
 	}
 
-	// open shm
+	// get shm
 	int shm_size = 0;
 	int shm_id = shmget(shm_key, 0, 0);
 	if (shm_id == -1) {
-		fprintf(stderr, "failed open shm, key=%d\n", shm_key);
+		fprintf(stderr, "failed get shm, key=%d, filepath=%s\n", shm_key,
+				filepath);
+
+		output_errmsg();
+
 		exit(EXIT_FAILURE);
 	}
 	fprintf(stdout, "success get shm id: %d\n", shm_id);
