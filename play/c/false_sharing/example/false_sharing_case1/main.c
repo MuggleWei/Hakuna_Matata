@@ -93,9 +93,9 @@ int main(int argc, char *argv[])
 
 #if MUGGLE_C_HAVE_ALIGNED_ALLOC
 	data_t *datas =
-		(data_t *)aligned_alloc(MUGGLE_CACHE_LINE_X2_SIZE, sizeof(data_t) * n);
+		(data_t *)aligned_alloc(MUGGLE_CACHE_LINE_SIZE, sizeof(data_t) * n);
 	thread_data_t *th_datas = (thread_data_t *)aligned_alloc(
-		MUGGLE_CACHE_LINE_X2_SIZE, sizeof(thread_data_t) * n);
+		MUGGLE_CACHE_LINE_SIZE, sizeof(thread_data_t) * n);
 #else
 	data_t *datas = (data_t *)malloc(sizeof(data_t) * n);
 	thread_data_t *th_datas = malloc(sizeof(thread_data_t) * n);
