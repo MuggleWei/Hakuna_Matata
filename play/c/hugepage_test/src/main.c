@@ -130,6 +130,7 @@ int main(int argc, char *argv[])
 		datas = (record_t *)mmap(NULL, n_bytes, PROT_READ | PROT_WRITE, flags,
 								 fd, 0);
 		if (datas == MAP_FAILED) {
+			close(fd);
 			fprintf(stderr, "failed mmap hugetlbfs, errno=%d\n", errno);
 			exit(EXIT_FAILURE);
 		}
@@ -152,6 +153,9 @@ int main(int argc, char *argv[])
 	srand(time(NULL));
 	size_t pos_arr_size = 5000000;
 	int *pos_arr = (int *)malloc(sizeof(int) * pos_arr_size);
+	if (pos_arr == NULL) {
+		goto cleanup;
+	}
 	for (size_t i = 0; i < pos_arr_size; ++i) {
 		if (args.random_access) {
 			pos_arr[i] = rand() % n;
@@ -175,7 +179,11 @@ int main(int argc, char *argv[])
 	fprintf(stdout, "elapsed ms: %lld\n", (long long)elapsed);
 
 	// cleanup datas
+cleanup:
 	fprintf(stdout, "start cleanup datas\n");
+	if (pos_arr) {
+		free(pos_arr);
+	}
 	if (args.use_hugepage) {
 		if (munmap(datas, n_bytes) == -1) {
 			fprintf(stderr, "failed munmap, errno=%d\n", errno);

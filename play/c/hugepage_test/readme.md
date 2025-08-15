@@ -72,9 +72,9 @@ echo "UID=$UID, GID=$GID"
 
 # mount hugetlbfs, see: https://docs.kernel.org/admin-guide/mm/hugetlbpage.html
 sudo mkdir -p /mnt/hugetlbfs_2M
-sudo mount -t hugetlbfs none /mnt/hugetlbfs_2M -o uid=$UID,gid=$GID,pagesize=2M,size=2G
+sudo mount -t hugetlbfs nodev /mnt/hugetlbfs_2M -o uid=$UID,gid=$GID,pagesize=2M,size=2G
 sudo mkdir -p /mnt/hugetlbfs_1G
-sudo mount -t hugetlbfs none /mnt/hugetlbfs_1G -o uid=$UID,gid=$GID,pagesize=1G,size=2G
+sudo mount -t hugetlbfs nodev /mnt/hugetlbfs_1G -o uid=$UID,gid=$GID,pagesize=1G,size=2G
 
 # show current hugetlbfs
 mount | grep huge
