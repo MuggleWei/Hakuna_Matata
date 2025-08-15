@@ -142,18 +142,28 @@ int main(int argc, char *argv[])
 	}
 	fprintf(stdout, "allocate datas completed\n");
 
+	// prefetch datas
+	for (size_t i = 0; i < n; ++i) {
+		memset(&datas[i], 0, sizeof(record_t));
+	}
+
 	// random access data
 	fprintf(stdout, "run access datas\n");
-	struct timespec start_ts, end_ts;
 	srand(time(NULL));
-	clock_gettime(CLOCK_BOOTTIME, &start_ts);
-	for (size_t i = 0; i < 500000; ++i) {
-		int pos = 0;
+	size_t pos_arr_size = 5000000;
+	int *pos_arr = (int *)malloc(sizeof(int) * pos_arr_size);
+	for (size_t i = 0; i < pos_arr_size; ++i) {
 		if (args.random_access) {
-			pos = rand() % n;
+			pos_arr[i] = rand() % n;
 		} else {
-			pos = i % n;
+			pos_arr[i] = i % n;
 		}
+	}
+
+	struct timespec start_ts, end_ts;
+	clock_gettime(CLOCK_BOOTTIME, &start_ts);
+	for (size_t i = 0; i < pos_arr_size; ++i) {
+		int pos = pos_arr[i];
 		++datas[pos].update_cnt;
 		datas[pos].last_update_ts = time(NULL);
 	}
