@@ -6,11 +6,14 @@
 #include <time.h>
 #include <sys/mman.h>
 #include <errno.h>
+#include <unistd.h>
+#include <fcntl.h>
 
 typedef struct {
 	int use_hugepage;
 	int random_access;
 	char page_size[16];
+	char hugetlbfs_file[512];
 } args_t;
 
 typedef union {
@@ -26,17 +29,25 @@ void output_usage(char *argv0, FILE *fp)
 	fprintf(fp,
 			"Usage: %s\n"
 			"  -p, --hugepage    use huge page\n"
+			"    * 0: without HUGE_TLB\n"
+			"    * 1: use HUGE_TLB with mmap\n"
+			"    * 2: use HUGE_TLB with hugetlbfs + mmap\n"
 			"  -r, --random      random access data\n"
-			"  -s, --pagesize    specific page size\n",
+			"  -s, --pagesize    specific page size, run with '-p 1'\n"
+			"  -f, --file        filepath in hugetlbfs"
+			"",
 			argv0);
 }
 
 void parse_args(int argc, char **argv, args_t *args)
 {
+	memset(args, 0, sizeof(*args));
+
 	static struct option long_options[] = {
 		{ "huagepage", required_argument, NULL, 'p' },
 		{ "random", required_argument, NULL, 'r' },
 		{ "pagesize", required_argument, NULL, 's' },
+		{ "file", required_argument, NULL, 'f' },
 		{ "help", required_argument, NULL, 'h' },
 		{ NULL, 0, NULL, 0 }
 	};
@@ -44,7 +55,7 @@ void parse_args(int argc, char **argv, args_t *args)
 	int c;
 	while (1) {
 		int option_index = 0;
-		c = getopt_long(argc, argv, "p:r:s:h", long_options, &option_index);
+		c = getopt_long(argc, argv, "p:r:s:f:h", long_options, &option_index);
 		if (c == -1)
 			break;
 
@@ -62,6 +73,10 @@ void parse_args(int argc, char **argv, args_t *args)
 		case 's': {
 			strncpy(args->page_size, optarg, sizeof(args->page_size) - 1);
 		} break;
+		case 'f': {
+			strncpy(args->hugetlbfs_file, optarg,
+					sizeof(args->hugetlbfs_file) - 1);
+		} break;
 		}
 	}
 }
@@ -75,13 +90,16 @@ int main(int argc, char *argv[])
 	fprintf(stdout, "random access: %s\n", args.random_access ? "yes" : "no");
 	fprintf(stdout, "page size: %s\n",
 			args.page_size[0] != '\0' ? args.page_size : "default");
+	fprintf(stdout, "hugetlbfs filepath: %s\n",
+			args.hugetlbfs_file[0] != '\0' ? args.hugetlbfs_file : "(null)");
 
 	// init datas
 	size_t n = 1024UL * 1024UL * 16UL;
 	size_t n_bytes = n * sizeof(record_t);
 	record_t *datas = NULL;
+	int fd = -1;
 	fprintf(stdout, "start allocate datas\n");
-	if (args.use_hugepage) {
+	if (args.use_hugepage == 1) {
 		int flags = MAP_PRIVATE | MAP_ANONYMOUS | MAP_HUGETLB;
 		if (args.page_size[0] != '\0') {
 			if (strcmp(args.page_size, "2MB") == 0) {
@@ -94,6 +112,25 @@ int main(int argc, char *argv[])
 								 -1, 0);
 		if (datas == MAP_FAILED) {
 			fprintf(stderr, "failed mmap, errno=%d\n", errno);
+			exit(EXIT_FAILURE);
+		}
+	} else if (args.use_hugepage == 2) {
+		int flags = MAP_SHARED;
+		if (args.hugetlbfs_file[0] == '\0') {
+			fprintf(stderr, "use hugetlbfs+mmap without specify file\n");
+			output_usage(argv[0], stderr);
+			exit(EXIT_FAILURE);
+		}
+
+		fd = open(args.hugetlbfs_file, O_CREAT | O_RDWR, 0755);
+		if (fd == -1) {
+			fprintf(stderr, "failed open %s\n", args.hugetlbfs_file);
+			exit(EXIT_FAILURE);
+		}
+		datas = (record_t *)mmap(NULL, n_bytes, PROT_READ | PROT_WRITE, flags,
+								 fd, 0);
+		if (datas == MAP_FAILED) {
+			fprintf(stderr, "failed mmap hugetlbfs, errno=%d\n", errno);
 			exit(EXIT_FAILURE);
 		}
 	} else {
@@ -133,6 +170,9 @@ int main(int argc, char *argv[])
 		if (munmap(datas, n_bytes) == -1) {
 			fprintf(stderr, "failed munmap, errno=%d\n", errno);
 			exit(EXIT_FAILURE);
+		}
+		if (fd != -1) {
+			close(fd);
 		}
 	} else {
 		free(datas);
