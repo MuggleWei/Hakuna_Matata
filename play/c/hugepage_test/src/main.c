@@ -164,7 +164,7 @@ void *alloc_datas(args_t *p_args, size_t n_bytes)
 		datas = alloc_datas_hugetlbfs(p_args, n_bytes);
 	} break;
 	case 3: {
-		datas = aligned_alloc(PAGE_SIZE_4K, n_bytes);
+		datas = aligned_alloc(PAGE_SIZE_2M, n_bytes);
 		if (madvise(datas, n_bytes, MADV_HUGEPAGE) != 0) {
 			fprintf(stderr,
 					"failed madvise MADV_HUGEPAGE, n_bytes: %lu, errno: %d\n",
@@ -174,7 +174,8 @@ void *alloc_datas(args_t *p_args, size_t n_bytes)
 		}
 	} break;
 	default: {
-		datas = aligned_alloc(PAGE_SIZE_4K, n_bytes);
+		// datas = malloc(n_bytes);
+		datas = aligned_alloc(PAGE_SIZE_2M, n_bytes);
 	} break;
 	}
 	if (datas == NULL) {
@@ -190,6 +191,9 @@ void *alloc_datas(args_t *p_args, size_t n_bytes)
 					"failed madivse MADV_POPULATE_WRITE, "
 					"n_bytes: %lu, errno: %d\n",
 					(unsigned long)n_bytes, errno);
+		} else {
+			fprintf(stderr, "use memset to prefetch\n");
+			memset(datas, 0, n_bytes);
 		}
 #else
 		memset(datas, 0, n_bytes);
@@ -215,13 +219,13 @@ int main(int argc, char *argv[])
 	fprintf(stdout, "----------------\n");
 
 	// init datas
-	const size_t n_src_pos = 8 * PAGE_SIZE_2M / sizeof(uint32_t);
+	const size_t n_src_pos = PAGE_SIZE_2M;
 	const size_t n_bytes_src_pos = sizeof(uint32_t) * n_src_pos;
-	const size_t n_dst_pos = 8 * PAGE_SIZE_2M / sizeof(uint32_t);
+	const size_t n_dst_pos = PAGE_SIZE_2M;
 	const size_t n_bytes_dst_pos = sizeof(uint32_t) * n_dst_pos;
-	size_t n_src = PAGE_SIZE_2M / sizeof(record_t);
+	size_t n_src = PAGE_SIZE_2M;
 	size_t n_bytes_src = sizeof(record_t) * n_src;
-	size_t n_dst = 1024UL * 1024UL * 4UL;
+	size_t n_dst = 2 * PAGE_SIZE_2M;
 	size_t n_bytes_dst = n_dst * sizeof(record_t);
 	size_t n_pos = n_src_pos > n_dst_pos ? n_src_pos : n_dst_pos;
 	size_t access_times = n_pos;
