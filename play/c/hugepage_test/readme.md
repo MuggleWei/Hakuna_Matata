@@ -1,5 +1,5 @@
 # 测试大页效果
-这里分别测试 **HUGE_TLB**(标准大页) 和 **THP**(透明大页) 的在随即访问和顺序访问的效果
+这里分别测试 **HUGE_TLB**(标准大页) 和 **THP**(透明大页) 的在 随即访问和顺序访问 以及 预取和不预取 时的效果
 
 ## 测试用例
 **关闭 HUGETLB, 关闭 THP**  
@@ -7,8 +7,21 @@
 sudo su
 echo "never" > /sys/kernel/mm/transparent_hugepage/enabled
 sysctl -w vm.nr_hugepages=0
-./bin/hugepage_test -p 0 -r 0
-./bin/hugepage_test -p 0 -r 1
+./bin/hugepage_test -p 0 -r 0 -P 0
+./bin/hugepage_test -p 0 -r 1 -P 0
+./bin/hugepage_test -p 0 -r 0 -P 1
+./bin/hugepage_test -p 0 -r 1 -P 1
+```
+
+**关闭 HUGETLB, 建议 THP**  
+```
+sudo su
+echo "madvise" > /sys/kernel/mm/transparent_hugepage/enabled
+sysctl -w vm.nr_hugepages=0
+./bin/hugepage_test -p 3 -r 0 -P 0
+./bin/hugepage_test -p 3 -r 1 -P 0
+./bin/hugepage_test -p 3 -r 0 -P 1
+./bin/hugepage_test -p 3 -r 1 -P 1
 ```
 
 **关闭 HUGETLB, 开启 THP**  
@@ -16,8 +29,10 @@ sysctl -w vm.nr_hugepages=0
 sudo su
 echo "always" > /sys/kernel/mm/transparent_hugepage/enabled
 sysctl -w vm.nr_hugepages=0
-./bin/hugepage_test -p 0 -r 0
-./bin/hugepage_test -p 0 -r 1
+./bin/hugepage_test -p 0 -r 0 -P 0
+./bin/hugepage_test -p 0 -r 1 -P 0
+./bin/hugepage_test -p 0 -r 0 -P 1
+./bin/hugepage_test -p 0 -r 1 -P 1
 ```
 
 **开启 HUGETLB(mmap + MAP_HUGETLB), 关闭 THP**  
@@ -30,8 +45,10 @@ sysctl -w vm.nr_hugepages=1024
 cat /proc/meminfo | grep -i huge
 sysctl -a | grep -i huge
 
-./bin/hugepage_test -p 1 -r 0
-./bin/hugepage_test -p 1 -r 1
+./bin/hugepage_test -p 1 -r 0 -P 0
+./bin/hugepage_test -p 1 -r 1 -P 0
+./bin/hugepage_test -p 1 -r 0 -P 1
+./bin/hugepage_test -p 1 -r 1 -P 1
 ```
 
 **注意**: 还可以通过入参 `-s` 指定使用的 `HugepageSize`, 如果想使用 1GB 大小的大页(大部分 linux 发行版默认是 2MB 大页), 需要更改 grub 选项
@@ -79,10 +96,12 @@ sudo mount -t hugetlbfs nodev /mnt/hugetlbfs_1G -o uid=$UID,gid=$GID,pagesize=1G
 # show current hugetlbfs
 mount | grep huge
 
-./bin/hugepage_test -p 2 -r 0 -f /mnt/hugetlbfs_2M/test
-./bin/hugepage_test -p 2 -r 1 -f /mnt/hugetlbfs_2M/test
-./bin/hugepage_test -p 2 -r 0 -f /mnt/hugetlbfs_1G/test
-./bin/hugepage_test -p 2 -r 1 -f /mnt/hugetlbfs_1G/test
+./bin/hugepage_test -p 2 -r 0 -P 0 -f /mnt/hugetlbfs_2M/test
+./bin/hugepage_test -p 2 -r 1 -P 0 -f /mnt/hugetlbfs_2M/test
+./bin/hugepage_test -p 2 -r 0 -P 1 -f /mnt/hugetlbfs_2M/test
+./bin/hugepage_test -p 2 -r 1 -P 1 -f /mnt/hugetlbfs_2M/test
+./bin/hugepage_test -p 2 -r 0 -P 1 -f /mnt/hugetlbfs_1G/test
+./bin/hugepage_test -p 2 -r 1 -P 1 -f /mnt/hugetlbfs_1G/test
 ```
 
 **注意**: 这里使用 1G 大页有可能会失败, 这是因为系统没有预留 1G 的大页, 可以参考上一小节中的附加说明, 更改 grub 去预留 1G 大页

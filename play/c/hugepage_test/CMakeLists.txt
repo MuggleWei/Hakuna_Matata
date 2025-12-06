@@ -53,6 +53,17 @@ endif()
 set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 
 ################################
+# check symbol
+################################
+include(CheckSymbolExists)
+check_symbol_exists(MADV_POPULATE_WRITE "sys/mman.h" SUPPORT_MADV_POPULATE_WRITE)
+
+configure_file(
+	${CMAKE_CURRENT_LIST_DIR}/src/config.h.in
+	${CMAKE_BINARY_DIR}/gen/config.h)
+
+################################
 # examples
 ################################
 add_executable(hugepage_test ${CMAKE_CURRENT_LIST_DIR}/src/main.c)
+target_include_directories(hugepage_test PUBLIC ${CMAKE_BINARY_DIR})
