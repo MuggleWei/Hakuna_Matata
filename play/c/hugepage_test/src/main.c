@@ -48,7 +48,7 @@ void output_usage(char *argv0, FILE *fp)
 			"    * 0: without HUGE_TLB\n"
 			"    * 1: use HUGE_TLB with mmap\n"
 			"    * 2: use HUGE_TLB with hugetlbfs + mmap\n"
-			"    * 3: use THP with madvise"
+			"    * 3: use THP with madvise\n"
 			"  -r, --random      random access data\n"
 			"  -s, --pagesize    specific page size, run with '-p 1'\n"
 			"  -f, --file        filepath in hugetlbfs\n"
