@@ -1,0 +1,10 @@
+#ifndef COMMON_CONFIG_H_IN_
+#define COMMON_CONFIG_H_IN_
+
+#cmakedefine01 SIMD_HAS_SSE4
+#cmakedefine01 SIMD_HAS_AVX2
+#cmakedefine01 SIMD_HAS_NEON
+
+#cmakedefine01 INCREASE_SIMD_ILP
+
+#endif // !COMMON_CONFIG_H_IN_
