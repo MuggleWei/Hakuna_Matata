@@ -3,7 +3,7 @@
 void *common_aligned_alloc(size_t alignment, size_t size)
 {
 #if defined(_MSC_VER)
-	retrn _aligned_malloc(size, alignment);
+	return _aligned_malloc(size, alignment);
 #else
 	return aligned_alloc(alignment, size);
 #endif

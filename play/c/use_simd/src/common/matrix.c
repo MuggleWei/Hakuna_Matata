@@ -9,7 +9,7 @@ void matrix4_add(const matrix4_t *mat1, const matrix4_t *mat2, matrix4_t *mat)
 #else
 	const float *a = (const float *)mat1;
 	const float *b = (const float *)mat2;
-	const float *c = (const float *)mat;
+	float *c = (float *)mat;
 #endif
 
 	for (int i = 0; i < 16; ++i) {
@@ -26,7 +26,7 @@ void matrix4_mul(const matrix4_t *mat1, const matrix4_t *mat2, matrix4_t *mat)
 #else
 	const float *a = (const float *)mat1;
 	const float *b = (const float *)mat2;
-	const float *c = (const float *)mat;
+	float *c = (float *)mat;
 #endif
 
 	for (int i = 0; i < 4; ++i) {

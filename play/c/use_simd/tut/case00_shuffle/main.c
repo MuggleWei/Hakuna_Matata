@@ -34,10 +34,10 @@ void sse4_shuffle()
 	printf("expect: {%.2f, %.2f, %.2f, %.2f}\n", v1[imm_w], v1[imm_x],
 		   v2[imm_y], v2[imm_z]);
 	printf("actual: {%.2f, %.2f, %.2f, %.2f}\n", v[0], v[1], v[2], v[3]);
-	printf("imm_w=%d, a[imm_w] = %.2f\n", imm_w, a[imm_w]);
-	printf("imm_x=%d, a[imm_x] = %.2f\n", imm_x, a[imm_x]);
-	printf("imm_y=%d, b[imm_y] = %.2f\n", imm_y, b[imm_y]);
-	printf("imm_z=%d, b[imm_z] = %.2f\n", imm_z, b[imm_z]);
+	printf("imm_w=%d, a[imm_w] = %.2f\n", imm_w, v1[imm_w]);
+	printf("imm_x=%d, a[imm_x] = %.2f\n", imm_x, v1[imm_x]);
+	printf("imm_y=%d, b[imm_y] = %.2f\n", imm_y, v2[imm_y]);
+	printf("imm_z=%d, b[imm_z] = %.2f\n", imm_z, v2[imm_z]);
 
 	#undef imm_w
 	#undef imm_x
