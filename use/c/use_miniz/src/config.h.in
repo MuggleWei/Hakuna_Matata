@@ -1,0 +1,4 @@
+#ifndef USE_MINIZ_CONFIG_H_IN_
+#define USE_MINIZ_CONFIG_H_IN_
+
+#endif // !USE_MINIZ_CONFIG_H_IN_

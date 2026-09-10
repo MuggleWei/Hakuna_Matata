@@ -15,6 +15,7 @@ compile_commands.json
 
 # clangd
 .clangd/
+.clangd
 
 # clang-format
 .clang-format
