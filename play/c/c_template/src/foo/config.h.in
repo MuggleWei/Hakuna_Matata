@@ -1,0 +1,20 @@
+#ifndef MUGGLE_FOO_CONFIG_H_IN_
+#define MUGGLE_FOO_CONFIG_H_IN_
+
+#if !defined(FOO_USE_ASYNC_LOG) && !defined(FOO_USE_SYNC_LOG)
+	#define FOO_USE_SYNC_LOG 1
+	#define FOO_USE_ASYNC_LOG 0
+#endif
+
+#if FOO_USE_SYNC_LOG
+	#define MUGGLE_HOLD_LOG_MACRO 1
+#elif FOO_USE_ASYNC_LOG 
+	#define HACLOG_HOLD_LOG_MACRO 1
+#endif
+
+#include "muggle/c/muggle_c.h"
+#include "haclog/haclog.h"
+
+#cmakedefine FOO_VERSION "@FOO_VERSION@"
+
+#endif // !MUGGLE_FOO_CONFIG_H_IN_
